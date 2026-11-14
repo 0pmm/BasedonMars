@@ -1,0 +1,310 @@
+[
+ {
+  "unit": "mNh",
+  "desc": "Middle Noachian highland unit",
+  "polygons": 99,
+  "area_km2": 32313475.2,
+  "color": "#c45c3c"
+ },
+ {
+  "unit": "lHl",
+  "desc": "Late Hesperian lowland unit",
+  "polygons": 10,
+  "area_km2": 16020810.4,
+  "color": "#57bbd4"
+ },
+ {
+  "unit": "eNh",
+  "desc": "Early Noachian highland unit",
+  "polygons": 112,
+  "area_km2": 14599336.4,
+  "color": "#89402a"
+ },
+ {
+  "unit": "AHv",
+  "desc": "Amazonian and Hesperian volcanic",
+  "polygons": 12,
+  "area_km2": 13213955.4,
+  "color": "#e1be50"
+ },
+ {
+  "unit": "lNh",
+  "desc": "Late Noachian highland unit",
+  "polygons": 292,
+  "area_km2": 8419068.6,
+  "color": "#f5734b"
+ },
+ {
+  "unit": "AHi",
+  "desc": "Amazonian and Hesperian impact unit",
+  "polygons": 342,
+  "area_km2": 7913061.4,
+  "color": "#e1be50"
+ },
+ {
+  "unit": "eHv",
+  "desc": "Early Hesperian volcanic unit",
+  "polygons": 23,
+  "area_km2": 5791996.8,
+  "color": "#316976"
+ },
+ {
+  "unit": "eHt",
+  "desc": "Early Hesperian transition unit",
+  "polygons": 20,
+  "area_km2": 3688017.3,
+  "color": "#316976"
+ },
+ {
+  "unit": "lAv",
+  "desc": "Late Amazonian volcanic unit",
+  "polygons": 11,
+  "area_km2": 3409561.0,
+  "color": "#ffed64"
+ },
+ {
+  "unit": "mAl",
+  "desc": "Middle Amazonian lowland unit",
+  "polygons": 26,
+  "area_km2": 2996875.7,
+  "color": "#e1be50"
+ },
+ {
+  "unit": "HNt",
+  "desc": "Hesperian and Noachian transition unit",
+  "polygons": 46,
+  "area_km2": 2889482.4,
+  "color": "#4696aa"
+ },
+ {
+  "unit": "lHv",
+  "desc": "Late Hesperian volcanic unit",
+  "polygons": 13,
+  "area_km2": 2391021.7,
+  "color": "#57bbd4"
+ },
+ {
+  "unit": "lHt",
+  "desc": "Late Hesperian transition unit",
+  "polygons": 28,
+  "area_km2": 2345022.4,
+  "color": "#57bbd4"
+ },
+ {
+  "unit": "lNv",
+  "desc": "Late Noachian volcanic unit",
+  "polygons": 9,
+  "area_km2": 2226351.6,
+  "color": "#f5734b"
+ },
+ {
+  "unit": "AHtu",
+  "desc": "Amazonian and Hesperian transition undivided unit",
+  "polygons": 12,
+  "area_km2": 2200401.8,
+  "color": "#e1be50"
+ },
+ {
+  "unit": "Av",
+  "desc": "Amazonian volcanic unit",
+  "polygons": 8,
+  "area_km2": 2102494.3,
+  "color": "#e1be50"
+ },
+ {
+  "unit": "Apu",
+  "desc": "Amazonian polar undivided unit",
+  "polygons": 5,
+  "area_km2": 2005394.2,
+  "color": "#e1be50"
+ },
+ {
+  "unit": "eNhm",
+  "desc": "Early Noachian highland massif unit",
+  "polygons": 10,
+  "area_km2": 1944451.7,
+  "color": "#89402a"
+ },
+ {
+  "unit": "mNhm",
+  "desc": "Middle Noachian highland massif unit",
+  "polygons": 15,
+  "area_km2": 1873163.5,
+  "color": "#c45c3c"
+ },
+ {
+  "unit": "eHh",
+  "desc": "Early Hesperian highland unit",
+  "polygons": 21,
+  "area_km2": 1805659.3,
+  "color": "#316976"
+ },
+ {
+  "unit": "Nhu",
+  "desc": "Noachian highland undivided unit",
+  "polygons": 16,
+  "area_km2": 1610477.2,
+  "color": "#c45c3c"
+ },
+ {
+  "unit": "Hto",
+  "desc": "Hesperian transition outflow unit",
+  "polygons": 8,
+  "area_km2": 1289054.5,
+  "color": "#4696aa"
+ },
+ {
+  "unit": "Hp",
+  "desc": "Hesperian polar unit",
+  "polygons": 9,
+  "area_km2": 1221563.2,
+  "color": "#4696aa"
+ },
+ {
+  "unit": "HNhu",
+  "desc": "Hesperian and Noachian highland undivided unit",
+  "polygons": 11,
+  "area_km2": 1006732.2,
+  "color": "#4696aa"
+ },
+ {
+  "unit": "Aa",
+  "desc": "Amazonian apron unit",
+  "polygons": 13,
+  "area_km2": 998728.6,
+  "color": "#e1be50"
+ },
+ {
+  "unit": "lHb",
+  "desc": "Late Hesperian basin unit",
+  "polygons": 1,
+  "area_km2": 912198.0,
+  "color": "#57bbd4"
+ },
+ {
+  "unit": "Ht",
+  "desc": "Hesperian transition unit",
+  "polygons": 16,
+  "area_km2": 910149.3,
+  "color": "#4696aa"
+ },
+ {
+  "unit": "Ave",
+  "desc": "Amazonian volcanic edifice",
+  "polygons": 6,
+  "area_km2": 824779.2,
+  "color": "#e1be50"
+ },
+ {
+  "unit": "Htu",
+  "desc": "Hesperian transition undivided unit",
+  "polygons": 16,
+  "area_km2": 741193.7,
+  "color": "#4696aa"
+ },
+ {
+  "unit": "lApc",
+  "desc": "Late Amazonian polar cap unit",
+  "polygons": 2,
+  "area_km2": 700535.0,
+  "color": "#ffed64"
+ },
+ {
+  "unit": "HNb",
+  "desc": "Hesperian and Noachian basin unit",
+  "polygons": 2,
+  "area_km2": 596206.0,
+  "color": "#4696aa"
+ },
+ {
+  "unit": "eAb",
+  "desc": "Early Amazonian basin unit",
+  "polygons": 2,
+  "area_km2": 545426.7,
+  "color": "#9d8538"
+ },
+ {
+  "unit": "lHvf",
+  "desc": "Late Hesperian volcanic field unit",
+  "polygons": 7,
+  "area_km2": 440896.9,
+  "color": "#57bbd4"
+ },
+ {
+  "unit": "eHb",
+  "desc": "Early Hesperian basin unit",
+  "polygons": 2,
+  "area_km2": 395407.1,
+  "color": "#316976"
+ },
+ {
+  "unit": "Hve",
+  "desc": "Hesperian volcanic edifice unit",
+  "polygons": 10,
+  "area_km2": 382779.7,
+  "color": "#4696aa"
+ },
+ {
+  "unit": "ANa",
+  "desc": "Amazonian and Noachian apron unit",
+  "polygons": 17,
+  "area_km2": 373841.8,
+  "color": "#e1be50"
+ },
+ {
+  "unit": "lAvf",
+  "desc": "Late Amazonian volcanic field unit",
+  "polygons": 9,
+  "area_km2": 312533.7,
+  "color": "#ffed64"
+ },
+ {
+  "unit": "lApd",
+  "desc": "Late Amazonian polar dunes unit",
+  "polygons": 5,
+  "area_km2": 301048.4,
+  "color": "#ffed64"
+ },
+ {
+  "unit": "lAa",
+  "desc": "Late Amazonian apron unit",
+  "polygons": 4,
+  "area_km2": 285947.5,
+  "color": "#ffed64"
+ },
+ {
+  "unit": "Hpe",
+  "desc": "Hesperian polar edifice unit",
+  "polygons": 8,
+  "area_km2": 259771.4,
+  "color": "#4696aa"
+ },
+ {
+  "unit": "Ap",
+  "desc": "Amazonian polar unit",
+  "polygons": 1,
+  "area_km2": 221101.0,
+  "color": "#e1be50"
+ },
+ {
+  "unit": "Nhe",
+  "desc": "Noachian highland edifice unit",
+  "polygons": 23,
+  "area_km2": 220604.3,
+  "color": "#c45c3c"
+ },
+ {
+  "unit": "Nve",
+  "desc": "Noachian volcanic edifice unit",
+  "polygons": 8,
+  "area_km2": 206573.7,
+  "color": "#c45c3c"
+ },
+ {
+  "unit": "Hpu",
+  "desc": "Hesperian polar undivided unit",
+  "polygons": 1,
+  "area_km2": 34509.9,
+  "color": "#4696aa"
+ }
+]
