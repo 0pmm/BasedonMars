@@ -1,0 +1,114 @@
+[
+  {
+    "id": "jezero-landing",
+    "group": "Jezero",
+    "name": { "en": "Octavia E. Butler landing", "pt": "Pouso Octavia E. Butler" },
+    "lat": 18.44463,
+    "lon": 77.45089,
+    "source": "Perseverance waypoint, sol 13 (JPL MMGIS)",
+    "sizeM": 1500,
+    "goal": {
+      "en": "Characterise the crater-floor (Máaz) lavas and set up the base camp on flat, stable ground.",
+      "pt": "Caracterizar as lavas do fundo da cratera (Máaz) e montar o acampamento-base em solo plano e estável."
+    },
+    "targets": ["regolith", "igneous"]
+  },
+  {
+    "id": "seitah",
+    "group": "Jezero",
+    "name": { "en": "Séítah", "pt": "Séítah" },
+    "lat": 18.43255,
+    "lon": 77.44069,
+    "source": "Perseverance waypoint, sol 200",
+    "sizeM": 1500,
+    "goal": {
+      "en": "Sample olivine-rich cumulate rocks between sand ripples — mind the soft sand.",
+      "pt": "Amostrar rochas cumuladas ricas em olivina entre ondulações de areia — cuidado com a areia fofa."
+    },
+    "targets": ["olivine", "sand"]
+  },
+  {
+    "id": "delta-front",
+    "group": "Jezero",
+    "name": { "en": "Delta front (Hawksbill Gap)", "pt": "Frente do delta (Hawksbill Gap)" },
+    "lat": 18.44982,
+    "lon": 77.40136,
+    "source": "Perseverance waypoint, sol 420",
+    "sizeM": 2000,
+    "goal": {
+      "en": "Climb the delta scarp to reach layered sedimentary rocks deposited by an ancient river.",
+      "pt": "Subir a escarpa do delta até as rochas sedimentares em camadas depositadas por um rio antigo."
+    },
+    "targets": ["sedimentary", "carbonate"]
+  },
+  {
+    "id": "upper-delta",
+    "group": "Jezero",
+    "name": { "en": "Upper delta", "pt": "Delta superior" },
+    "lat": 18.48265,
+    "lon": 77.35846,
+    "source": "Perseverance waypoint, sol 899",
+    "sizeM": 2000,
+    "goal": {
+      "en": "Survey boulder-rich fluvial deposits carried from the crater's watershed.",
+      "pt": "Levantar depósitos fluviais cheios de blocos trazidos da bacia da cratera."
+    },
+    "targets": ["boulders", "sedimentary"]
+  },
+  {
+    "id": "cheyava-falls",
+    "group": "Jezero",
+    "name": { "en": "Cheyava Falls (Neretva Vallis)", "pt": "Cheyava Falls (Neretva Vallis)" },
+    "lat": 18.49748,
+    "lon": 77.30519,
+    "source": "Perseverance waypoint, sol 1210",
+    "sizeM": 1500,
+    "goal": {
+      "en": "Re-examine the 'leopard spot' rock — a potential biosignature found in July 2024.",
+      "pt": "Reexaminar a rocha com 'manchas de leopardo' — possível bioassinatura encontrada em julho de 2024."
+    },
+    "targets": ["biosignature", "sulfate"]
+  },
+  {
+    "id": "witch-hazel",
+    "group": "Jezero",
+    "name": { "en": "Crater rim (Witch Hazel Hill)", "pt": "Borda da cratera (Witch Hazel Hill)" },
+    "lat": 18.469,
+    "lon": 77.29301,
+    "source": "Perseverance waypoint, sol 1299",
+    "sizeM": 2000,
+    "goal": {
+      "en": "Ascend the steep crater rim to sample ancient crust — the hardest Marswalk in Jezero.",
+      "pt": "Subir a borda íngreme da cratera para amostrar crosta antiga — a caminhada mais difícil de Jezero."
+    },
+    "targets": ["crust", "steep"]
+  },
+  {
+    "id": "spirit-landing",
+    "group": "Gusev",
+    "name": { "en": "Spirit landing (Columbia Memorial)", "pt": "Pouso do Spirit (Columbia Memorial)" },
+    "lat": -14.5684,
+    "lon": 175.4726,
+    "source": "Spirit landing site, MER mission",
+    "sizeM": 1500,
+    "goal": {
+      "en": "Plan a traverse from the plains towards the Columbia Hills.",
+      "pt": "Planejar uma travessia das planícies em direção às Columbia Hills."
+    },
+    "targets": ["basalt", "dust"]
+  },
+  {
+    "id": "boxwork",
+    "group": "Gale",
+    "name": { "en": "Boxwork region, Mount Sharp", "pt": "Região de boxwork, Monte Sharp" },
+    "lat": -4.80689,
+    "lon": 137.37984,
+    "source": "Curiosity waypoint, sol 4650 (JPL MMGIS)",
+    "sizeM": 3000,
+    "goal": {
+      "en": "Study boxwork ridges — mineral veins left by ancient groundwater (Curiosity, 2025).",
+      "pt": "Estudar as cristas de boxwork — veios minerais deixados por água subterrânea antiga (Curiosity, 2025)."
+    },
+    "targets": ["boxwork", "veins"]
+  }
+]

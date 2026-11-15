@@ -1,0 +1,520 @@
+/* First-person HUD: top bar, compass, minimap, prompt, story card,
+   tactical intro, helmet visor and touch controls. */
+#surface-hud {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  pointer-events: none;
+}
+#surface-hud .panel,
+#surface-hud button,
+#surface-hud .story-card,
+#surface-hud .mobile-controls > * {
+  pointer-events: auto;
+}
+.hud-stack {
+  position: fixed;
+  top: calc(10px + var(--safe-top));
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: max-content;
+  max-width: calc(100vw - 20px);
+}
+.hud-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 12px;
+  max-width: calc(100vw - 20px);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.hud-location {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  letter-spacing: 1px;
+  color: var(--orange-glow);
+}
+.hud-sub {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+.hud-stat {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+}
+.gauge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+.gauge-track {
+  width: 90px;
+  height: 9px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 5px;
+  overflow: hidden;
+}
+.gauge-fill {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, var(--green), var(--cyan));
+  transition:
+    width 0.3s linear,
+    background 0.3s;
+}
+.gauge.low .gauge-fill {
+  background: linear-gradient(90deg, var(--red), var(--orange));
+}
+.gauge.low .gauge-value {
+  color: var(--red);
+  font-weight: 700;
+}
+.story-dots {
+  display: flex;
+  gap: 5px;
+}
+.story-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--panel-border);
+  font-size: 0.72rem;
+  font-family: var(--font-display);
+  color: var(--muted);
+}
+.story-dot.active {
+  background: var(--orange);
+  color: #1a0e0a;
+}
+.story-dot.done {
+  background: rgba(57, 255, 136, 0.22);
+  color: var(--green);
+  border-color: var(--green);
+}
+.story-dot:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* ---------- Compass ---------- */
+.compass {
+  position: relative;
+  width: min(420px, 80vw);
+  height: 30px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: rgba(8, 12, 22, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent);
+}
+.compass-strip {
+  position: absolute;
+  inset: 0;
+}
+.compass-tick {
+  position: absolute;
+  top: 4px;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.compass-tick.cardinal {
+  color: #fff;
+  font-weight: 700;
+}
+.compass-marker {
+  position: absolute;
+  top: 2px;
+  transform: translateX(-50%);
+  font-size: 0.95rem;
+}
+.compass-center {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--orange);
+}
+.objective-tracker {
+  padding: 6px 14px;
+  border-radius: 20px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  white-space: nowrap;
+  max-width: 92vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#objective-distance {
+  color: var(--cyan);
+  font-weight: 700;
+}
+.objective-tracker.complete {
+  border-color: var(--green);
+  color: var(--green);
+}
+.hazard-banner {
+  padding: 6px 14px;
+  border-radius: 8px;
+  background: rgba(255, 59, 92, 0.18);
+  border: 1px solid var(--red);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+.minimap {
+  position: fixed;
+  right: calc(14px + var(--safe-right));
+  top: calc(66px + var(--safe-top));
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  border: 2px solid var(--panel-border);
+  background: rgba(8, 12, 22, 0.7);
+}
+.crosshair {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: rgba(255, 255, 255, 0.7);
+  font-family: monospace;
+  font-size: 16px;
+  text-shadow: 0 0 4px #000;
+}
+.interact-prompt {
+  position: fixed;
+  top: 58%;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px 8px 10px;
+  border-radius: 24px;
+  background: rgba(8, 14, 26, 0.92);
+  border: 1px solid var(--cyan);
+  box-shadow: 0 0 16px rgba(79, 209, 255, 0.4);
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+}
+.interact-prompt .ring {
+  width: 34px;
+  height: 34px;
+  transform: rotate(-90deg);
+}
+.ring-bg {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.15);
+  stroke-width: 3;
+}
+.ring-fg {
+  fill: none;
+  stroke: var(--green);
+  stroke-width: 3;
+  stroke-dasharray: 94.25;
+  stroke-dashoffset: 94.25;
+  transition: stroke-dashoffset 0.08s linear;
+}
+.interact-prompt kbd {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border: none;
+  color: #fff;
+  font-weight: 700;
+}
+.click-hint {
+  position: fixed;
+  bottom: calc(18px + var(--safe-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--muted);
+  background: rgba(0, 0, 0, 0.45);
+  padding: 4px 10px;
+  border-radius: 8px;
+}
+.captions {
+  position: fixed;
+  bottom: calc(52px + var(--safe-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.caption {
+  background: rgba(0, 0, 0, 0.75);
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+
+/* ---------- Tutorial coach box ---------- */
+.tutorial {
+  position: fixed;
+  left: 50%;
+  bottom: calc(60px + var(--safe-bottom));
+  transform: translateX(-50%);
+  width: min(440px, 92vw);
+  padding: 10px 14px;
+  border-color: var(--cyan);
+  text-align: center;
+}
+.tutorial-text {
+  margin: 4px 0;
+  font-size: 1rem;
+}
+@media (max-width: 800px) {
+  .tutorial {
+    bottom: auto;
+    top: calc(130px + var(--safe-top));
+  }
+}
+
+/* ---------- Tactical intro ---------- */
+.fps-intro {
+  position: fixed;
+  top: calc(190px + var(--safe-top));
+  left: calc(24px + var(--safe-left));
+  max-width: min(520px, 70vw);
+  font-family: var(--font-mono);
+  color: var(--cyan);
+  text-shadow: 0 0 8px rgba(79, 209, 255, 0.6);
+  background: linear-gradient(90deg, rgba(6, 12, 24, 0.9), rgba(6, 12, 24, 0.35));
+  border-left: 3px solid var(--cyan);
+  padding: 12px 18px;
+  border-radius: 0 8px 8px 0;
+  opacity: 0;
+  transform: translateX(-25px);
+  transition:
+    opacity 0.6s,
+    transform 0.6s;
+}
+.fps-intro.active {
+  opacity: 1;
+  transform: none;
+}
+.fps-bracket {
+  font-size: 0.72rem;
+  letter-spacing: 3px;
+  color: var(--orange);
+  margin-bottom: 6px;
+  font-weight: 700;
+}
+.fps-line {
+  font-size: 0.88rem;
+  line-height: 1.45;
+  min-height: 18px;
+}
+.fps-line.objective {
+  color: var(--green);
+  margin-top: 6px;
+  border-top: 1px dashed rgba(57, 255, 136, 0.3);
+  padding-top: 6px;
+}
+.type-cursor {
+  color: var(--cyan);
+  animation: blink 0.45s infinite alternate;
+}
+@keyframes blink {
+  to {
+    opacity: 0.15;
+  }
+}
+
+/* ---------- Story card (right side on desktop) ---------- */
+.story-card {
+  position: fixed;
+  right: calc(14px + var(--safe-right));
+  top: calc(236px + var(--safe-top));
+  bottom: calc(14px + var(--safe-bottom));
+  width: min(380px, 40vw);
+  padding: 14px 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+.story-card.minimized {
+  bottom: auto;
+  overflow: hidden;
+}
+.story-card.minimized #story-body {
+  display: none;
+}
+.story-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.chapter-tag {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--orange);
+  letter-spacing: 2px;
+}
+.story-toggle-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--panel-border);
+  color: var(--cyan);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  border-radius: 6px;
+  min-height: 32px;
+}
+.story-title {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  margin-bottom: 2px;
+}
+.story-subtitle {
+  font-size: 0.9rem;
+  color: var(--cyan);
+  margin-bottom: 10px;
+}
+.story-narrative {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  font-style: italic;
+  border-left: 3px solid var(--orange);
+  padding-left: 12px;
+  min-height: 60px;
+  cursor: pointer;
+}
+.story-stats {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 10px;
+  font-size: 0.85rem;
+  margin: 10px 0;
+}
+.story-stats dt {
+  color: var(--muted);
+}
+.story-stats dd {
+  color: var(--cyan);
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  text-align: right;
+}
+.story-objective {
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.9rem;
+  color: var(--orange-glow);
+  font-weight: 600;
+}
+
+/* ---------- Helmet visor overlay ---------- */
+#visor {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 6;
+  background: radial-gradient(ellipse 120% 95% at 50% 50%, transparent 62%, rgba(20, 10, 4, 0.55) 80%, rgba(0, 0, 0, 0.92) 100%),
+    linear-gradient(115deg, rgba(255, 255, 255, 0.05) 0%, transparent 25%, transparent 70%, rgba(255, 255, 255, 0.04) 85%, transparent 100%);
+}
+
+/* ---------- Touch controls ---------- */
+.mobile-controls {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+.joystick {
+  position: fixed;
+  left: calc(24px + var(--safe-left));
+  bottom: calc(24px + var(--safe-bottom));
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  background: rgba(8, 12, 22, 0.5);
+  border: 2px solid var(--panel-border);
+  touch-action: none;
+  z-index: 2;
+}
+.joystick-knob {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 54px;
+  height: 54px;
+  margin: -27px 0 0 -27px;
+  border-radius: 50%;
+  background: rgba(255, 107, 53, 0.55);
+  border: 2px solid var(--orange);
+}
+.look-zone {
+  position: fixed;
+  top: calc(150px + var(--safe-top)); /* keep the top HUD buttons tappable */
+  right: 0;
+  bottom: 0;
+  left: 45%;
+  touch-action: none;
+  z-index: 1;
+}
+.mobile-buttons {
+  position: fixed;
+  right: calc(18px + var(--safe-right));
+  bottom: calc(24px + var(--safe-bottom));
+  display: grid;
+  grid-template-columns: repeat(2, 60px);
+  gap: 10px;
+  z-index: 2;
+}
+.m-btn {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: rgba(8, 12, 22, 0.7);
+  border: 2px solid var(--panel-border);
+  font-size: 1.4rem;
+  touch-action: none;
+  user-select: none;
+}
+.m-btn.on,
+.m-btn:active {
+  background: rgba(255, 107, 53, 0.4);
+  border-color: var(--orange);
+}
+.orientation-hint {
+  position: fixed;
+  inset: auto 16px calc(170px + var(--safe-bottom)) 16px;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 8px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+
+/* Neutral status (work at a stop, route finished) */
+.hazard-banner.info {
+  background: rgba(10, 30, 48, 0.88);
+  border-color: rgba(79, 209, 255, 0.7);
+  color: #e8f7ff;
+  animation: none;
+}

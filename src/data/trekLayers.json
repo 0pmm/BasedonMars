@@ -1,0 +1,244 @@
+{
+  "$comment": "Real NASA data layers streamed from NASA/JPL Mars Trek (trek.nasa.gov). 'url' overrides the default WMTS template. maxZ = highest level verified to exist. measured=true means the pixel values come straight from an instrument (no modelling by this app).",
+  "global": [
+    {
+      "id": "viking",
+      "trek": "Mars_Viking_MDIM21_ClrMosaic_global_232m",
+      "ext": "jpg",
+      "maxZ": 7,
+      "kind": "optical",
+      "icon": "🛰️",
+      "instrument": "Viking Orbiter · MDIM 2.1",
+      "resolution": "232 m/px",
+      "measured": true,
+      "base": true
+    },
+    {
+      "id": "mola",
+      "trek": "Mars_MGS_MOLA_ClrShade_merge_global_463m",
+      "ext": "jpg",
+      "maxZ": 7,
+      "kind": "topography",
+      "icon": "🗻",
+      "instrument": "Mars Global Surveyor · MOLA",
+      "resolution": "463 m/px",
+      "measured": true,
+      "legend": {
+        "gradient": "linear-gradient(90deg,#3b2cc1,#2aa3d8,#32c45a,#e8e23f,#e57b2c,#d32a2a,#f2f2f2)",
+        "min": "−8 km",
+        "max": "+21 km"
+      }
+    },
+    {
+      "id": "themisDay",
+      "trek": "THEMIS_DayIR_ControlledMosaics_100m_v2_oct2018",
+      "ext": "png",
+      "maxZ": 9,
+      "kind": "thermal",
+      "icon": "🌡️",
+      "instrument": "Mars Odyssey · THEMIS IR (day)",
+      "resolution": "100 m/px",
+      "measured": true,
+      "legend": {
+        "gradient": "linear-gradient(90deg,#111,#888,#fff)",
+        "minKey": "legend.cold",
+        "maxKey": "legend.warm"
+      }
+    },
+    {
+      "id": "themisNight",
+      "trek": "THEMIS_NightIR_ControlledMosaics_100m_v2_oct2018",
+      "ext": "png",
+      "maxZ": 9,
+      "kind": "thermal",
+      "icon": "🌙",
+      "instrument": "Mars Odyssey · THEMIS IR (night)",
+      "resolution": "100 m/px",
+      "measured": true,
+      "legend": {
+        "gradient": "linear-gradient(90deg,#111,#888,#fff)",
+        "minKey": "legend.loose",
+        "maxKey": "legend.rocky"
+      }
+    },
+    {
+      "id": "thermalInertia",
+      "trek": "TES_Thermal_Inertia",
+      "ext": "png",
+      "maxZ": 1,
+      "kind": "thermal",
+      "icon": "🧱",
+      "instrument": "Mars Global Surveyor · TES",
+      "resolution": "~3 km/px",
+      "measured": true,
+      "legend": {
+        "gradient": "linear-gradient(90deg,#1a1aa6,#2fa8e0,#3cc45a,#f0e040,#e0402a)",
+        "minKey": "legend.loose",
+        "maxKey": "legend.rocky"
+      }
+    },
+    {
+      "id": "dust",
+      "trek": "TES_Dust",
+      "ext": "png",
+      "maxZ": 1,
+      "kind": "spectral",
+      "icon": "🌫️",
+      "instrument": "Mars Global Surveyor · TES (dust cover index)",
+      "resolution": "~3 km/px",
+      "measured": true,
+      "legend": {
+        "gradient": "linear-gradient(90deg,#1a1aa6,#2fa8e0,#3cc45a,#f0e040,#e0402a)",
+        "minKey": "legend.dusty",
+        "maxKey": "legend.clean"
+      }
+    },
+    {
+      "id": "clay",
+      "trek": "TES_Glass_Clay",
+      "ext": "png",
+      "maxZ": 1,
+      "kind": "spectral",
+      "icon": "🧪",
+      "instrument": "Mars Global Surveyor · TES (sheet silicates / high-Si glass)",
+      "resolution": "~3 km/px",
+      "measured": true,
+      "legend": {
+        "gradient": "linear-gradient(90deg,#1a1aa6,#2fa8e0,#3cc45a,#f0e040,#e0402a)",
+        "minKey": "legend.low",
+        "maxKey": "legend.high"
+      }
+    },
+    {
+      "id": "pyroxene",
+      "trek": "TES_Clinopyroxene",
+      "ext": "png",
+      "maxZ": 1,
+      "kind": "spectral",
+      "icon": "💎",
+      "instrument": "Mars Global Surveyor · TES (high-Ca pyroxene)",
+      "resolution": "~3 km/px",
+      "measured": true,
+      "legend": {
+        "gradient": "linear-gradient(90deg,#1a1aa6,#2fa8e0,#3cc45a,#f0e040,#e0402a)",
+        "minKey": "legend.low",
+        "maxKey": "legend.high"
+      }
+    },
+    {
+      "id": "albedo",
+      "trek": "Mars_MGS_TES_Albedo_mosaic_global_7410m",
+      "ext": "png",
+      "maxZ": 1,
+      "kind": "optical",
+      "icon": "☀️",
+      "instrument": "Mars Global Surveyor · TES bolometric albedo",
+      "resolution": "7.4 km/px",
+      "measured": true,
+      "legend": {
+        "gradient": "linear-gradient(90deg,#000,#fff)",
+        "minKey": "legend.dark",
+        "maxKey": "legend.bright"
+      }
+    },
+    {
+      "id": "roughness",
+      "trek": "mola_roughness",
+      "ext": "png",
+      "maxZ": 1,
+      "kind": "topography",
+      "icon": "🪨",
+      "instrument": "Mars Global Surveyor · MOLA (vertical roughness)",
+      "resolution": "~3 km/px",
+      "measured": true,
+      "legend": {
+        "gradient": "linear-gradient(90deg,#1a1aa6,#2fa8e0,#3cc45a,#f0e040,#e0402a)",
+        "minKey": "legend.smooth",
+        "maxKey": "legend.rough"
+      }
+    },
+    {
+      "id": "geology",
+      "trek": "SIM3292_Global_Geology",
+      "url": "https://trek.nasa.gov/mars/trekarcgis/rest/services/SIM3292_Global_Geology/MapServer/WMTS/tile/1.0.0/SIM3292_Global_Geology/default/default028mm/{z}/{row}/{col}.png",
+      "ext": "png",
+      "maxZ": 7,
+      "kind": "geology",
+      "icon": "🗺️",
+      "instrument": "USGS SIM 3292 (Tanaka et al., 2014)",
+      "resolution": "1:20,000,000",
+      "measured": false,
+      "legend": {
+        "gradient": "linear-gradient(90deg,#8b5a2b,#d9a066,#c25b56,#7d9ec0,#b7c26b)",
+        "minKey": "legend.units",
+        "maxKey": ""
+      }
+    }
+  ],
+  "regional": [
+    {
+      "id": "hiriseJezero",
+      "trek": "JEZ_hirise_soc_006_orthoMosaic_25cm_Eqc_latTs0_lon0_first_dd",
+      "ext": "png",
+      "maxZ": 17,
+      "kind": "optical",
+      "instrument": "MRO · HiRISE (controlled mosaic)",
+      "resolution": "25 cm/px",
+      "bbox": [77.2229331, 18.3067994, 77.583964, 18.669315],
+      "grayscale": true
+    },
+    {
+      "id": "hiriseColumbiaHills",
+      "trek": "CLH_Visible_Mosaic_HiRISE_CTX_HRSC_GCS_MARS_07-10-2018",
+      "ext": "png",
+      "maxZ": 17,
+      "kind": "optical",
+      "instrument": "MRO · HiRISE / CTX / HRSC mosaic",
+      "resolution": "25 cm – 6 m/px",
+      "bbox": [175.1752978, -14.8276616, 175.6980715, -14.3215408],
+      "grayscale": true
+    },
+    {
+      "id": "ctxJezero",
+      "trek": "JEZ_ctx_B_soc_008_orthoMosaic_6m_Eqc_latTs0_lon0",
+      "ext": "png",
+      "maxZ": 13,
+      "kind": "optical",
+      "instrument": "MRO · CTX (controlled mosaic)",
+      "resolution": "6 m/px",
+      "bbox": [77.1604655, 18.2110274, 77.6991776, 18.7211945],
+      "grayscale": true
+    },
+    {
+      "id": "ctxGale",
+      "trek": "Gale_CTX_BlockAdj_dd",
+      "ext": "png",
+      "maxZ": 12,
+      "kind": "optical",
+      "instrument": "MRO · CTX (block-adjusted mosaic)",
+      "resolution": "6 m/px",
+      "bbox": [135.1842593, -6.5732988, 139.2413012, -2.8077809],
+      "grayscale": true
+    },
+    {
+      "id": "hrscShade",
+      "trek": "Mars_MOLA_blend200ppx_HRSC_ClrShade_clon0dd_200mpp_lzw",
+      "ext": "jpg",
+      "maxZ": 8,
+      "kind": "topography",
+      "instrument": "MOLA + Mars Express HRSC (blended DEM, colour hillshade)",
+      "resolution": "200 m/px",
+      "bbox": [-180, -90, 180, 90]
+    }
+  ],
+  "features": {
+    "hydrous": {
+      "url": "https://trek.nasa.gov/mars/trekarcgis/rest/services/Hydrous_Mineral_Detections_OMEGA_CRISM_clon0/MapServer/0/query",
+      "instrument": "MRO CRISM + Mars Express OMEGA"
+    }
+  },
+  "terrain": {
+    "url": "https://marshub.s3.amazonaws.com/mars_v14",
+    "instrument": "NASA/JPL Mars Trek terrain (MOLA/HRSC global + CTX/HiRISE DTMs at landing sites)"
+  }
+}

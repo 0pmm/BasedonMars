@@ -1,0 +1,352 @@
+[
+  {
+    "id": "jezero",
+    "name": "Jezero Crater",
+    "lat": 18.4447,
+    "lon": 77.4508,
+    "type": "landing",
+    "elevation": -2600,
+    "mission": { "en": "Perseverance rover (2021)", "pt": "Rover Perseverance (2021)" },
+    "description": {
+      "en": "Ancient lake bed with a fossilized river delta. Landing site of the Perseverance rover, rich in clay and carbonate minerals.",
+      "pt": "Antigo leito de lago com um delta fluvial fossilizado. Local de pouso do rover Perseverance, rico em argilas e carbonatos."
+    },
+    "hazard": {
+      "en": "Uneven rocky terrain and fine sand dunes may compromise mobility.",
+      "pt": "Terreno rochoso irregular e dunas de areia fina podem comprometer a mobilidade."
+    },
+    "resource": {
+      "en": "Carbonates and hydrated clays: prime targets in the search for ancient life.",
+      "pt": "Carbonatos e argilas hidratadas: alvos principais na busca por vida antiga."
+    },
+    "photoQuery": "Jezero crater Perseverance",
+    "learnMore": "https://science.nasa.gov/mission/mars-2020-perseverance/",
+    "base": { "water": 0.55, "radiation": 0.6, "terrain": 0.7, "sunlight": 0.85, "temperature": 0.6 },
+    "surface": { "profile": "flat", "hazards": [] }
+  },
+  {
+    "id": "gale",
+    "name": "Gale Crater",
+    "lat": -5.4,
+    "lon": 137.8,
+    "type": "landing",
+    "elevation": -4500,
+    "mission": { "en": "Curiosity rover (2012)", "pt": "Rover Curiosity (2012)" },
+    "description": {
+      "en": "Impact crater around Mount Sharp, whose layers record billions of years of Martian climate history.",
+      "pt": "Cratera de impacto ao redor do Monte Sharp, cujas camadas registram bilhões de anos da história climática de Marte."
+    },
+    "hazard": {
+      "en": "Fine suspended dust and surface radiation of about 0.67 mSv per day (measured by Curiosity's RAD).",
+      "pt": "Poeira fina em suspensão e radiação na superfície de cerca de 0,67 mSv por dia (medida pelo RAD do Curiosity)."
+    },
+    "resource": {
+      "en": "Hydrated clays and sulfates show liquid water was once present.",
+      "pt": "Argilas hidratadas e sulfatos mostram que já houve água líquida no local."
+    },
+    "photoQuery": "Curiosity rover Mount Sharp",
+    "learnMore": "https://science.nasa.gov/mission/msl-curiosity/",
+    "base": { "water": 0.5, "radiation": 0.6, "terrain": 0.55, "sunlight": 0.95, "temperature": 0.75 },
+    "surface": { "profile": "hill", "hazards": ["slope"] }
+  },
+  {
+    "id": "elysium",
+    "name": "Elysium Planitia",
+    "lat": 4.5,
+    "lon": 135.9,
+    "type": "landing",
+    "elevation": -2600,
+    "mission": { "en": "InSight lander (2018)", "pt": "Sonda InSight (2018)" },
+    "description": {
+      "en": "Vast, flat volcanic plain chosen to study the deep Martian interior with a seismometer.",
+      "pt": "Vasta planície vulcânica e plana, escolhida para estudar o interior profundo de Marte com um sismômetro."
+    },
+    "hazard": {
+      "en": "Seasonal dust storms can cover solar panels and cut power.",
+      "pt": "Tempestades de poeira sazonais podem cobrir os painéis solares e cortar a energia."
+    },
+    "resource": {
+      "en": "Stable, smooth ground suited for drilling and equipment installation.",
+      "pt": "Solo estável e liso, adequado para perfuração e instalação de equipamentos."
+    },
+    "photoQuery": "InSight lander Elysium Planitia",
+    "learnMore": "https://science.nasa.gov/mission/insight/",
+    "base": { "water": 0.35, "radiation": 0.55, "terrain": 0.95, "sunlight": 0.95, "temperature": 0.75 },
+    "surface": { "profile": "flat", "hazards": ["dust_storm"] }
+  },
+  {
+    "id": "olympus",
+    "name": "Olympus Mons",
+    "lat": 18.65,
+    "lon": -133.8,
+    "type": "geological",
+    "elevation": 21900,
+    "mission": { "en": "Orbital observation (MRO / MOLA)", "pt": "Observação orbital (MRO / MOLA)" },
+    "description": {
+      "en": "The largest volcano in the Solar System: about 22 km high and roughly 600 km across at its base.",
+      "pt": "O maior vulcão do Sistema Solar: cerca de 22 km de altura e aproximadamente 600 km de diâmetro na base."
+    },
+    "hazard": {
+      "en": "Steep scarps and an even thinner atmosphere at altitude, with less radiation shielding.",
+      "pt": "Escarpas íngremes e atmosfera ainda mais rarefeita na altitude, com menos proteção contra radiação."
+    },
+    "resource": {
+      "en": "Possible lava tubes: natural shelters against radiation.",
+      "pt": "Possíveis tubos de lava: abrigos naturais contra a radiação."
+    },
+    "photoQuery": "Olympus Mons",
+    "learnMore": "https://en.wikipedia.org/wiki/Olympus_Mons",
+    "base": { "water": 0.15, "radiation": 0.9, "terrain": 0.35, "sunlight": 0.9, "temperature": 0.4 },
+    "surface": { "profile": "volcano", "hazards": ["radiation", "slope"] }
+  },
+  {
+    "id": "valles",
+    "name": "Valles Marineris",
+    "lat": -14,
+    "lon": -59.2,
+    "type": "geological",
+    "elevation": -6000,
+    "mission": { "en": "Orbital observation (MRO / MOLA)", "pt": "Observação orbital (MRO / MOLA)" },
+    "description": {
+      "en": "Canyon system over 4,000 km long and up to 7 km deep.",
+      "pt": "Sistema de cânions com mais de 4.000 km de extensão e até 7 km de profundidade."
+    },
+    "hazard": {
+      "en": "Landslides and unstable rock walls; strong canyon winds.",
+      "pt": "Deslizamentos e paredes rochosas instáveis; ventos fortes no cânion."
+    },
+    "resource": {
+      "en": "Exposed layers reveal geological strata from several Martian eras.",
+      "pt": "Camadas expostas revelam estratos geológicos de várias eras marcianas."
+    },
+    "photoQuery": "Valles Marineris",
+    "learnMore": "https://en.wikipedia.org/wiki/Valles_Marineris",
+    "base": { "water": 0.45, "radiation": 0.35, "terrain": 0.3, "sunlight": 0.75, "temperature": 0.8 },
+    "surface": { "profile": "canyon", "hazards": ["wind", "slope"] }
+  },
+  {
+    "id": "southpole",
+    "name": "South Polar Cap",
+    "lat": -87,
+    "lon": 0,
+    "type": "resource",
+    "elevation": 1000,
+    "mission": { "en": "Mars Express / MRO", "pt": "Mars Express / MRO" },
+    "description": {
+      "en": "Permanent cap of water ice under a seasonal layer of dry ice (frozen CO₂).",
+      "pt": "Calota permanente de gelo de água sob uma camada sazonal de gelo seco (CO₂ congelado)."
+    },
+    "hazard": {
+      "en": "Extreme cold (below -120 °C) and months of polar night.",
+      "pt": "Frio extremo (abaixo de -120 °C) e meses de noite polar."
+    },
+    "resource": {
+      "en": "Huge water-ice reserves for drinking water, oxygen and rocket fuel.",
+      "pt": "Enormes reservas de gelo de água para água potável, oxigênio e combustível."
+    },
+    "photoQuery": "Mars south polar cap",
+    "learnMore": "https://en.wikipedia.org/wiki/Martian_polar_ice_caps",
+    "base": { "water": 1, "radiation": 0.55, "terrain": 0.6, "sunlight": 0.15, "temperature": 0.05 },
+    "surface": { "profile": "icy", "hazards": ["cold"] }
+  },
+  {
+    "id": "northpole",
+    "name": "Planum Boreum",
+    "lat": 86,
+    "lon": 0,
+    "type": "resource",
+    "elevation": -2600,
+    "mission": { "en": "Orbital observation (MRO / SHARAD)", "pt": "Observação orbital (MRO / SHARAD)" },
+    "description": {
+      "en": "North polar plateau of layered water ice, cut by spiral troughs carved by the wind.",
+      "pt": "Planalto polar norte de gelo de água em camadas, cortado por vales em espiral esculpidos pelo vento."
+    },
+    "hazard": {
+      "en": "Extreme cold and katabatic winds descending from the plateau.",
+      "pt": "Frio extremo e ventos catabáticos descendo do planalto."
+    },
+    "resource": {
+      "en": "Water ice layers that record recent climate cycles.",
+      "pt": "Camadas de gelo de água que registram ciclos climáticos recentes."
+    },
+    "photoQuery": "Mars north polar cap",
+    "learnMore": "https://en.wikipedia.org/wiki/Planum_Boreum",
+    "base": { "water": 1, "radiation": 0.6, "terrain": 0.55, "sunlight": 0.2, "temperature": 0.08 },
+    "surface": { "profile": "icy", "hazards": ["cold", "wind"] }
+  },
+  {
+    "id": "medusae",
+    "name": "Medusae Fossae",
+    "lat": -3.2,
+    "lon": -163,
+    "type": "hazard",
+    "elevation": -1500,
+    "mission": { "en": "Orbital observation (Mars Odyssey)", "pt": "Observação orbital (Mars Odyssey)" },
+    "description": {
+      "en": "Soft, wind-eroded deposit, possibly the largest volcanic ash deposit in the Solar System.",
+      "pt": "Depósito macio erodido pelo vento, possivelmente o maior depósito de cinzas vulcânicas do Sistema Solar."
+    },
+    "hazard": {
+      "en": "Extremely fine electrostatic dust reduces visibility and damages equipment.",
+      "pt": "Poeira eletrostática extremamente fina reduz a visibilidade e danifica equipamentos."
+    },
+    "resource": {
+      "en": "Key site to understand explosive volcanism on ancient Mars.",
+      "pt": "Local-chave para entender o vulcanismo explosivo da Marte antiga."
+    },
+    "photoQuery": "Medusae Fossae formation",
+    "learnMore": "https://en.wikipedia.org/wiki/Medusae_Fossae_Formation",
+    "base": { "water": 0.3, "radiation": 0.55, "terrain": 0.45, "sunlight": 0.9, "temperature": 0.75 },
+    "surface": { "profile": "dunes", "hazards": ["dust_storm", "sand"] }
+  },
+  {
+    "id": "utopia",
+    "name": "Utopia Planitia",
+    "lat": 47.64,
+    "lon": 134.29,
+    "type": "landing",
+    "elevation": -4500,
+    "mission": { "en": "Viking 2 lander (1976)", "pt": "Sonda Viking 2 (1976)" },
+    "description": {
+      "en": "The largest recognized impact basin in the Solar System, filled with lowland plains. Viking 2 photographed frost here.",
+      "pt": "A maior bacia de impacto reconhecida do Sistema Solar, preenchida por planícies baixas. A Viking 2 fotografou geada aqui."
+    },
+    "hazard": {
+      "en": "Cold winters with seasonal frost; rock-strewn plains.",
+      "pt": "Invernos frios com geada sazonal; planícies cheias de rochas."
+    },
+    "resource": {
+      "en": "Radar detected a buried water-ice deposit comparable in volume to Lake Superior.",
+      "pt": "O radar detectou um depósito de gelo enterrado comparável em volume ao Lago Superior."
+    },
+    "photoQuery": "Viking 2 Utopia Planitia",
+    "learnMore": "https://en.wikipedia.org/wiki/Viking_2",
+    "base": { "water": 0.85, "radiation": 0.5, "terrain": 0.7, "sunlight": 0.55, "temperature": 0.35 },
+    "surface": { "profile": "flat", "hazards": ["cold"] }
+  },
+  {
+    "id": "chryse",
+    "name": "Chryse Planitia",
+    "lat": 22.27,
+    "lon": -47.95,
+    "type": "landing",
+    "elevation": -3600,
+    "mission": { "en": "Viking 1 lander (1976)", "pt": "Sonda Viking 1 (1976)" },
+    "description": {
+      "en": "Smooth plain where Viking 1 made the first successful landing on Mars, at the mouth of ancient outflow channels.",
+      "pt": "Planície lisa onde a Viking 1 fez o primeiro pouso bem-sucedido em Marte, na foz de antigos canais de escoamento."
+    },
+    "hazard": {
+      "en": "Boulder fields left by ancient catastrophic floods.",
+      "pt": "Campos de rochas deixados por antigas inundações catastróficas."
+    },
+    "resource": {
+      "en": "Flood deposits carried material from the southern highlands.",
+      "pt": "Depósitos de inundação trouxeram material das terras altas do sul."
+    },
+    "photoQuery": "Viking 1 lander Chryse Planitia",
+    "learnMore": "https://en.wikipedia.org/wiki/Viking_1",
+    "base": { "water": 0.45, "radiation": 0.5, "terrain": 0.75, "sunlight": 0.85, "temperature": 0.6 },
+    "surface": { "profile": "channels", "hazards": [] }
+  },
+  {
+    "id": "meridiani",
+    "name": "Meridiani Planum",
+    "lat": -1.95,
+    "lon": -5.53,
+    "type": "landing",
+    "elevation": -1400,
+    "mission": { "en": "Opportunity rover (2004)", "pt": "Rover Opportunity (2004)" },
+    "description": {
+      "en": "Plain covered with hematite \"blueberries\": tiny spheres formed in water, found by Opportunity.",
+      "pt": "Planície coberta de \"mirtilos\" de hematita: pequenas esferas formadas na água, encontradas pelo Opportunity."
+    },
+    "hazard": {
+      "en": "Ripples of soft sand: Opportunity got stuck in one for weeks.",
+      "pt": "Ondulações de areia macia: o Opportunity ficou preso em uma delas por semanas."
+    },
+    "resource": {
+      "en": "Hematite and sulfates that formed in acidic, salty water.",
+      "pt": "Hematita e sulfatos formados em água ácida e salgada."
+    },
+    "photoQuery": "Opportunity rover Meridiani Planum",
+    "learnMore": "https://en.wikipedia.org/wiki/Opportunity_(rover)",
+    "base": { "water": 0.4, "radiation": 0.55, "terrain": 0.85, "sunlight": 1, "temperature": 0.8 },
+    "surface": { "profile": "dunes", "hazards": ["sand"] }
+  },
+  {
+    "id": "gusev",
+    "name": "Gusev Crater",
+    "lat": -14.57,
+    "lon": 175.47,
+    "type": "landing",
+    "elevation": -1900,
+    "mission": { "en": "Spirit rover (2004)", "pt": "Rover Spirit (2004)" },
+    "description": {
+      "en": "Crater explored by Spirit, which found silica deposits pointing to ancient hot springs.",
+      "pt": "Cratera explorada pelo Spirit, que encontrou depósitos de sílica indicando antigas fontes termais."
+    },
+    "hazard": {
+      "en": "Soft soil pockets: Spirit was trapped in one in 2009.",
+      "pt": "Bolsões de solo macio: o Spirit ficou preso em um deles em 2009."
+    },
+    "resource": {
+      "en": "Silica-rich deposits, a possible record of hydrothermal activity.",
+      "pt": "Depósitos ricos em sílica, possível registro de atividade hidrotermal."
+    },
+    "photoQuery": "Spirit rover Gusev crater",
+    "learnMore": "https://en.wikipedia.org/wiki/Spirit_(rover)",
+    "base": { "water": 0.4, "radiation": 0.55, "terrain": 0.65, "sunlight": 0.9, "temperature": 0.7 },
+    "surface": { "profile": "crater", "hazards": ["sand"] }
+  },
+  {
+    "id": "phoenix",
+    "name": "Vastitas Borealis",
+    "lat": 68.22,
+    "lon": -125.75,
+    "type": "resource",
+    "elevation": -4100,
+    "mission": { "en": "Phoenix lander (2008)", "pt": "Sonda Phoenix (2008)" },
+    "description": {
+      "en": "Arctic plain with polygonal ground where Phoenix dug up and confirmed water ice just below the surface.",
+      "pt": "Planície ártica com solo poligonal, onde a Phoenix escavou e confirmou gelo de água logo abaixo da superfície."
+    },
+    "hazard": {
+      "en": "Long winters with CO₂ frost and very low temperatures.",
+      "pt": "Invernos longos com geada de CO₂ e temperaturas muito baixas."
+    },
+    "resource": {
+      "en": "Shallow water ice only centimetres below the soil.",
+      "pt": "Gelo de água raso, a poucos centímetros abaixo do solo."
+    },
+    "photoQuery": "Phoenix Mars lander ice",
+    "learnMore": "https://en.wikipedia.org/wiki/Phoenix_(spacecraft)",
+    "base": { "water": 0.95, "radiation": 0.5, "terrain": 0.8, "sunlight": 0.35, "temperature": 0.15 },
+    "surface": { "profile": "icy", "hazards": ["cold"] }
+  },
+  {
+    "id": "hellas",
+    "name": "Hellas Planitia",
+    "lat": -42.4,
+    "lon": 70.5,
+    "type": "geological",
+    "elevation": -7152,
+    "mission": { "en": "Orbital observation (MRO / MOLA)", "pt": "Observação orbital (MRO / MOLA)" },
+    "description": {
+      "en": "Giant impact basin and the lowest point on Mars, more than 7 km below the reference level.",
+      "pt": "Bacia de impacto gigante e o ponto mais baixo de Marte, mais de 7 km abaixo do nível de referência."
+    },
+    "hazard": {
+      "en": "Frequent dust storms start in the basin.",
+      "pt": "Tempestades de poeira frequentes começam na bacia."
+    },
+    "resource": {
+      "en": "Highest air pressure on Mars (above 1,100 Pa): better natural radiation shielding.",
+      "pt": "Maior pressão atmosférica de Marte (acima de 1.100 Pa): melhor proteção natural contra radiação."
+    },
+    "photoQuery": "Hellas Planitia Mars",
+    "learnMore": "https://en.wikipedia.org/wiki/Hellas_Planitia",
+    "base": { "water": 0.6, "radiation": 0.25, "terrain": 0.6, "sunlight": 0.55, "temperature": 0.35 },
+    "surface": { "profile": "crater", "hazards": ["dust_storm", "cold"] }
+  }
+]

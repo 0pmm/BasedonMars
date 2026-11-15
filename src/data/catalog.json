@@ -1,0 +1,172 @@
+{
+  "types": {
+    "landing": {
+      "color": "#ff6b35",
+      "icon": "🛬"
+    },
+    "geological": {
+      "color": "#4fd1ff",
+      "icon": "⛰️"
+    },
+    "resource": {
+      "color": "#39ff88",
+      "icon": "💧"
+    },
+    "hazard": {
+      "color": "#ff3b5c",
+      "icon": "⚠️"
+    }
+  },
+  "layers": [
+    {
+      "id": "none",
+      "icon": "🪐",
+      "legend": null
+    },
+    {
+      "id": "mola",
+      "icon": "🗻",
+      "trek": true
+    },
+    {
+      "id": "themisDay",
+      "icon": "🌡️",
+      "trek": true
+    },
+    {
+      "id": "themisNight",
+      "icon": "🌙",
+      "trek": true
+    },
+    {
+      "id": "thermalInertia",
+      "icon": "🧱",
+      "trek": true
+    },
+    {
+      "id": "dust",
+      "icon": "🌫️",
+      "trek": true
+    },
+    {
+      "id": "clay",
+      "icon": "🧪",
+      "trek": true
+    },
+    {
+      "id": "pyroxene",
+      "icon": "💎",
+      "trek": true
+    },
+    {
+      "id": "albedo",
+      "icon": "☀️",
+      "trek": true
+    },
+    {
+      "id": "roughness",
+      "icon": "🪨",
+      "trek": true
+    },
+    {
+      "id": "geology",
+      "icon": "🗺️",
+      "trek": true
+    }
+  ],
+  "rovers": [
+    {
+      "id": "perseverance",
+      "name": "Perseverance",
+      "lat": 18.47,
+      "lon": 77.35,
+      "status": {
+        "en": "Active · approximate position",
+        "pt": "Ativo · posição aproximada"
+      }
+    },
+    {
+      "id": "curiosity",
+      "name": "Curiosity",
+      "lat": -4.75,
+      "lon": 137.38,
+      "status": {
+        "en": "Active · approximate position",
+        "pt": "Ativo · posição aproximada"
+      }
+    }
+  ],
+  "orbiters": [
+    {
+      "id": "mro",
+      "name": "Mars Reconnaissance Orbiter",
+      "agency": "NASA",
+      "altitudeKm": 255,
+      "apoapsisKm": 320,
+      "inclination": 93,
+      "periodMin": 112,
+      "color": "#4fd1ff"
+    },
+    {
+      "id": "odyssey",
+      "name": "Mars Odyssey",
+      "agency": "NASA",
+      "altitudeKm": 400,
+      "apoapsisKm": 400,
+      "inclination": 93,
+      "periodMin": 118,
+      "color": "#39ff88"
+    },
+    {
+      "id": "maven",
+      "name": "MAVEN",
+      "agency": "NASA",
+      "altitudeKm": 150,
+      "apoapsisKm": 4500,
+      "inclination": 75,
+      "periodMin": 210,
+      "color": "#ffcc33"
+    },
+    {
+      "id": "tgo",
+      "name": "ExoMars TGO",
+      "agency": "ESA/Roscosmos",
+      "altitudeKm": 400,
+      "apoapsisKm": 400,
+      "inclination": 74,
+      "periodMin": 118,
+      "color": "#ff9d5c"
+    },
+    {
+      "id": "mex",
+      "name": "Mars Express",
+      "agency": "ESA",
+      "altitudeKm": 330,
+      "apoapsisKm": 10530,
+      "inclination": 87,
+      "periodMin": 402,
+      "color": "#b48cff"
+    },
+    {
+      "id": "hope",
+      "name": "Emirates Hope",
+      "agency": "UAESA",
+      "altitudeKm": 20000,
+      "apoapsisKm": 43000,
+      "inclination": 25,
+      "periodMin": 3300,
+      "color": "#ff6b9a"
+    },
+    {
+      "id": "tianwen1",
+      "name": "Tianwen-1",
+      "agency": "CNSA",
+      "altitudeKm": 265,
+      "apoapsisKm": 10700,
+      "inclination": 87,
+      "periodMin": 470,
+      "color": "#ffe08a"
+    }
+  ],
+  "$orbitersNote": "Orbiters around Mars (approximate orbital elements from the agencies; periapsis/apoapsis in km). MAVEN: contact lost in Dec 2025 (still in orbit)."
+}

@@ -1,0 +1,38 @@
+/* Design tokens: colours, typography, spacing. High-contrast and font
+   scale are applied by toggling classes / variables on <html>. */
+:root {
+  --bg: #03050a;
+  --panel: rgba(8, 12, 22, 0.88);
+  --panel-solid: #0a0f1c;
+  --panel-border: rgba(255, 107, 53, 0.38);
+  --orange: #ff6b35;
+  --orange-glow: #ff9d5c;
+  --cyan: #4fd1ff;
+  --green: #39ff88;
+  --red: #ff3b5c;
+  --yellow: #ffcc33;
+  --text: #e6ecf5;
+  --muted: #a7b2c4; /* AA contrast on --panel */
+  --focus: #ffd166;
+  --radius: 14px;
+  --font-body: 'Rajdhani', system-ui, sans-serif;
+  --font-display: 'Orbitron', system-ui, sans-serif;
+  --font-mono: 'Share Tech Mono', ui-monospace, monospace;
+  --font-scale: 1;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --gutter: 18px;
+}
+
+html.hc {
+  --panel: #000;
+  --panel-solid: #000;
+  --panel-border: #fff;
+  --text: #fff;
+  --muted: #e6e6e6;
+  --orange: #ffa64d;
+  --cyan: #7fe3ff;
+  --focus: #ffff00;
+}

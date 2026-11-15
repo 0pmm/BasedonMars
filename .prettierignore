@@ -1,0 +1,9 @@
+node_modules/
+dist/
+public/draco/
+package-lock.json
+test-results/
+playwright-report/
+*.webp
+*.png
+*.glb
