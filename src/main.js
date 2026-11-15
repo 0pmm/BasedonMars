@@ -41,8 +41,9 @@ import { formatLatLon } from './geo/mars.js';
 import { formatDistance } from './core/units.js';
 import { openSources } from './ui/sources.js';
 import { marsTime, localSolarTime, formatHours, seasonKey } from './geo/mars24.js';
-import { initDashboard, updateDashboard, showDashboardUI, handleDashboardEscape, openDetails, switchTab } from './ui/dashboard.js';
-import { initSciencePanel } from './ui/sciencePanel.js';
+import { initDashboard, updateDashboard, showDashboardUI, handleDashboardEscape, openSheet } from './ui/dashboard.js';
+import { initGuide, objectiveCards } from './ui/guide.js';
+import { startMission, setStep, setObjective, selectSite, selectZone } from './core/mission.js';
 import { initHud, showHud } from './ui/hud.js';
 import { initMobileControls } from './ui/mobileControls.js';
 import { openSettings, openHelp } from './ui/menus.js';
@@ -50,6 +51,10 @@ import { isModalOpen } from './ui/modal.js';
 import { toast } from './ui/feedback.js';
 import pois from './data/pois.json';
 import sites from './data/sites.json';
+import scienceSites from './data/scienceSites.json';
+import prospects from './data/prospects.json';
+
+const SCIENCE_SITES = scienceSites.sites;
 
 const canvas = /** @type {HTMLCanvasElement} */ ($('#scene'));
 let quality;
@@ -216,9 +221,9 @@ function bindGlobal() {
   addEventListener('pointerdown', unlockAudio, { once: false, passive: true });
   addEventListener('keydown', unlockAudio, { passive: true });
 
-  $('#btn-start-explore').addEventListener('click', () => {
-    openDashboard();
-    switchTab('route');
+  $('#btn-objective')?.addEventListener('click', () => {
+    setStep('objective');
+    openSheet('right-panel');
   });
   $('#btn-language').addEventListener('click', () => {
     const codes = LANGUAGES.map((l) => l.code);
@@ -300,11 +305,28 @@ function loop(now) {
 /* ============================ Deep links ============================ */
 function handleDeepLink() {
   const link = parseHash();
-  const site = link.site && sites.find((s) => s.id === link.site);
+  const scienceSite = link.site ? SCIENCE_SITES.find((s) => s.id === link.site) : null;
+  if (link.objective || link.zone || link.step || scienceSite) {
+    if (link.objective) setObjective(link.objective);
+    if (scienceSite) selectSite(scienceSite.id);
+    if (link.zone) selectZone(link.zone);
+    if (link.step) setStep(link.step);
+    openDashboard();
+    const zone = link.zone ? prospects.zones.find((z) => z.id === link.zone) : null;
+    const target = scienceSite || zone;
+    if (target) {
+      orbitView.flyTo(
+        { lat: target.lat, lon: target.lon, range: zone ? Math.max(12000, zone.radiusKm * 2400) : 6000, heading: 0, tilt: 55 },
+        2600
+      );
+    }
+    return true;
+  }
+  const site = link.site ? sites.find((s) => s.id === link.site) : null;
   const at = site ? { lat: site.lat, lon: site.lon } : link.at;
   if (at) {
     openDashboard();
-    switchTab('route');
+    setStep('route');
     orbitView.flyTo({ lat: at.lat, lon: at.lon, range: 3000, heading: 0, tilt: 55 }, 2600);
     return true;
   }
@@ -312,8 +334,8 @@ function handleDeepLink() {
     const poi = pois.find((p) => p.id === link.poi);
     if (poi) {
       openDashboard();
-      openDetails(poi);
-      setTimeout(() => orbitView.focusPoi(poi.id), 300);
+      if (SCIENCE_SITES.some((s) => s.id === poi.id)) selectSite(poi.id);
+      orbitView.flyTo({ lat: poi.lat, lon: poi.lon, range: 6000, heading: 0, tilt: 55 }, 2600);
       return true;
     }
   }
@@ -321,6 +343,17 @@ function handleDeepLink() {
 }
 
 /* ============================ Boot ============================ */
+function buildStartObjectives() {
+  const picker = $('#start-objectives');
+  if (!picker) return;
+  picker.replaceChildren(
+    ...objectiveCards((id) => {
+      startMission(id);
+      openDashboard();
+    })
+  );
+}
+
 async function boot() {
   initSettings();
   initErrorCapture();
@@ -350,7 +383,17 @@ async function boot() {
 
     initDashboard({ goHome, screenshot });
     initRoutePanel({ traverse: (plan) => startTraverse(plan, 'dashboard') });
-    initSciencePanel();
+    initGuide();
+    buildStartObjectives();
+    on('language:change', buildStartObjectives);
+    on('mission:change', (m) => {
+      setHash({
+        objective: m.objective,
+        step: m.step,
+        ...(m.siteId ? { site: m.siteId } : {}),
+        ...(m.zoneId ? { zone: m.zoneId } : {}),
+      });
+    });
     initHud();
     mobile = initMobileControls();
     initTraverseApp({ show: showSurface, exitTo });

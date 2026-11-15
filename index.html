@@ -59,13 +59,8 @@
         <p class="start-subtitle" data-i18n="start.subtitle">Martian map · Survival guide</p>
         <p class="lead" data-i18n="start.lead"></p>
         <div class="start-divider" aria-hidden="true"></div>
-        <div class="start-actions">
-          <button class="start-btn primary" id="btn-start-explore" type="button">
-            <span aria-hidden="true">🪐</span> <span data-i18n="start.explore">Explore Mars and plan a route</span>
-            <small data-i18n="start.exploreDetail"></small>
-            <span class="btn-arrow" aria-hidden="true">➜</span>
-          </button>
-        </div>
+        <p class="start-question" data-i18n="start.objectiveQuestion">What do you want to discover on Mars?</p>
+        <div class="start-objectives" id="start-objectives"></div>
         <nav class="start-links" data-i18n-attr="aria-label:start.more">
           <button type="button" class="link-btn" data-open="settings">
             <span aria-hidden="true">⚙️</span> <span data-i18n="menu.settings">Settings</span>
@@ -106,8 +101,13 @@
         <button class="icon-btn" type="button" data-open="sources" data-i18n-attr="aria-label:menu.sources;title:menu.sources">
           <span aria-hidden="true">📚</span>
         </button>
-        <button class="cta-header-btn" id="btn-open-route" type="button">
-          <span aria-hidden="true">🧭</span> <span data-i18n="menu.route">Plan a route</span>
+        <button
+          class="cta-header-btn"
+          id="btn-objective"
+          type="button"
+          data-i18n-attr="aria-label:guide.changeObjective;title:guide.changeObjective"
+        >
+          <span aria-hidden="true" id="header-objective-icon">🧬</span> <span id="header-objective-name">Ancient life</span>
         </button>
       </div>
     </header>
@@ -117,7 +117,7 @@
         <span aria-hidden="true">🗂️</span> <span data-i18n="panel.layers">Layers</span>
       </button>
       <button type="button" class="pill-btn" data-panel="right-panel">
-        <span aria-hidden="true">🧭</span> <span data-i18n="tab.route">Route</span>
+        <span aria-hidden="true">🧭</span> <span data-i18n="guide.title">Mission guide</span>
       </button>
     </div>
 
@@ -192,93 +192,54 @@
     </aside>
 
     <aside class="panel" id="right-panel" hidden data-i18n-attr="aria-label:panel.locations">
-      <div class="panel-head tabs" role="tablist">
-        <button
-          class="tab-btn active"
-          type="button"
-          role="tab"
-          id="tab-btn-route"
-          aria-controls="tab-route"
-          aria-selected="true"
-          data-tab="route"
-          data-i18n="tab.route"
-        >
-          Route
-        </button>
-        <button
-          class="tab-btn"
-          type="button"
-          role="tab"
-          id="tab-btn-poi"
-          aria-controls="tab-poi"
-          aria-selected="false"
-          data-tab="poi"
-          data-i18n="tab.locations"
-        >
-          Locations
-        </button>
-        <button
-          class="tab-btn"
-          type="button"
-          role="tab"
-          id="tab-btn-info"
-          aria-controls="tab-info"
-          aria-selected="false"
-          data-tab="info"
-          data-i18n="tab.details"
-        >
-          Details
-        </button>
-        <button
-          class="tab-btn"
-          type="button"
-          role="tab"
-          id="tab-btn-compare"
-          aria-controls="tab-compare"
-          aria-selected="false"
-          data-tab="compare"
-          data-i18n="tab.compare"
-        >
-          Compare
-        </button>
-        <button
-          class="tab-btn"
-          type="button"
-          role="tab"
-          id="tab-btn-science"
-          aria-controls="tab-science"
-          aria-selected="false"
-          data-tab="science"
-          data-i18n="tab.science"
-        >
-          Science
-        </button>
-        <button type="button" class="close-sheet" data-close-panel data-i18n-attr="aria-label:common.close">
-          <span aria-hidden="true">✕</span>
-        </button>
+      <div class="guide-head">
+        <div class="guide-objective">
+          <span class="guide-objective-icon" id="guide-objective-icon" aria-hidden="true">🧬</span>
+          <div class="guide-objective-text">
+            <small data-i18n="guide.objective">Objective</small>
+            <strong id="guide-objective-name">Ancient life</strong>
+          </div>
+          <button class="guide-change" id="btn-change-objective" type="button" data-i18n="guide.change">Change</button>
+          <button type="button" class="close-sheet" data-close-panel data-i18n-attr="aria-label:common.close">
+            <span aria-hidden="true">✕</span>
+          </button>
+        </div>
+        <div class="guide-steps" role="tablist" data-i18n-attr="aria-label:guide.title">
+          <button
+            class="guide-step-btn"
+            type="button"
+            role="tab"
+            data-step="objective"
+            aria-selected="true"
+            data-i18n="guide.step.objective"
+          >
+            Objective
+          </button>
+          <button class="guide-step-btn" type="button" role="tab" data-step="site" aria-selected="false" data-i18n="guide.step.site">
+            Site
+          </button>
+          <button class="guide-step-btn" type="button" role="tab" data-step="route" aria-selected="false" data-i18n="guide.step.route">
+            Route
+          </button>
+          <button class="guide-step-btn" type="button" role="tab" data-step="try" aria-selected="false" data-i18n="guide.step.try">
+            Walk
+          </button>
+        </div>
       </div>
-      <section class="tab-content active" id="tab-route" role="tabpanel" aria-labelledby="tab-btn-route">
-        <div id="route-panel"></div>
-      </section>
-      <section class="tab-content" id="tab-poi" role="tabpanel" aria-labelledby="tab-btn-poi">
-        <label class="search">
-          <span class="sr-only" data-i18n="search.label">Search locations</span>
-          <input id="poi-search" type="search" autocomplete="off" data-i18n-attr="placeholder:search.placeholder" />
-        </label>
-        <div class="filter-chips" id="type-filters" role="group" data-i18n-attr="aria-label:search.filter"></div>
-        <p class="result-count" id="poi-count" aria-live="polite"></p>
-        <ul id="poi-list" class="poi-list"></ul>
-      </section>
-      <section class="tab-content" id="tab-info" role="tabpanel" aria-labelledby="tab-btn-info">
-        <p id="info-empty" class="empty" data-i18n="details.empty"></p>
-        <div id="info-content" hidden></div>
-      </section>
-      <section class="tab-content" id="tab-compare" role="tabpanel" aria-labelledby="tab-btn-compare">
-        <div id="compare-content"></div>
-      </section>
-      <section class="tab-content" id="tab-science" role="tabpanel" aria-labelledby="tab-btn-science">
-        <div id="science-panel"></div>
-      </section>
+      <div class="guide-body">
+        <section class="guide-step" data-step="objective" id="guide-step-objective" aria-label="Objective">
+          <div id="guide-objective"></div>
+        </section>
+        <section class="guide-step" data-step="site" id="guide-step-site" aria-label="Site">
+          <div id="guide-site"></div>
+        </section>
+        <section class="guide-step" data-step="route" id="guide-step-route" aria-label="Route">
+          <div id="route-panel"></div>
+        </section>
+        <section class="guide-step" data-step="try" id="guide-step-try" aria-label="Walk">
+          <div id="guide-try"></div>
+        </section>
+      </div>
     </aside>
 
     <section class="panel" id="telemetry" hidden data-i18n-attr="aria-label:tele.title">

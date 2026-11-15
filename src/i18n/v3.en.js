@@ -384,4 +384,22 @@ export default {
   'science.disclaimer':
     'Scores are this project model, not an official NASA ranking. Weights are shown per objective and every criterion carries a source.',
   'pl.sum.scienceCoverage': 'Science coverage',
+
+  'guide.title': 'Mission guide',
+  'guide.objective': 'Objective',
+  'guide.change': 'Change',
+  'guide.changeObjective': 'Change scientific objective',
+  'guide.step.objective': 'Objective',
+  'guide.step.site': 'Site',
+  'guide.step.route': 'Route',
+  'guide.step.try': 'Walk',
+  'guide.chooseTitle': 'Choose the mission objective',
+  'guide.chooseSub': 'Everything below — ranking, zones on the map and the route — follows this choice.',
+  'guide.zonesOnMap': 'Zones on map',
+  'guide.try.title': 'Walk the science route',
+  'guide.try.noRoute': 'Plan a route first (step 3) to rehearse it in first person.',
+  'guide.try.sub': 'Summary of the current plan. Walking it updates oxygen, clock and dose in real EVA time.',
+  'guide.try.note': 'The rehearsal uses the real terrain and the same consumables model as the plan.',
+  'guide.backToRoute': 'Back to route',
+  'start.objectiveQuestion': 'What do you want to discover on Mars?',
 };

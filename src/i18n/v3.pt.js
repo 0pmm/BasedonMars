@@ -388,4 +388,22 @@ export default {
   'science.disclaimer':
     'As notas são o modelo deste projeto, não um ranking oficial da NASA. Os pesos aparecem por objetivo e cada critério tem uma fonte.',
   'pl.sum.scienceCoverage': 'Cobertura científica',
+
+  'guide.title': 'Guia da missão',
+  'guide.objective': 'Objetivo',
+  'guide.change': 'Trocar',
+  'guide.changeObjective': 'Trocar objetivo científico',
+  'guide.step.objective': 'Objetivo',
+  'guide.step.site': 'Local',
+  'guide.step.route': 'Rota',
+  'guide.step.try': 'Ensaio',
+  'guide.chooseTitle': 'Escolha o objetivo da missão',
+  'guide.chooseSub': 'Tudo abaixo — ranking, zonas no mapa e rota — segue esta escolha.',
+  'guide.zonesOnMap': 'Zonas no mapa',
+  'guide.try.title': 'Percorrer a rota científica',
+  'guide.try.noRoute': 'Planeje uma rota primeiro (etapa 3) para ensaiá-la em primeira pessoa.',
+  'guide.try.sub': 'Resumo do plano atual. Percorrer atualiza oxigênio, relógio e dose no tempo real da EVA.',
+  'guide.try.note': 'O ensaio usa o terreno real e o mesmo modelo de consumíveis do plano.',
+  'guide.backToRoute': 'Voltar à rota',
+  'start.objectiveQuestion': 'O que você quer descobrir em Marte?',
 };

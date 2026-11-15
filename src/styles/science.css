@@ -1,5 +1,158 @@
 /* Science tab: objective -> site ranking -> detail -> Marswalk. */
 
+/* ---------- Guided mission shell ---------- */
+.guide-head {
+  flex: 0 0 auto;
+  padding: 10px 12px 0;
+  border-bottom: 1px solid var(--panel-border);
+}
+.guide-objective {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.guide-objective-icon {
+  font-size: 1.3rem;
+  line-height: 1;
+}
+.guide-objective-text {
+  display: grid;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
+}
+.guide-objective-text small {
+  color: var(--muted);
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+.guide-objective-text strong {
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.guide-change {
+  background: transparent;
+  border: 1px solid var(--panel-border);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 0.68rem;
+  padding: 4px 8px;
+  cursor: pointer;
+}
+.guide-steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  margin: 8px 0 0;
+}
+.guide-step-btn {
+  min-height: 34px;
+  padding: 5px 2px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--font-display);
+  font-size: 0.6rem;
+  letter-spacing: 0.4px;
+  cursor: pointer;
+}
+.guide-step-btn.active {
+  color: var(--orange);
+  border-bottom-color: var(--orange);
+}
+.guide-step-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.guide-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 12px 14px;
+}
+.guide-step[hidden] {
+  display: none;
+}
+.guide-report {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 12px;
+}
+
+/* ---------- Objective cards (start screen and step 1) ---------- */
+.start-question {
+  margin: 0 0 14px;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  letter-spacing: 0.4px;
+  color: var(--text);
+}
+.start-objectives {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  width: min(880px, 100%);
+  margin: 0 auto 18px;
+}
+.start-objective,
+.objective-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 16px 14px;
+  text-align: left;
+  color: var(--text);
+  background: rgba(8, 12, 22, 0.78);
+  border: 1px solid var(--panel-border);
+  border-radius: 14px;
+  cursor: pointer;
+  min-height: 44px;
+}
+.start-objective:hover,
+.objective-card:hover,
+.objective-card.active {
+  border-color: var(--orange);
+  background: rgba(255, 107, 53, 0.1);
+}
+.start-objective .objective-icon,
+.objective-card .objective-icon {
+  font-size: 1.7rem;
+  line-height: 1;
+}
+.start-objective strong,
+.objective-card strong {
+  font-family: var(--font-display);
+  font-size: 0.86rem;
+}
+.objective-question {
+  color: var(--cyan);
+  font-size: 0.78rem;
+  line-height: 1.3;
+}
+.start-objective small,
+.objective-card small {
+  color: var(--muted);
+  font-size: 0.74rem;
+  line-height: 1.35;
+}
+.objective-grid {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.objective-grid .objective-card {
+  padding: 10px 12px;
+}
+.objective-grid .objective-card .objective-icon {
+  font-size: 1.2rem;
+}
+
 .panel-head.tabs {
   flex: 0 0 auto;
   overflow-x: auto;
@@ -370,6 +523,12 @@
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   padding-top: 8px;
   margin: 4px 0 0;
+}
+
+@media (max-width: 800px) {
+  .start-objectives {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 520px) {

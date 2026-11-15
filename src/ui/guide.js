@@ -1,23 +1,24 @@
 /**
- * "Science" tab: pick a scientific objective, rank landing sites by how well
- * they serve it, inspect why, and turn the best site (or a data-discovered
- * zone) into a Marswalk in the route planner.
- *
- * Every score is the project's transparent model (src/game/siteFit.js); the
- * weights and the source of each attribute are shown in the panel.
+ * Mission guide: the backbone of the app. The chosen scientific objective
+ * drives a four-step flow — objective, site, route, walk — and the globe
+ * layer (candidate zones + ranked sites) reacts to the same state.
  */
 import { h, $, clear } from '../core/dom.js';
 import { t, tr } from '../core/i18n.js';
 import { on } from '../core/events.js';
 import { orbitView } from '../orbit/orbitView.js';
 import { toast } from './feedback.js';
-import { switchTab } from './dashboard.js';
-import { setRoute, setEditing } from './routePanel.js';
+import { openSheet } from './dashboard.js';
+import { setRoute, getRouteSummary, walkCurrentRoute, setEditing, formatDuration } from './routePanel.js';
+import { getMission, setStep, setObjective, selectSite, selectZone, objective as currentObjective } from '../core/mission.js';
+import { getSettings } from '../core/settings.js';
 import { OBJECTIVES, fitSite, rankSites, objectiveById } from '../game/siteFit.js';
 import { landability, landingConfidence } from '../game/landability.js';
 import { buildSciencePlan, bestBasePoint } from '../planner/scout.js';
 import { loadSite } from '../planner/site.js';
 import { distanceM } from '../geo/mars.js';
+import { formatDistance } from '../core/units.js';
+import { initZonesLayer, refreshZones, setZonesVisible, isZonesVisible } from '../orbit/zonesLayer.js';
 import sitesData from '../data/scienceSites.json';
 import prospects from '../data/prospects.json';
 
@@ -25,23 +26,17 @@ const SITES = sitesData.sites;
 const MISSIONS = sitesData.missions;
 
 const S = {
-  objective: 'life',
   view: 'sites',
+  hideExplored: true,
+  landing: null,
+  busy: false,
   selectedSite: null,
   selectedZone: null,
-  hideExplored: true,
-  landing: null, // {zoneId, status, metrics, error}
-  busy: false,
 };
 
-let root = null;
-
-export function initSciencePanel() {
-  root = $('#science-panel');
-  S.selectedSite = 'jezero';
-  render();
-  on('language:change', render);
-}
+let siteRoot = null;
+let tryRoot = null;
+let objectiveRoot = null;
 
 /* ------------------------------ helpers ------------------------------ */
 
@@ -61,9 +56,7 @@ function kindBadge(kind) {
   return h('span.sci-kind', { attrs: { title: t(`science.kind.${kind}`) } }, t(`science.kind.${kind}`));
 }
 
-function pct(v) {
-  return `${Math.round(v * 100)}%`;
-}
+const pct = (v) => `${Math.round(v * 100)}%`;
 
 function bar(value, label) {
   return h(
@@ -81,14 +74,12 @@ function bar(value, label) {
   );
 }
 
-function siteMission(siteId) {
+function missionsAt(siteId) {
   return MISSIONS.filter((m) => m.siteId === siteId);
 }
 
 function zoneName(zone) {
-  if (zone.near) {
-    return t('science.zoneNear', { name: zone.near.name, km: zone.near.km });
-  }
+  if (zone.near) return t('science.zoneNear', { name: zone.near.name, km: zone.near.km });
   const lat = Math.abs(zone.lat).toFixed(1);
   const lon = Math.abs(zone.lon).toFixed(1);
   return `${lat}°${zone.lat >= 0 ? 'N' : 'S'} ${lon}°${zone.lon >= 0 ? 'E' : 'W'}`;
@@ -96,72 +87,182 @@ function zoneName(zone) {
 
 function zoneFit(zone, objectiveId) {
   if (objectiveId === 'survival') return null;
-  // Zones come from hydrated-mineral clusters: a direct proxy for the life
-  // objective, an alteration proxy for the geological one.
   return objectiveId === 'life' ? zone.score : Math.round(zone.score * 85) / 100;
+}
+
+/** Cards used by the start screen and the objective step. */
+export function objectiveCards(onPick, variant = 'start') {
+  const cls = variant === 'start' ? 'start-objective' : 'objective-card';
+  return OBJECTIVES.map((o) =>
+    h(
+      'button',
+      {
+        class: cls,
+        attrs: { type: 'button', 'data-objective': o.id },
+        on: { click: () => onPick(o.id) },
+      },
+      h('span.objective-icon', { attrs: { 'aria-hidden': 'true' } }, o.icon),
+      h('strong', null, tr(o.name)),
+      h('span.objective-question', null, tr(o.question)),
+      h('small', null, tr(o.short))
+    )
+  );
+}
+
+/* ------------------------------- init -------------------------------- */
+
+export function initGuide() {
+  siteRoot = $('#guide-site');
+  tryRoot = $('#guide-try');
+  objectiveRoot = $('#guide-objective');
+
+  document.querySelectorAll('.guide-step-btn').forEach((btn) => {
+    btn.addEventListener('click', () => setStep(btn.dataset.step));
+  });
+  $('#btn-change-objective')?.addEventListener('click', () => setStep('objective'));
+
+  initZonesLayer({
+    onZone: (zone) => {
+      S.view = 'zones';
+      S.selectedZone = zone.id;
+      S.landing = null;
+      selectZone(zone.id);
+      setStep('site');
+      flyTo(zone);
+      openSheet('right-panel');
+    },
+    onSite: (site) => {
+      S.view = 'sites';
+      S.selectedSite = site.id;
+      selectSite(site.id);
+      setStep('site');
+      flyTo(site);
+      openSheet('right-panel');
+    },
+  });
+
+  on('mission:change', (mission) => {
+    if (mission.siteId) S.selectedSite = mission.siteId;
+    if (mission.zoneId) S.selectedZone = mission.zoneId;
+    refreshZones(mission.objective, mission.siteId);
+    render();
+    if (mission.step !== 'objective') openSheet('right-panel');
+  });
+  on('language:change', render);
+  on('route:change', () => {
+    if (getMission().step === 'try') renderTry();
+  });
+  render();
+  refreshZones(getMission().objective, getMission().siteId);
 }
 
 /* ------------------------------- render ------------------------------ */
 
 function render() {
-  if (!root) return;
-  clear(root);
-  const objective = objectiveById(S.objective);
+  const mission = getMission();
+  const objective = currentObjective();
 
-  root.append(
-    h('div.sci-head', null, h('h3', null, `🔬 ${t('science.title')}`), h('p.sci-sub', null, t('science.subtitle'))),
+  const icon = $('#guide-objective-icon');
+  const name = $('#guide-objective-name');
+  const headerIcon = $('#header-objective-icon');
+  const headerName = $('#header-objective-name');
+  if (icon) icon.textContent = objective.icon;
+  if (name) name.textContent = tr(objective.name);
+  if (headerIcon) headerIcon.textContent = objective.icon;
+  if (headerName) headerName.textContent = tr(objective.name);
+
+  document.querySelectorAll('.guide-step').forEach((el) => {
+    el.hidden = el.dataset.step !== mission.step;
+  });
+  document.querySelectorAll('.guide-step-btn').forEach((btn) => {
+    const active = btn.dataset.step === mission.step;
+    btn.classList.toggle('active', active);
+    btn.setAttribute('aria-selected', String(active));
+  });
+
+  if (mission.step === 'objective') renderObjective();
+  if (mission.step === 'site') renderSite();
+  if (mission.step === 'try') renderTry();
+}
+
+function renderObjective() {
+  if (!objectiveRoot) return;
+  clear(objectiveRoot);
+  const mission = getMission();
+  const objective = currentObjective();
+  objectiveRoot.append(
+    h('h3', null, `🔬 ${t('guide.chooseTitle')}`),
+    h('p.sci-sub', null, t('guide.chooseSub')),
     h(
-      'div.sci-objectives',
-      { attrs: { role: 'tablist', 'aria-label': t('science.objective') } },
+      'div.objective-grid',
+      null,
       ...OBJECTIVES.map((o) =>
         h(
-          'button.sci-obj',
+          'button',
           {
-            attrs: {
-              type: 'button',
-              role: 'tab',
-              'aria-selected': String(o.id === S.objective),
-              title: tr(o.short),
-            },
+            class: `objective-card${o.id === mission.objective ? ' active' : ''}`,
+            attrs: { type: 'button', 'aria-pressed': String(o.id === mission.objective) },
             on: {
               click: () => {
-                S.objective = o.id;
-                S.selectedSite = S.selectedSite || 'jezero';
-                S.landing = null;
-                render();
+                setObjective(o.id);
+                setStep('site');
               },
             },
           },
-          h('span.sci-obj-icon', { attrs: { 'aria-hidden': 'true' } }, o.icon),
-          h('strong', null, tr(o.name))
+          h('span.objective-icon', { attrs: { 'aria-hidden': 'true' } }, o.icon),
+          h('strong', null, tr(o.name)),
+          h('span.objective-question', null, tr(o.question)),
+          h('small', null, tr(o.short))
         )
       )
     ),
-    h('p.sci-question', null, `❓ ${tr(objective.question)}`),
-    h('p.sci-short', null, tr(objective.short)),
     h(
       'p.sci-missions',
       null,
       h('strong', null, `${t('science.realMissions')}: `),
-      MISSIONS.filter((m) => m.objective === S.objective)
+      MISSIONS.filter((m) => m.objective === mission.objective)
         .map((m) => `${m.name} (${m.year})`)
         .join(' · ')
     ),
     h(
+      'div.sci-actions',
+      null,
+      h(
+        'button.btn.primary',
+        { attrs: { type: 'button' }, on: { click: () => setStep('site') } },
+        `${tr(objective.name)} → ${t('guide.step.site')}`
+      )
+    ),
+    h('p.sci-disclaimer', null, t('science.disclaimer'))
+  );
+}
+
+function renderSite() {
+  if (!siteRoot) return;
+  clear(siteRoot);
+  const mission = getMission();
+  const objectiveId = mission.objective;
+
+  siteRoot.append(
+    h(
       'div.sci-views',
       { attrs: { role: 'group', 'aria-label': t('science.view') } },
       viewButton('sites', `📍 ${t('science.view.sites')}`),
-      viewButton('zones', `🛰️ ${t('science.view.zones')}`)
+      viewButton('zones', `🛰️ ${t('science.view.zones')}`),
+      h(
+        'label.sci-check',
+        { attrs: { title: t('guide.zonesOnMap') } },
+        h('input', {
+          attrs: { type: 'checkbox', checked: isZonesVisible() },
+          on: { change: (e) => setZonesVisible(e.target.checked) },
+        }),
+        ` ${t('guide.zonesOnMap')}`
+      )
     )
   );
 
-  if (S.view === 'zones') {
-    renderZones();
-  } else {
-    renderSites();
-  }
-
-  root.append(h('p.sci-disclaimer', null, t('science.disclaimer')));
+  if (S.view === 'zones') renderZones(objectiveId);
+  else renderSites(objectiveId);
 }
 
 function viewButton(id, label) {
@@ -169,22 +270,21 @@ function viewButton(id, label) {
     'button.sci-view',
     {
       attrs: { type: 'button', 'aria-pressed': String(S.view === id) },
-      on: { click: () => ((S.view = id), (S.landing = null), render()) },
+      on: { click: () => ((S.view = id), (S.landing = null), renderSite()) },
     },
     label
   );
 }
 
-function renderSites() {
-  const ranked = rankSites(SITES, S.objective);
-  if (!S.selectedSite) S.selectedSite = ranked[0]?.site.id || null;
-
-  root.append(
+function renderSites(objectiveId) {
+  const ranked = rankSites(SITES, objectiveId);
+  const selected = S.selectedSite || getMission().siteId || ranked[0]?.site.id;
+  siteRoot.append(
     h(
       'ol.sci-list',
       null,
       ...ranked.map(({ rank, site, fit }) => {
-        const missions = siteMission(site.id);
+        const missions = missionsAt(site.id);
         return h(
           'li',
           null,
@@ -193,10 +293,17 @@ function renderSites() {
             {
               attrs: {
                 type: 'button',
-                'aria-pressed': String(S.selectedSite === site.id),
+                'aria-pressed': String(selected === site.id),
                 'aria-label': `${site.name}: ${t('science.fit')} ${fit.score}/100`,
               },
-              on: { click: () => ((S.selectedSite = site.id), render()) },
+              on: {
+                click: () => {
+                  S.selectedSite = site.id;
+                  selectSite(site.id);
+                  flyTo(site);
+                  renderSite();
+                },
+              },
             },
             h('span.sci-rank', null, `#${rank}`),
             h(
@@ -219,14 +326,15 @@ function renderSites() {
       })
     )
   );
-  const site = SITES.find((s) => s.id === S.selectedSite);
-  if (site) root.append(renderSiteDetail(site));
+  const site = SITES.find((s) => s.id === selected);
+  if (site) siteRoot.append(renderSiteDetail(site));
 }
 
 function renderSiteDetail(site) {
-  const fit = fitSite(site, S.objective);
-  const objective = objectiveById(S.objective);
-  const missions = siteMission(site.id);
+  const objectiveId = getMission().objective;
+  const fit = fitSite(site, objectiveId);
+  const objective = objectiveById(objectiveId);
+  const missions = missionsAt(site.id);
   const imagery = sitesData.imagery?.[site.id];
   const box = h('div.sci-detail');
 
@@ -330,34 +438,34 @@ function renderSiteDetail(site) {
       null,
       h('button.btn', { attrs: { type: 'button' }, on: { click: () => flyTo(site) } }, `🌍 ${t('science.flyTo')}`),
       h('button.btn.primary', { attrs: { type: 'button' }, on: { click: () => planFromSite(site) } }, `🥾 ${t('science.planEva')}`),
-      h(
-        'a.btn.ghost',
-        { attrs: { href: `https://science.nasa.gov/mars/`, target: '_blank', rel: 'noopener noreferrer' } },
-        `📚 ${t('science.learnMore')} ↗`
-      )
+      h('button.btn', { attrs: { type: 'button' }, on: { click: () => setStep('route') } }, `🧭 ${t('guide.step.route')}`)
     )
   );
   if (site.confidence < 0.6) box.append(h('p.sci-warn', null, `⚠ ${t('science.preliminary')}`));
   return box;
 }
 
-function renderZones() {
-  if (S.objective === 'survival') {
-    root.append(
+function renderZones(objectiveId) {
+  if (objectiveId === 'survival') {
+    siteRoot.append(
       h('p.sci-note', null, t('science.zones.survival')),
-      h('button.btn', { attrs: { type: 'button' }, on: { click: () => ((S.view = 'sites'), render()) } }, `📍 ${t('science.view.sites')}`)
+      h(
+        'button.btn',
+        { attrs: { type: 'button' }, on: { click: () => ((S.view = 'sites'), renderSite()) } },
+        `📍 ${t('science.view.sites')}`
+      )
     );
     return;
   }
   const zones = prospects.zones.filter((z) => (S.hideExplored ? !z.explored : true));
-  root.append(
+  siteRoot.append(
     h('p.sci-note', null, t('science.zones.note', { n: prospects.totalDetections, date: prospects.generated })),
     h(
       'label.sci-check',
       null,
       h('input', {
         attrs: { type: 'checkbox', checked: S.hideExplored },
-        on: { change: (e) => ((S.hideExplored = e.target.checked), render()) },
+        on: { change: (e) => ((S.hideExplored = e.target.checked), renderSite()) },
       }),
       ` ${t('science.zones.hideExplored')}`
     ),
@@ -365,7 +473,7 @@ function renderZones() {
       'ol.sci-list',
       null,
       ...zones.slice(0, 25).map((zone) => {
-        const value = zoneFit(zone, S.objective);
+        const value = zoneFit(zone, objectiveId);
         return h(
           'li',
           null,
@@ -377,7 +485,15 @@ function renderZones() {
                 'aria-pressed': String(S.selectedZone === zone.id),
                 'aria-label': `${zoneName(zone)}: ${t('science.fit')} ${Math.round(value * 100)}`,
               },
-              on: { click: () => ((S.selectedZone = zone.id), (S.landing = null), render()) },
+              on: {
+                click: () => {
+                  S.selectedZone = zone.id;
+                  S.landing = null;
+                  selectZone(zone.id);
+                  flyTo(zone);
+                  renderSite();
+                },
+              },
             },
             h('span.sci-rank', null, '🛰️'),
             h(
@@ -393,8 +509,11 @@ function renderZones() {
       })
     )
   );
-  const zone = prospects.zones.find((z) => z.id === S.selectedZone) || zones[0];
-  if (zone) root.append(renderZoneDetail(zone));
+  const zone = prospects.zones.find((z) => z.id === (S.selectedZone || getMission().zoneId)) || zones[0];
+  if (zone) {
+    S.selectedZone = zone.id;
+    siteRoot.append(renderZoneDetail(zone));
+  }
 }
 
 function renderZoneDetail(zone) {
@@ -462,10 +581,7 @@ function renderZoneDetail(zone) {
     h('button.btn', { attrs: { type: 'button' }, on: { click: () => flyTo(zone) } }, `🌍 ${t('science.flyTo')}`),
     h(
       'button.btn',
-      {
-        attrs: { type: 'button', disabled: S.busy },
-        on: { click: () => checkLanding(zone) },
-      },
+      { attrs: { type: 'button', disabled: S.busy }, on: { click: () => checkLanding(zone) } },
       `🛬 ${t('science.zones.checkLanding')}`
     ),
   ];
@@ -482,6 +598,42 @@ function renderZoneDetail(zone) {
   return box;
 }
 
+function renderTry() {
+  if (!tryRoot) return;
+  clear(tryRoot);
+  const sum = getRouteSummary();
+  if (!sum) {
+    tryRoot.append(
+      h('h3', null, `🥾 ${t('guide.try.title')}`),
+      h('p.sci-sub', null, t('guide.try.noRoute')),
+      h('button.btn.primary', { attrs: { type: 'button' }, on: { click: () => setStep('route') } }, `🧭 ${t('guide.step.route')}`)
+    );
+    return;
+  }
+  tryRoot.append(
+    h('h3', null, `🥾 ${t('guide.try.title')}`),
+    h('p.sci-sub', null, t('guide.try.sub')),
+    h(
+      'dl.sci-kv.guide-report',
+      null,
+      h('div', null, h('dt', null, t('pl.sum.length')), h('dd', null, formatDistance(sum.length, getSettings().units))),
+      h('div', null, h('dt', null, t('pl.sum.duration')), h('dd', null, formatDuration(sum.seconds))),
+      h('div', null, h('dt', null, t('pl.sum.o2')), h('dd', null, `${sum.o2Pct.toFixed(0)}%`)),
+      h('div', null, h('dt', null, t('pl.score.total')), h('dd', null, String(sum.score.total))),
+      ...(Number.isFinite(sum.coverage)
+        ? [h('div', null, h('dt', null, t('pl.sum.scienceCoverage')), h('dd', null, `${Math.round(sum.coverage * 100)}%`))]
+        : [])
+    ),
+    h(
+      'div.sci-actions',
+      null,
+      h('button.btn.primary', { attrs: { type: 'button' }, on: { click: () => walkCurrentRoute() } }, `🚶 ${t('rt.walk')}`),
+      h('button.btn', { attrs: { type: 'button' }, on: { click: () => setStep('route') } }, `🧭 ${t('guide.backToRoute')}`)
+    ),
+    h('p.sci-disclaimer', null, t('guide.try.note'))
+  );
+}
+
 /* ------------------------------ actions ------------------------------ */
 
 function flyTo(target) {
@@ -490,25 +642,19 @@ function flyTo(target) {
 }
 
 function planFromSite(site) {
-  const objective = objectiveById(S.objective);
+  const objective = currentObjective();
   const targets = (site.targets || []).map((tt) => ({ ...tt, h: site.elevationM }));
-  // Survival walks are operational patrols: any target is a valid checkpoint
-  // for terrain, power and comms, not a sample site.
   const planningObjective =
-    S.objective === 'survival' ? { ...objective, targetKinds: [...new Set(targets.flatMap((tt) => tt.kinds || []))] } : objective;
-  // A walking EVA needs at least two targets close to the base; a rover wins
-  // when it adds a large share of the objective (e.g. a distant delta).
+    objective.id === 'survival' ? { ...objective, targetKinds: [...new Set(targets.flatMap((tt) => tt.kinds || []))] } : objective;
   const walk = buildSciencePlan({ site, targets, objective: planningObjective, maxStops: 4, maxRadiusM: 6000 });
   const rover = buildSciencePlan({ site, targets, objective: planningObjective, maxStops: 4, maxRadiusM: 30000 });
   const walkValue = walk.targets.reduce((s, t) => s + t.value, 0);
   const roverValue = rover.targets.reduce((s, t) => s + t.value, 0);
-  // Estimated round trip on straight lines: past ~9 km on foot the suit
-  // consumables rarely close, so the rover is the honest recommendation.
   let walkLength = 0;
   let prev = { lat: site.lat, lon: site.lon };
-  for (const t of walk.targets) {
-    walkLength += distanceM(prev.lat, prev.lon, t.lat, t.lon);
-    prev = t;
+  for (const tt of walk.targets) {
+    walkLength += distanceM(prev.lat, prev.lon, tt.lat, tt.lon);
+    prev = tt;
   }
   if (walk.targets.length) walkLength += distanceM(prev.lat, prev.lon, site.lat, site.lon);
   let mode = 'walk';
@@ -521,15 +667,9 @@ function planFromSite(site) {
     toast(t('science.err.noTargets'), { type: 'warn' });
     return;
   }
-  // Coverage is always measured against the rover-reachable targets, so a
-  // walking plan honestly shows what it leaves for a later traverse.
   const coverage = rover.potential > 0 ? Math.min(1, (mode === 'rover' ? roverValue : walkValue) / rover.potential) : 0;
-  setRoute(plan.points, {
-    params: { mode },
-    returnToBase: true,
-    sciencePotential: rover.potential,
-  });
-  switchTab('route');
+  setRoute(plan.points, { params: { mode }, returnToBase: true, sciencePotential: rover.potential });
+  setStep('route');
   flyTo(site);
   toast(t('science.planReady', { n: plan.targets.length, pct: Math.round(coverage * 100), mode: t(`pl.mode.${mode}`) }), {
     type: 'success',
@@ -541,7 +681,7 @@ async function checkLanding(zone) {
   if (S.busy) return;
   S.busy = true;
   S.landing = { zoneId: zone.id, status: 'loading' };
-  render();
+  renderSite();
   try {
     const site = await loadSite(
       { lat: zone.lat, lon: zone.lon },
@@ -559,11 +699,11 @@ async function checkLanding(zone) {
     });
     S.landing = { zoneId: zone.id, status: 'done', base: { ...base, landability: land }, confidence };
   } catch (err) {
-    console.warn('[science] landing check failed', err);
+    console.warn('[guide] landing check failed', err);
     S.landing = { zoneId: zone.id, status: 'error' };
   } finally {
     S.busy = false;
-    render();
+    renderSite();
   }
 }
 
@@ -572,8 +712,8 @@ function useZoneAsBase(base) {
     params: { mode: 'walk' },
     returnToBase: true,
   });
+  setStep('route');
   setEditing(true);
-  switchTab('route');
   flyTo(base);
   toast(t('science.zones.baseReady'), { type: 'success', duration: 6000 });
 }

@@ -10,7 +10,7 @@
  */
 import { h, $, clear } from '../core/dom.js';
 import { t, tr, getLocale } from '../core/i18n.js';
-import { on } from '../core/events.js';
+import { on, emit } from '../core/events.js';
 import { getState } from '../core/state.js';
 import { getSettings } from '../core/settings.js';
 import { load, save } from '../core/storage.js';
@@ -277,6 +277,7 @@ async function compute() {
   } finally {
     if (R.computing === ctrl) R.computing = null;
     render();
+    emit('route:change', getRouteSummary());
   }
 }
 
@@ -476,20 +477,7 @@ function render() {
   );
 
   // Walk button right at the top once a route exists
-  if (R.result)
-    root.append(
-      btn(
-        `🚶 ${t('rt.walk')}`,
-        () =>
-          nav.traverse({
-            route: R.result,
-            points: R.points.map((p) => ({ ...p })),
-            heightAtLL: (la, lo) => orbitView.terrain.heightAt(la, lo),
-          }),
-        'pl-btn primary big',
-        { id: 'rt-walk' }
-      )
-    );
+  if (R.result) root.append(btn(`🚶 ${t('rt.walk')}`, () => walkCurrentRoute(), 'pl-btn primary big', { id: 'rt-walk' }));
 
   // --- Suggested places (empty route)
   if (!R.points.length) {
@@ -913,4 +901,34 @@ export function routeCard() {
     ],
     profile: { pts: r.profile, pnr: r.pnr, stops: r.stopD.slice(0, R.points.length - 1) },
   };
+}
+
+/** Compact summary for the guide's "walk" step (null before a route exists). */
+export function getRouteSummary() {
+  const r = R.result;
+  if (!r) return null;
+  return {
+    length: r.evaluation.length,
+    seconds: r.evaluation.totalSeconds,
+    o2Pct: r.evaluation.o2UsablePct,
+    dose: r.doseMsv,
+    pnr: r.pnr,
+    score: r.score,
+    coverage: r.scienceCoverage,
+    mode: R.params.mode,
+    points: R.points.map((p) => ({ lat: p.lat, lon: p.lon, label: p.label, science: p.science })),
+    failed: r.failedLeg,
+    tooLong: r.tooLong,
+  };
+}
+
+/** Start the first-person rehearsal of the current route. */
+export function walkCurrentRoute() {
+  if (!R.result) return false;
+  nav.traverse({
+    route: R.result,
+    points: R.points.map((p) => ({ ...p })),
+    heightAtLL: (la, lo) => orbitView.terrain.heightAt(la, lo),
+  });
+  return true;
 }
