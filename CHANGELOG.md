@@ -20,6 +20,13 @@ Uma ferramenta só: **olhar Marte inteiro, planejar uma rota entre quaisquer pon
   caminhante: blocos ativos, blocos carregando escondidos pela neblina e blocos descartados; relógio da EVA,
   O₂, dose e Sol avançando com o tempo da EVA; fator de tempo ×1 a ×200; modo livre
 - Ao sair da primeira pessoa, o globo volta exatamente ao ponto onde o caminhante estava
+- Aba "Ciência": três objetivos (vida antiga, história geológica, sobrevivência humana) com pesos e fontes
+  visíveis, ranking de 12 locais e ficha com os fatores que mais ajudam e mais limitam cada local
+- Zonas candidatas geradas a partir de todas as detecções de minerais hidratados do CRISM/OMEGA, com selo de
+  confiança, distinção entre explorado e nunca visitado, e verificação de pouso ao vivo sobre o relevo real
+- "Planejar Marswalk": paradas científicas escolhidas pelo objetivo, modo a pé ou rover decidido pela
+  distância e cobertura científica da rota no painel da EVA
+- Scripts `build-science-data.mjs` e `build-prospects.mjs` para regerar os dados a partir do Mars Trek
 
 ### Removido
 

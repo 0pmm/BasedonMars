@@ -55,6 +55,16 @@ percorrer a rota em primeira pessoa para testá-la.**
   livre (WASD). Relógio da EVA, O₂, dose e posição do Sol avançam com o tempo da EVA
 - Ao sair, o globo volta exatamente ao ponto onde você estava
 
+**4. Objetivos científicos e guia de pouso**
+
+- Três objetivos (vida antiga, história geológica, sobrevivência humana) com pesos e fontes visíveis em
+  cada critério
+- Ranking de 12 locais curados e de zonas candidatas descobertas nas detecções de minerais hidratados do
+  CRISM/OMEGA, com selo de explorado/nunca visitado e de confiança
+- "Planejar Marswalk": escolhe as paradas científicas do objetivo, monta a EVA (a pé ou de rover) e mostra
+  a cobertura científica da rota
+- Em zona não explorada, verifica a landabilidade ao vivo sobre o relevo real e propõe um ponto de base
+
 ## Como rodar
 
 Requer [Node.js](https://nodejs.org/) 20.19+ (ou 22.12+) e internet (os dados vêm da NASA ao vivo).

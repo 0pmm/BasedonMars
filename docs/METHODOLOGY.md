@@ -102,6 +102,44 @@ A mesma informação aparece no app em **📚 Fontes e metodologia**.
   blocos detectados no local. **Estimativa.**
 - **Trilha da Perseverance**: em Jezero, as marcas das rodas seguem o traverse real do rover (NASA/JPL MMGIS).
 
+## Objetivos científicos e aptidão dos locais (novo)
+
+O app responde a três objetivos, cada um com pesos publicados na interface:
+
+| Objetivo           | Critérios (peso)                                                                                                            |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| Vida antiga        | hidratação 30%, contexto aquoso 25%, acesso à água 15%, exposição 10%, transitabilidade 10%, energia 5%, rádio 5%           |
+| História geológica | diversidade de unidades 30%, contexto aquoso 20%, hidratação 15%, exposição 15%, transitabilidade 10%, energia 5%, rádio 5% |
+| Sobrevivência      | transitabilidade 25%, energia 20%, rádio 15%, blindagem 15%, água 15%, exposição 10%                                        |
+
+- **De onde vêm os valores**: cada atributo de cada local (0–1) tem uma fonte curta no cartão. Hidratação é um
+  valor de literatura corroborado pela contagem de detecções CRISM/OMEGA num raio de 140 km; a unidade
+  geológica vem do serviço `identify` do mapa USGS SIM 3292; os demais são julgamentos de planejamento
+  apoiados em estudos publicados das missões.
+- **Nota**: `fit = Σ peso × atributo`, em 0–100 com nota A–D. O cartão mostra os dois fatores que mais
+  ajudaram e os dois que mais limitaram, com a fonte de cada um. **Não é um ranking da NASA.**
+- **Confiança**: ligada à melhor resolução de imagem disponível no local (HiRISE/DTM > CTX > HRSC). Locais
+  sem imagem fina recebem o selo "preliminar" e a recomendação de uma observação direcionada.
+- **Validação retroativa**: os testes conferem que o modelo coloca Perseverance/Jezero e Curiosity/Gale no
+  topo para vida antiga e InSight/Elysium no topo para sobrevivência. Pousos dos anos 1970 são marcados como
+  "escolhidos com restrições da época" e não entram na validação — eles foram escolhidos por engenharia, não
+  pela ciência que o modelo valoriza hoje.
+- **Landabilidade**: nota separada (declive 35%, atmosfera/elevação 25%, rugosidade 15%, blocos 15%,
+  latitude 10%), calculada ao vivo sobre a grade de relevo real quando o usuário manda verificar o pouso de
+  uma zona. O ponto de base proposto é a célula mais plana e lisa dentro da zona.
+- **Rota científica**: as paradas são escolhidas pelos tipos de alvo do objetivo e ordenadas por vizinho mais
+  próximo + 2-opt. A **cobertura científica** é a soma do valor das paradas dividida pelas melhores paradas
+  alcançáveis de rover no local, então um plano a pé mostra honestamente o que deixa para depois. Se a
+  caminhada passa de ~9 km (ida e volta) ou perde muito valor, o app propõe rover em vez de fingir que cabe
+  no traje.
+- **Zonas candidatas**: `src/data/prospects.json` é gerado a partir de **todas** as 1.642 detecções
+  CRISM/OMEGA publicadas no Mars Trek, agrupadas por densidade com raio de 100 km e nota relativa
+  (participação de CRISM + tamanho do agrupamento). O selo "explorado" indica que a zona está a ≤150 km de um
+  local já visitado. **Limitação importante**: os instrumentos só observaram alvos escolhidos; ausência de
+  detecção não é evidência de ausência de minerais.
+
+Para regerar os dados: `node scripts/build-science-data.mjs` e `node scripts/build-prospects.mjs`.
+
 ## Limitações
 
 - Altitudes absolutas são aproximadas (±100 m longe do equador); as diferenças de altura são as do modelo.
@@ -111,3 +149,9 @@ A mesma informação aparece no app em **📚 Fontes e metodologia**.
 - Fotos HiRISE e CTX são em tons de cinza; a cor "marciana" do terreno é uma aproximação e pode ser desligada.
 - Avaliamos trocar o Three.js pelo CesiumJS (que tem Marte 3D com dados da NASA/JPL), mas ele exige conta e
   token do Cesium ion; optamos por ler os mesmos tiles do Mars Trek diretamente, sem conta.
+- Não há camada pública de gelo subsuperficial nem de sísmica no Mars Trek: por isso "recursos/ISRU" e
+  "interior" ficaram fora dos objetivos. A "água" do modelo é mineral hidratado, não gelo.
+- As coordenadas dos alvos científicos são aproximadas (centenas de metros a poucos km); elas servem para
+  planejar a caminhada, não para apontar um instrumento.
+- Os valores 0–1 dos atributos são julgamentos documentados, não medições; os pesos e as fontes aparecem na
+  interface para que qualquer pessoa possa discordar e recalibrar.

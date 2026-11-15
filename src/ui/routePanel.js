@@ -57,6 +57,7 @@ const R = {
   error: null,
   weather: null,
   space: null,
+  sciencePotential: null,
 };
 
 let nav = { traverse: () => {} };
@@ -114,6 +115,38 @@ export function setEditing(on) {
   render();
 }
 
+/**
+ * Replace the whole route from code (science panel, deep links). Points may
+ * carry `science`, `value`, `targetId` and `label`; `sciencePotential` is the
+ * sum of the best target values for the objective, used for coverage.
+ * @param {Array<object>} points
+ * @param {{params?:object, returnToBase?:boolean, crew?:number, sciencePotential?:number, compute?:boolean}} [opts]
+ */
+export function setRoute(points, opts = {}) {
+  R.computing?.abort();
+  R.computing = null;
+  R.points = points.map((p, i) => ({
+    lat: p.lat,
+    lon: p.lon,
+    h: p.h,
+    science: !!p.science,
+    value: p.value,
+    targetId: p.targetId,
+    label: p.label,
+    kinds: p.kinds,
+    minutes: p.minutes ?? (i === 0 ? 0 : R.params.stopMinutes),
+    note: p.note || '',
+  }));
+  if (opts.params) R.params = { ...DEFAULT_EVA, ...opts.params };
+  if (typeof opts.returnToBase === 'boolean') R.returnToBase = opts.returnToBase;
+  if (Number.isFinite(opts.crew)) R.crew = opts.crew;
+  R.sciencePotential = Number.isFinite(opts.sciencePotential) ? opts.sciencePotential : null;
+  R.editing = false;
+  R.result = null;
+  R.error = null;
+  changed();
+}
+
 /** Hooks for automated tests (dev server only). */
 export const routeDebug = {
   state: R,
@@ -127,6 +160,7 @@ export const routeDebug = {
  * ==================================================================== */
 
 function addPoint(p) {
+  R.sciencePotential = null;
   R.points.push({
     lat: p.lat,
     lon: p.lon,
@@ -151,6 +185,7 @@ function clearRoute() {
   R.computing?.abort();
   R.computing = null;
   R.points = [];
+  R.sciencePotential = null;
   changed();
 }
 
@@ -215,6 +250,7 @@ async function compute() {
       returnToBase: R.returnToBase,
       crew: R.crew,
       timeMs: R.timeMs,
+      sciencePotential: R.sciencePotential,
       signal: ctrl.signal,
       onProgress: (f, stage) => {
         R.progress = f;
@@ -285,6 +321,7 @@ function summary() {
         o2: r.evaluation.o2UsablePct,
         maxSlope: r.maxSlope,
         coverage: r.coverage,
+        scienceCoverage: r.scienceCoverage,
         dose: r.doseMsv,
         score: r.score.total,
       }
@@ -476,7 +513,9 @@ function render() {
                 title: t('pl.science'),
                 'aria-pressed': String(!!p.science),
               }),
-          btn(i === 0 ? t('rt.base') : formatLatLon(p.lat, p.lon, 3), fly, 'rt-coord', { title: formatLatLon(p.lat, p.lon, 5) }),
+          btn(i === 0 ? p.label || t('rt.base') : p.label || formatLatLon(p.lat, p.lon, 3), fly, 'rt-coord', {
+            title: `${p.label ? `${p.label} · ` : ''}${formatLatLon(p.lat, p.lon, 5)}`,
+          }),
           i > 0
             ? h('input', {
                 attrs: { type: 'number', min: 0, max: 240, step: 5, value: p.minutes, 'aria-label': t('pl.stopMinutes') },
@@ -610,6 +649,7 @@ function render() {
         ...kv(t('pl.sum.shelter'), formatDuration(r.shelterS)),
         ...kv(t('pl.sum.range'), formatDistance(rangeRadius(R.params), units)),
         ...kv(t('pl.sum.comms'), `${Math.round(r.coverage * 100)}%`),
+        ...(Number.isFinite(r.scienceCoverage) ? kv(t('pl.sum.scienceCoverage'), `${Math.round(r.scienceCoverage * 100)}%`) : []),
         ...kv(t('pl.sum.dose'), `${r.doseMsv.toFixed(3)} mSv`)
       )
     );
@@ -865,6 +905,7 @@ export function routeCard() {
       [t('pl.sum.pnr'), formatDistance(r.pnr, units)],
       [t('pl.sum.shelter'), formatDuration(r.shelterS)],
       [t('pl.sum.comms'), `${Math.round(r.coverage * 100)}%`],
+      ...(Number.isFinite(r.scienceCoverage) ? [[t('pl.sum.scienceCoverage'), `${Math.round(r.scienceCoverage * 100)}%`]] : []),
       [t('pl.sum.dose'), `${r.doseMsv.toFixed(3)} mSv`],
       [t('pl.score.total'), `${r.score.total}/100`],
       [t('rt.ltst'), `${formatHours(lt.ltst)} · Ls ${sun.Ls.toFixed(0)}°`],

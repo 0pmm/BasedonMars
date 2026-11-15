@@ -18,6 +18,7 @@ import './styles/surface.css';
 import './styles/dialogs.css';
 import './styles/responsive.css';
 import './styles/planner.css';
+import './styles/science.css';
 
 import { $, $$ } from './core/dom.js';
 import { on, emit } from './core/events.js';
@@ -41,6 +42,7 @@ import { formatDistance } from './core/units.js';
 import { openSources } from './ui/sources.js';
 import { marsTime, localSolarTime, formatHours, seasonKey } from './geo/mars24.js';
 import { initDashboard, updateDashboard, showDashboardUI, handleDashboardEscape, openDetails, switchTab } from './ui/dashboard.js';
+import { initSciencePanel } from './ui/sciencePanel.js';
 import { initHud, showHud } from './ui/hud.js';
 import { initMobileControls } from './ui/mobileControls.js';
 import { openSettings, openHelp } from './ui/menus.js';
@@ -348,6 +350,7 @@ async function boot() {
 
     initDashboard({ goHome, screenshot });
     initRoutePanel({ traverse: (plan) => startTraverse(plan, 'dashboard') });
+    initSciencePanel();
     initHud();
     mobile = initMobileControls();
     initTraverseApp({ show: showSurface, exitTo });

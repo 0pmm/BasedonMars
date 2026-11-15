@@ -1,0 +1,132 @@
+{
+  "version": 1,
+  "attributes": {
+    "hydration": {
+      "labelKey": "science.attr.hydration",
+      "source": "CRISM / OMEGA hydrated-mineral detections (NASA/JPL Mars Trek)",
+      "kind": "derived"
+    },
+    "aqueousContext": {
+      "labelKey": "science.attr.aqueousContext",
+      "source": "Published mission and orbital studies",
+      "kind": "literature"
+    },
+    "unitDiversity": {
+      "labelKey": "science.attr.unitDiversity",
+      "source": "USGS SIM 3292 geology + published stratigraphy",
+      "kind": "literature"
+    },
+    "exposure": {
+      "labelKey": "science.attr.exposure",
+      "source": "TES dust cover / albedo + published images",
+      "kind": "literature"
+    },
+    "trafficability": {
+      "labelKey": "science.attr.trafficability",
+      "source": "Terrain slope/roughness (MOLA/HRSC/CTX) + published rover experience",
+      "kind": "literature"
+    },
+    "power": {
+      "labelKey": "science.attr.power",
+      "source": "Latitude + TES dust + Mars24 insolation",
+      "kind": "derived"
+    },
+    "comms": {
+      "labelKey": "science.attr.comms",
+      "source": "Orbiter relay geometry (approximate)",
+      "kind": "derived"
+    },
+    "shielding": {
+      "labelKey": "science.attr.shielding",
+      "source": "Atmospheric depth from elevation (RAD-based model)",
+      "kind": "derived"
+    },
+    "waterAccess": {
+      "labelKey": "science.attr.waterAccess",
+      "source": "Hydrated minerals / ground ice studies",
+      "kind": "literature"
+    }
+  },
+  "objectives": [
+    {
+      "id": "life",
+      "icon": "🧬",
+      "name": { "en": "Ancient life", "pt": "Vida antiga" },
+      "question": {
+        "en": "Did Mars ever host life?",
+        "pt": "Marte já abrigou vida?"
+      },
+      "short": {
+        "en": "Find sedimentary rocks with hydrated minerals and preserved organic matter.",
+        "pt": "Encontrar rochas sedimentares com minerais hidratados e matéria orgânica preservada."
+      },
+      "targetKinds": ["hydration", "aqueous", "biosignature"],
+      "weights": {
+        "hydration": 0.3,
+        "aqueousContext": 0.25,
+        "waterAccess": 0.15,
+        "exposure": 0.1,
+        "trafficability": 0.1,
+        "power": 0.05,
+        "comms": 0.05
+      },
+      "success": {
+        "en": "Sample a fine-grained sedimentary unit where hydrated minerals and organic carbon are preserved.",
+        "pt": "Amostrar uma unidade sedimentar de grão fino onde minerais hidratados e carbono orgânico estejam preservados."
+      }
+    },
+    {
+      "id": "geology",
+      "icon": "🪨",
+      "name": { "en": "Geological history", "pt": "História geológica" },
+      "question": {
+        "en": "How did Mars' climate and surface change over time?",
+        "pt": "Como o clima e a superfície de Marte mudaram ao longo do tempo?"
+      },
+      "short": {
+        "en": "Read layered sequences that record water, volcanism and climate change.",
+        "pt": "Ler sequências em camadas que registram água, vulcanismo e mudanças climáticas."
+      },
+      "targetKinds": ["diversity", "strata", "aqueous"],
+      "weights": {
+        "unitDiversity": 0.3,
+        "aqueousContext": 0.2,
+        "hydration": 0.15,
+        "exposure": 0.15,
+        "trafficability": 0.1,
+        "power": 0.05,
+        "comms": 0.05
+      },
+      "success": {
+        "en": "Measure a stratigraphic section spanning more than one geological unit.",
+        "pt": "Medir uma seção estratigráfica que atravesse mais de uma unidade geológica."
+      }
+    },
+    {
+      "id": "survival",
+      "icon": "🛡️",
+      "name": { "en": "Human survival", "pt": "Sobrevivência humana" },
+      "question": {
+        "en": "Where can astronauts live and work safely?",
+        "pt": "Onde astronautas podem viver e trabalhar com segurança?"
+      },
+      "short": {
+        "en": "Balance trafficability, power, radiation, communications and water.",
+        "pt": "Equilibrar transitabilidade, energia, radiação, comunicação e água."
+      },
+      "targetKinds": ["survival", "access", "water"],
+      "weights": {
+        "trafficability": 0.25,
+        "power": 0.2,
+        "comms": 0.15,
+        "shielding": 0.15,
+        "waterAccess": 0.15,
+        "exposure": 0.1
+      },
+      "success": {
+        "en": "Complete a Marswalk with oxygen, time, dose and radio margins inside the suit limits.",
+        "pt": "Completar um Marswalk com oxigênio, tempo, dose e rádio dentro dos limites do traje."
+      }
+    }
+  ]
+}

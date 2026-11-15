@@ -66,6 +66,19 @@ test('start screen loads without errors and switches language', async ({ page })
   expect(errors).toEqual([]);
 });
 
+test('science: objectives rank sites and plan a Marswalk', async ({ page }) => {
+  const errors = trackErrors(page);
+  await boot(page);
+  await page.click('#btn-start-explore');
+  await page.getByRole('tab', { name: 'Science' }).click();
+  await expect(page.locator('#science-panel .sci-row')).toHaveCount(12);
+  await expect(page.locator('.sci-detail h4')).toHaveText('Jezero Crater');
+  await page.getByRole('button', { name: /Plan Marswalk/ }).click();
+  await expect(page.locator('#tab-btn-route')).toHaveClass(/active/);
+  await expect(page.locator('#route-panel .rt-points li')).toHaveCount(4);
+  expect(errors).toEqual([]);
+});
+
 test('globe: locations, details, NASA and computed layers, compare', async ({ page }) => {
   const errors = trackErrors(page);
   await boot(page);

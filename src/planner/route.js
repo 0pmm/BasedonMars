@@ -176,6 +176,14 @@ export async function computeRoute(points, opts = {}) {
   const doseMsv = (surfaceDoseRate(baseP.h ?? path[0]?.h ?? 0) * evaluation.totalSeconds) / 86400;
   let straightLine = 0;
   for (let i = 0; i < seq.length - 1; i++) straightLine += distanceM(seq[i].lat, seq[i].lon, seq[i + 1].lat, seq[i + 1].lon);
+  // Science coverage: only when the caller knows the objective's full target set.
+  const scienceValues = points
+    .slice(1)
+    .filter((s) => s.science && Number.isFinite(s.value))
+    .map((s) => s.value);
+  const potential = Number.isFinite(opts.sciencePotential) ? opts.sciencePotential : 0;
+  const scienceCoverage =
+    potential > 0 && scienceValues.length ? Math.min(1, scienceValues.reduce((a, b) => a + b, 0) / potential) : undefined;
   const score = scorePlan({
     evaluation,
     maxSlope,
@@ -183,6 +191,7 @@ export async function computeRoute(points, opts = {}) {
     commsCoverage: coverage,
     stops: points.length - 1,
     scienceStops: points.slice(1).filter((s) => s.science).length,
+    scienceCoverage,
     straightLine,
     doseMsv,
   });
@@ -203,6 +212,7 @@ export async function computeRoute(points, opts = {}) {
     coverage,
     commsRadius,
     maxSlope,
+    scienceCoverage,
     shadowPct: samples ? shaded / samples : null,
     doseMsv,
     score,
