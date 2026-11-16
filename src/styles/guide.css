@@ -642,3 +642,12 @@ dialog.modal.picker .modal-body {
 .rehearsal .guide-report {
   margin: 10px 0;
 }
+
+/* header: the place the telemetry describes (route base) */
+.tele-place .t-value {
+  max-width: 190px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--orange-glow);
+}

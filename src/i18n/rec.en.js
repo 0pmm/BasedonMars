@@ -186,4 +186,22 @@ export default {
   'tour.walk.title': 'Final rehearsal',
   'tour.walk.text':
     'With the route ready, the "Final rehearsal" opens a summary of the plan and takes you on the route in first person, with oxygen, time and the Sun running for real. Ready? Let\'s go!',
+  // ---- telemetria do local (base da rota)
+  'tele.title': 'Telemetry of the place',
+  'tele.place': 'Place',
+  'tele.jezero': 'Jezero (Perseverance)',
+  'tele.noteModel': '≈ estimated for the route base · measured only at Jezero',
+  'genie.telePlace.title': 'Telemetry place',
+  'genie.telePlace.text':
+    'The top bar describes the base of your route: local time, season, temperature, pressure and radiation change with the place. With no route it shows Jezero, where Perseverance measures the weather for real.',
+  'genie.telePlace.now': 'Now: {v}.',
+  'genie.localTime.title': 'Local time',
+  'genie.localTime.text':
+    'Solar time at the place shown under "Place" (the route base, or Jezero with no route), from NASA\'s official Mars clock (Mars24). It changes with longitude, like time zones.',
+  'genie.temperature.text':
+    "Daily minimum and maximum. At Jezero they come from Perseverance's MEDA station; elsewhere (≈) they are estimated from MEDA, corrected for the latitude and elevation of the base.",
+  'genie.telePressure.text':
+    'On Earth it is about 101,000 Pa; on Mars close to 700 Pa. At Jezero it is measured by MEDA; elsewhere (≈) it is estimated from the elevation of the base: lower places have more air.',
+  'genie.radiation.text':
+    "About 0.64 mSv per day on the ground, measured by Curiosity's RAD instrument: some 200 times more than on Earth. Elsewhere (≈) it is adjusted for elevation: higher up, less air overhead, more radiation.",
 };

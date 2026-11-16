@@ -14,13 +14,13 @@ import { findLayer } from '../geo/trek.js';
 import { missionSol, localSolarTime, PERSEVERANCE_LANDING_MS, marsTime, seasonKey, formatHours } from '../geo/mars24.js';
 import { loadWeather } from '../geo/missionData.js';
 import { RAMPS, cssGradient } from '../planner/overlays.js';
-import { setEditing, isEditingRoute, currentSlopeLimit } from './routePanel.js';
+import { setEditing, isEditingRoute, currentSlopeLimit, routeState } from './routePanel.js';
+import { localConditions, JEZERO } from '../geo/localConditions.js';
 import { helpButton } from './genie.js';
 
 /** Layers computed in the globe shader from the real terrain heights. */
 const COMPUTED = [{ id: 'slope' }, { id: 'hazard' }, { id: 'elevation' }, { id: 'contours' }];
 
-const JEZERO = { lat: 18.4446, lon: 77.4509 };
 let weather = null;
 
 const state = {
@@ -299,29 +299,45 @@ function updateFocusHud(poi) {
   }
 }
 
-/* ======================= Telemetry (Jezero now) ======================= */
+/* ============ Telemetry: the base of the route (Jezero when there is none) ============ */
+const coordLabel = (p) => `${Math.abs(p.lat).toFixed(2)}°${p.lat >= 0 ? 'N' : 'S'} ${Math.abs(p.lon).toFixed(2)}°${p.lon >= 0 ? 'E' : 'W'}`;
+
+/** Place the header describes: the route's base, with its real terrain height when known. */
+export function telemetryPlace() {
+  const R = routeState();
+  const p = R?.points?.[0];
+  if (!p) return null;
+  const h = R.result?.path?.[0]?.h ?? p.h ?? orbitView.terrain?.heightAt?.(p.lat, p.lon) ?? null;
+  return { lat: p.lat, lon: p.lon, h: Number.isFinite(h) ? h : null, name: p.label || coordLabel(p) };
+}
+
 function updateTelemetry() {
   const units = getSettings().units;
   const now = Date.now();
-  const lt = localSolarTime(now, JEZERO.lon);
+  const place = telemetryPlace();
+  const at = place || JEZERO;
+  const lt = localSolarTime(now, at.lon);
   const Ls = marsTime(now).Ls;
+  const c = localConditions(place, { Ls, weather });
+  const est = c.measured ? '' : '≈ ';
   const set = (id, value) => {
     const el = $(id);
     if (el) el.textContent = value;
   };
+  set('#tele-place', place ? place.name : t('tele.jezero'));
   set('#tele-sol', String(missionSol(now, PERSEVERANCE_LANDING_MS, JEZERO.lon)));
   set('#tele-time', formatHours(lt.ltst));
-  set('#tele-wind', `${t(`season.${seasonKey(Ls, JEZERO.lat)}`)} · Ls ${Ls.toFixed(0)}°`);
-  set(
-    '#tele-temp',
-    weather?.maxTemp != null
-      ? `${formatTemperature(weather.minTemp ?? weather.maxTemp, units)} / ${formatTemperature(weather.maxTemp, units)}`
-      : '—'
-  );
-  set('#tele-pressure', weather?.pressure != null ? formatPressure(weather.pressure) : '—');
-  set('#tele-rad', `0.64 mSv/${t('tele.day')}`);
+  set('#tele-wind', `${t(`season.${seasonKey(Ls, at.lat)}`)} · Ls ${Ls.toFixed(0)}°`);
+  set('#tele-temp', c.maxT != null ? `${est}${formatTemperature(c.minT ?? c.maxT, units)} / ${formatTemperature(c.maxT, units)}` : '—');
+  set('#tele-pressure', c.pressure != null ? `${est}${formatPressure(c.pressure)}` : '—');
+  set('#tele-rad', c.dose != null ? `${est}${c.dose.toFixed(2)} mSv/${t('tele.day')}` : '—');
+  const telemetry = $('#telemetry');
+  if (telemetry) telemetry.classList.toggle('estimated', !c.measured);
   const note = $('#tele-note');
-  if (note) note.textContent = weather ? t('tele.note', { sol: weather.sol, date: weather.date }) : t('tele.noteNoWeather');
+  if (note) {
+    if (!c.measured) note.textContent = t('tele.noteModel');
+    else note.textContent = weather ? t('tele.note', { sol: weather.sol, date: weather.date }) : t('tele.noteNoWeather');
+  }
 }
 
 /** Real local solar time at Jezero. */
@@ -372,6 +388,7 @@ function addHelpButtons() {
   const flyHead = $('#layer-flyout .panel-title');
   if (flyHead) flyHead.after(helpButton('layers', { targets: () => [$('#layer-flyout')], label: t('panel.layers') }));
   const tele = {
+    'tele-place': 'telePlace',
     'tele-sol': 'sol',
     'tele-time': 'localTime',
     'tele-temp': 'temperature',

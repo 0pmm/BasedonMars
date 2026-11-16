@@ -133,6 +133,7 @@ export function initGenieTopics() {
     temperature: topic('temperature', () => ({ v: document.querySelector('#tele-temp')?.textContent || '—' })),
     telePressure: topic('telePressure', () => ({ v: document.querySelector('#tele-pressure')?.textContent || '—' })),
     radiation: topic('radiation'),
+    telePlace: topic('telePlace', () => ({ v: document.querySelector('#tele-place')?.textContent || '—' })),
     teleSeason: topic('season'),
     // ---- first-person HUD
     hudO2: topic('hudO2', () => {

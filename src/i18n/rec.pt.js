@@ -188,4 +188,22 @@ export default {
   'tour.walk.title': 'Ensaio final',
   'tour.walk.text':
     'Com a rota pronta, o "Ensaio final" abre um resumo do plano e leva você a percorrer a rota em primeira pessoa, com oxigênio, tempo e Sol correndo de verdade. Pronto? Vamos lá!',
+  // ---- telemetria do local (base da rota)
+  'tele.title': 'Telemetria do local',
+  'tele.place': 'Local',
+  'tele.jezero': 'Jezero (Perseverance)',
+  'tele.noteModel': '≈ estimado para a base da rota · medições só em Jezero',
+  'genie.telePlace.title': 'Local da telemetria',
+  'genie.telePlace.text':
+    'A barra de cima descreve a base da sua rota: hora local, estação, temperatura, pressão e radiação mudam com o lugar. Sem rota, ela mostra Jezero, onde a Perseverance mede o tempo de verdade.',
+  'genie.telePlace.now': 'Agora: {v}.',
+  'genie.localTime.title': 'Hora local',
+  'genie.localTime.text':
+    'Hora solar no lugar mostrado em "Local" (a base da rota, ou Jezero sem rota), calculada pelo relógio oficial de Marte (Mars24) da NASA. Muda com a longitude, como os fusos horários.',
+  'genie.temperature.text':
+    'Mínima e máxima do dia. Em Jezero vêm da estação MEDA da Perseverance; em outro lugar (≈) são uma estimativa a partir da MEDA, corrigida pela latitude e pela altitude da base.',
+  'genie.telePressure.text':
+    'Na Terra é cerca de 101.000 Pa; em Marte fica perto de 700 Pa. Em Jezero o valor é medido pela MEDA; em outro lugar (≈) é estimado pela altitude da base: lugares mais baixos têm mais ar.',
+  'genie.radiation.text':
+    'Cerca de 0,64 mSv por dia no chão de Marte, medidos pelo instrumento RAD do Curiosity: umas 200 vezes mais que na Terra. Em outro lugar (≈) o valor é ajustado pela altitude: mais alto, menos ar por cima, mais radiação.',
 };
