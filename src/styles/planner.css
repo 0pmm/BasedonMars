@@ -439,7 +439,8 @@
 }
 #layers-list {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: stretch;
 }
 .tele-item.note .small {
   font-size: 0.75em;
@@ -652,4 +653,71 @@
   #right-panel {
     width: auto;
   }
+}
+
+/* Route priority + "why this route" */
+.rt-prio {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.rt-label {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.rt-why-table td.win {
+  color: #39ff88;
+  font-weight: 700;
+}
+.rt-why-table th[scope='row'] {
+  text-align: left;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+/* Route profile comparison */
+.rt-modes {
+  margin-top: 6px;
+}
+.mode-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+}
+.mode-table th,
+.mode-table td {
+  padding: 4px 6px;
+  text-align: right;
+  border-bottom: 1px solid var(--line, rgba(255, 255, 255, 0.07));
+  white-space: nowrap;
+}
+.mode-table thead th {
+  color: var(--muted);
+  font-weight: 500;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.mode-table tbody th {
+  text-align: left;
+  font-family: var(--font-body, inherit);
+  font-weight: 500;
+}
+.mode-table tbody tr {
+  cursor: pointer;
+}
+.mode-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+.mode-table tbody tr.active {
+  background: rgba(205, 92, 52, 0.12);
+  cursor: default;
+}
+.mode-swatch {
+  display: inline-block;
+  width: 10px;
+  height: 3px;
+  margin-right: 8px;
+  vertical-align: middle;
 }

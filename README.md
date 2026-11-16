@@ -37,8 +37,11 @@ percorrer a rota em primeira pessoa para testá-la.**
 
 - Marque a base e as paradas clicando em qualquer lugar do globo, em qualquer zoom; arraste os marcadores
 - Cada trecho é calculado numa grade do tamanho dele: um trecho de 300 m usa ~1,5 m de resolução (com os
-  blocos detectados na HiRISE); um de 200 km usa centenas de metros. O A\* minimiza o tempo de caminhada
-  e evita declives, rugosidade e blocos acima dos limites do traje
+  blocos detectados na HiRISE); um de 200 km usa centenas de metros. O A\* (16 direções, depois endireitado)
+  evita declives, rugosidade e blocos acima dos limites do traje
+- Três perfis com regras próprias: **Rápido** (menor tempo, aceita declives até o limite), **Equilibrado**
+  e **Seguro** (limite efetivo menor, margem de 15 m do terreno proibido, contorna morros). Os três são
+  calculados e comparados no painel e no mapa
 - Distância, duração, subida/descida, O₂, ponto de não retorno, pior tempo até a base, raio de alcance,
   % da rota com sinal de rádio (linha de visada da antena), % na sombra, dose e nota do plano; perfil
 - A pé ou de rover, em dupla ou sozinho, hora solar local ajustável, premissas do traje editáveis
@@ -54,6 +57,19 @@ percorrer a rota em primeira pessoa para testá-la.**
 - Modo "seguir" (anda sozinho pela rota na velocidade do modelo × fator de tempo de ×1 a ×200) e modo
   livre (WASD). Relógio da EVA, O₂, dose e posição do Sol avançam com o tempo da EVA
 - Ao sair, o globo volta exatamente ao ponto onde você estava
+
+**4. Objetivos científicos e guia de pouso**
+
+- Dois objetivos: **História geológica** (onde as rochas contam melhor como Marte mudou) e **Sobrevivência
+  humana** (onde faria sentido montar uma base), com pesos e fontes visíveis em cada critério, e a
+  **Exploração livre**, sem objetivo científico, que leva direto ao mapa
+- O passo Local mostra a melhor escolha e o porquê; "Trocar" abre todas as opções com filtros
+- **Tour com o GENIE** na tela inicial e explicações do GENIE (botões "?") em todo o app
+- Ranking de 12 locais curados e de zonas candidatas descobertas nas detecções de minerais hidratados do
+  CRISM/OMEGA, com selo de explorado/nunca visitado e de confiança
+- "Planejar Marswalk": escolhe as paradas científicas do objetivo, monta a EVA (a pé ou de rover) e mostra
+  a cobertura científica da rota
+- Em zona não explorada, verifica a landabilidade ao vivo sobre o relevo real e propõe um ponto de base
 
 ## Como rodar
 
@@ -86,9 +102,10 @@ coordenada (latitude, longitude leste); `#poi=gale` abre um local do globo.
 
 ## Como planejar uma rota
 
-1. Em "Explorar Marte e planejar uma rota", aproxime o globo até o lugar (ou use um local sugerido).
-2. Ative **Marcar pontos** e clique no terreno: o primeiro ponto é a base 🏠, os outros são paradas.
-3. A rota aparece no globo e as métricas no painel. Arraste marcadores, mude o modo, a hora ou as premissas.
+1. Escolha um objetivo ou **Exploração livre** e aproxime o globo até o lugar (ou use um local sugerido).
+2. Ative **Marcar pontos** e clique no terreno: o primeiro ponto é a base, os outros são paradas.
+3. A rota aparece no globo e as métricas no painel, com a comparação Rápido / Equilibrado / Seguro.
+   Arraste marcadores, mude o perfil, a hora ou as premissas.
 4. Salve, compare e exporte.
 5. **Percorrer a rota em primeira pessoa** para testá-la.
 

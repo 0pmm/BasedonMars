@@ -113,7 +113,7 @@ export function renderPhotos(container, query, { gallery = true } = {}) {
       frame.classList.remove('loading');
       frame.removeAttribute('aria-busy');
       if (!items.length) {
-        frame.append(h('div.photo-fallback', null, '📡', h('span', null, t('photo.none'))));
+        frame.append(h('div.photo-fallback', null, h('span', null, t('photo.none'))));
         caption.textContent = t('photo.noneCaption');
         return;
       }
@@ -125,7 +125,7 @@ export function renderPhotos(container, query, { gallery = true } = {}) {
           style: { cursor: 'zoom-in' },
         });
         frame.append(img);
-        caption.textContent = `📷 ${item.title} — ${t('photo.source')}`;
+        caption.textContent = `${item.title} — ${t('photo.source')}`;
         thumbs?.querySelectorAll('button').forEach((b) => b.setAttribute('aria-current', String(b === btn)));
       };
       let thumbs = null;

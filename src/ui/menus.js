@@ -169,7 +169,7 @@ const SECTIONS = {
       h('p.section-title', null, t('about.privacy')),
       h('p', null, t('about.privacyText')),
       h('p.section-title', null, t('about.feedback')),
-      h('a.btn', { attrs: { href: FEEDBACK_URL, target: '_blank', rel: 'noopener noreferrer' } }, `💬 ${t('about.feedbackBtn')} ↗`),
+      h('a.btn', { attrs: { href: FEEDBACK_URL, target: '_blank', rel: 'noopener noreferrer' } }, `${t('about.feedbackBtn')} ↗`),
       errors.length
         ? h(
             'details',
@@ -225,7 +225,7 @@ export function openSettings(section = 'general') {
   }
   body.append(tabs, panel);
   show(section);
-  return openDialog({ title: `⚙️ ${t('menu.settings')}`, body, wide: true });
+  return openDialog({ title: `${t('menu.settings')}`, body, wide: true });
 }
 
 /* ---------------- Controls help ---------------- */

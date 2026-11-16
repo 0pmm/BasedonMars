@@ -1,6 +1,8 @@
 /** Textos da interface em português do Brasil. As chaves devem ser iguais às de en.js. */
 import v3 from './v3.pt.js';
 import routeTexts from './route.pt.js';
+import genieTexts from './genie.pt.js';
+import recTexts from './rec.pt.js';
 
 export default {
   'a11y.skip': 'Pular para o conteúdo',
@@ -113,11 +115,11 @@ export default {
   'log.data': 'Dados',
   'log.system': 'Sistema',
   'log.layer': 'Camada de dados: {layer}',
-  'log.focus': '🎯 Foco em {name}',
-  'log.orbiters': '🛰️ Mostrando Fobos, Deimos, sondas e rovers.',
+  'log.focus': 'Foco em {name}',
+  'log.orbiters': 'Mostrando Fobos, Deimos, sondas e rovers.',
   'log.explore': 'Modo de exploração livre ativo.',
-  'log.landed': '📍 Pouso em {name} (capítulo {n}/{total})',
-  'log.surface': '🚶 Caminhada na superfície: {name}',
+  'log.landed': 'Pouso em {name} (capítulo {n}/{total})',
+  'log.surface': 'Caminhada na superfície: {name}',
   'log.textureLoaded': 'Textura orbital carregada ({res}).',
   'log.textureFallback': 'Textura orbital indisponível: usando mapa procedural.',
   'logmsg.relay': 'Sinal do Perseverance recebido via retransmissão do MRO…',
@@ -137,7 +139,7 @@ export default {
   'photo.title': 'Foto',
   'photo.searching': 'Buscando na biblioteca de imagens da NASA…',
   'photo.none': 'Nenhuma imagem encontrada',
-  'photo.noneCaption': '📡 Imagem real indisponível no momento.',
+  'photo.noneCaption': 'Imagem real indisponível no momento.',
   'photo.error': 'Não foi possível acessar a biblioteca de imagens da NASA.',
   'photo.source': 'Fonte: NASA Image and Video Library',
   'photo.gallery': 'Galeria de fotos',
@@ -206,7 +208,7 @@ export default {
   'story.chapterShort': 'Capítulo {n}',
   'story.minimize': 'Minimizar',
   'story.expand': 'Expandir',
-  'story.skip': 'Pular texto ⏭',
+  'story.skip': 'Pular texto ',
   'story.leg': 'Distância do trecho',
   'story.total': 'Distância total',
   'story.sample': 'Amostra',
@@ -403,9 +405,9 @@ export default {
   'tut.moveTouch': 'Use o joystick da esquerda para andar.',
   'tut.look': 'Clique na visão e mova o mouse para olhar em volta.',
   'tut.lookTouch': 'Arraste no lado direito da tela para olhar em volta.',
-  'tut.compass': 'O 🎯 na bússola e no minimapa aponta para o seu objetivo.',
+  'tut.compass': 'O na bússola e no minimapa aponta para o seu objetivo.',
   'tut.interact': 'No farol, segure {key} para coletar a amostra.',
-  'tut.interactTouch': 'No farol, segure o botão ✋ para coletar a amostra.',
+  'tut.interactTouch': 'No farol, segure o botão para coletar a amostra.',
   'tut.skip': 'Pular tutorial',
 
   'caption.collect': 'som de amostra coletada',
@@ -446,4 +448,6 @@ export default {
   'about.resetDone': 'Progresso apagado.',
   ...v3,
   ...routeTexts,
+  ...genieTexts,
+  ...recTexts,
 };

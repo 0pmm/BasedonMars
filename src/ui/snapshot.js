@@ -39,20 +39,20 @@ export function composeSnapshot(frame, card) {
   const y = c.height - hh - pad;
 
   ctx.save();
-  ctx.fillStyle = 'rgba(8, 10, 18, 0.80)';
-  ctx.strokeStyle = 'rgba(255, 107, 53, 0.85)';
-  ctx.lineWidth = 1.5 * sc;
-  roundRect(ctx, x, y, w, hh, 12 * sc);
+  ctx.fillStyle = 'rgba(10, 11, 13, 0.86)';
+  ctx.strokeStyle = 'rgba(200, 85, 61, 0.9)';
+  ctx.lineWidth = 1 * sc;
+  roundRect(ctx, x, y, w, hh, 4 * sc);
   ctx.fill();
   ctx.stroke();
   let cy = y + pad + 20 * sc;
-  ctx.fillStyle = '#ff8a55';
-  ctx.font = `700 ${19 * sc}px Orbitron, Rajdhani, sans-serif`;
+  ctx.fillStyle = '#e07a4f';
+  ctx.font = `600 ${19 * sc}px IBM Plex Sans Condensed, sans-serif`;
   ctx.fillText(card.title, x + pad, cy);
   if (card.subtitle) {
     cy += 20 * sc;
-    ctx.fillStyle = '#c9ced8';
-    ctx.font = `500 ${13.5 * sc}px Rajdhani, sans-serif`;
+    ctx.fillStyle = '#e8e4de';
+    ctx.font = `500 ${13.5 * sc}px IBM Plex Sans, sans-serif`;
     ctx.fillText(card.subtitle, x + pad, cy);
   }
   cy += 12 * sc;
@@ -61,17 +61,17 @@ export function composeSnapshot(frame, card) {
     const row = i % perCol;
     const rx = x + pad + col * colW;
     const ry = cy + (row + 1) * lineH;
-    ctx.fillStyle = '#9aa3b2';
-    ctx.font = `500 ${12.5 * sc}px Rajdhani, sans-serif`;
+    ctx.fillStyle = '#a39d95';
+    ctx.font = `500 ${12.5 * sc}px IBM Plex Sans, sans-serif`;
     ctx.fillText(k, rx, ry, 112 * sc);
     ctx.fillStyle = '#ffffff';
-    ctx.font = `600 ${14 * sc}px "Share Tech Mono", monospace`;
+    ctx.font = `600 ${14 * sc}px IBM Plex Mono, monospace`;
     ctx.fillText(v, rx + 118 * sc, ry, colW - 124 * sc);
   });
   cy += perCol * lineH + 10 * sc;
   if (profH) drawProfile(ctx, card.profile, x + pad, cy, w - 2 * pad, profH - 6 * sc, sc);
-  ctx.fillStyle = '#7d8696';
-  ctx.font = `500 ${11 * sc}px Rajdhani, sans-serif`;
+  ctx.fillStyle = '#77726b';
+  ctx.font = `500 ${11 * sc}px IBM Plex Sans, sans-serif`;
   ctx.fillText(card.footer || t('snap.footer'), x + pad, y + hh - 10 * sc, w - 2 * pad);
   ctx.restore();
   return c;
@@ -89,21 +89,21 @@ function drawProfile(ctx, p, x, y, w, h, sc) {
   const L = pts[pts.length - 1].d || 1;
   const px = (d) => x + (d / L) * w;
   const py = (v) => y + h - ((v - min) / span) * h;
-  ctx.fillStyle = 'rgba(255,107,53,0.25)';
+  ctx.fillStyle = 'rgba(200,85,61,0.22)';
   ctx.beginPath();
   ctx.moveTo(px(0), y + h);
   for (const q of pts) ctx.lineTo(px(q.d), py(q.h));
   ctx.lineTo(px(L), y + h);
   ctx.fill();
-  ctx.strokeStyle = '#ff8a55';
+  ctx.strokeStyle = '#e07a4f';
   ctx.lineWidth = 1.6 * sc;
   ctx.beginPath();
   pts.forEach((q, i) => (i ? ctx.lineTo(px(q.d), py(q.h)) : ctx.moveTo(px(q.d), py(q.h))));
   ctx.stroke();
-  ctx.fillStyle = '#ffcc33';
+  ctx.fillStyle = '#d8a64a';
   for (const d of p.stops || []) ctx.fillRect(px(d) - sc, y, 2 * sc, h);
   if (p.pnr != null) {
-    ctx.strokeStyle = '#ff3b5c';
+    ctx.strokeStyle = '#e0524b';
     ctx.setLineDash([4 * sc, 3 * sc]);
     ctx.beginPath();
     ctx.moveTo(px(p.pnr), y);
@@ -115,13 +115,13 @@ function drawProfile(ctx, p, x, y, w, h, sc) {
     const mx = px(Math.min(L, p.marker));
     let hv = pts[0].h;
     for (const q of pts) if (q.d <= p.marker) hv = q.h;
-    ctx.fillStyle = '#4fd1ff';
+    ctx.fillStyle = '#8bb8c6';
     ctx.beginPath();
     ctx.arc(mx, py(hv), 5 * sc, 0, Math.PI * 2);
     ctx.fill();
   }
-  ctx.fillStyle = '#c9ced8';
-  ctx.font = `500 ${11 * sc}px "Share Tech Mono", monospace`;
+  ctx.fillStyle = '#e8e4de';
+  ctx.font = `500 ${11 * sc}px IBM Plex Mono, monospace`;
   ctx.fillText(`${Math.round(max)} m`, x, y + 10 * sc);
   ctx.fillText(`${Math.round(min)} m`, x, y + h - 2 * sc);
 }
@@ -168,13 +168,13 @@ export function openSnapshot(frame, card, opts = {}) {
       )
     : h('p.pl-meta', null, t('snap.noTrip'));
   return openDialog({
-    title: `📸 ${t('snap.title')}`,
+    title: `${t('snap.title')}`,
     wide: true,
     body: h('div.snap-body', null, img, toggle),
     actions: [
       {
         id: 'snap-download',
-        label: `⬇ ${t('snap.download')}`,
+        label: t('snap.download'),
         primary: true,
         onClick: () => {
           download(composed);

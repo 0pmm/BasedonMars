@@ -14,10 +14,12 @@ export function formatDistance(metres, units = 'metric') {
   if (units === 'imperial') {
     const ft = metres * M_TO_FT;
     if (ft < 1000) return `${Math.round(ft)} ft`;
-    return `${((metres / 1000) * KM_TO_MI).toFixed(2)} mi`;
+    const mi = (metres / 1000) * KM_TO_MI;
+    return `${mi.toFixed(mi >= 100 ? 0 : mi >= 10 ? 1 : 2)} mi`;
   }
   if (metres < 1000) return `${Math.round(metres)} m`;
-  return `${(metres / 1000).toFixed(2)} km`;
+  const km = metres / 1000;
+  return `${km.toFixed(km >= 100 ? 0 : km >= 10 ? 1 : 2)} km`;
 }
 
 /** Format a distance given in kilometres. */

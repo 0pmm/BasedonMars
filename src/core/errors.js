@@ -15,7 +15,7 @@ function record(message, source) {
   const list = load('errors', []);
   list.push(entry);
   save('errors', list.slice(-MAX_STORED));
-  emit('log', { type: 'system', text: `⚠️ ${entry.message}` });
+  emit('log', { type: 'system', text: entry.message });
   if (!seen.has(entry.message)) {
     seen.add(entry.message);
     emit('error:captured', entry);

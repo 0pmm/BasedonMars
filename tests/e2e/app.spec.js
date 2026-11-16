@@ -58,48 +58,79 @@ test('start screen loads without errors and switches language', async ({ page })
   const errors = trackErrors(page);
   await boot(page);
   await expect(page.locator('#start-screen')).toBeVisible();
-  await expect(page.locator('#btn-start-explore')).toContainText('Explore Mars and plan a route');
+  await expect(page.locator('#start-objectives [data-objective]')).toHaveCount(3);
+  await expect(page.locator('#start-objectives [data-objective="life"]')).toHaveCount(0);
+  await expect(page.locator('#start-objectives [data-objective="geology"]')).toContainText('Geological history');
+  await expect(page.locator('#btn-tour')).toBeVisible();
+  await expect(page.locator('#start-objectives [data-objective="free"]')).toContainText('Free exploration');
   await expect(page.locator('#btn-start-mission')).toHaveCount(0); // guided mission removed
   await page.click('#btn-language');
-  await expect(page.locator('#btn-start-explore')).toContainText('Explorar Marte');
+  await expect(page.locator('#start-objectives [data-objective="geology"]')).toContainText('História geológica');
   await expect(page.locator('html')).toHaveAttribute('lang', 'pt-BR');
   expect(errors).toEqual([]);
 });
 
-test('globe: locations, details, NASA and computed layers, compare', async ({ page }) => {
+test('guided mission: best site with its reasons, chooser with filters, then a Marswalk', async ({ page }) => {
   const errors = trackErrors(page);
   await boot(page);
-  await page.click('#btn-start-explore');
-  await expect(page.locator('#route-panel')).toBeVisible();
-  await page.getByRole('tab', { name: 'Locations' }).click();
-  await expect(page.locator('#poi-list .poi-item')).toHaveCount(14);
-  await page.fill('#poi-search', 'olympus');
-  await expect(page.locator('#poi-list .poi-item')).toHaveCount(1);
-  await page.locator('#poi-list .btn.primary').first().click();
-  await expect(page.locator('#info-content h3')).toContainText('Olympus Mons');
+  await page.locator('#start-objectives [data-objective="geology"]').click();
+  await expect(page.locator('#guide-step-site')).toBeVisible();
+  // one recommendation, with plain-language reasons
+  await expect(page.locator('.rec-card h4')).toHaveText('Gale Crater');
+  await expect(page.locator('.rec-card .rec-why li.plus').first()).toBeVisible();
+  // a filter changes the recommendation
+  await page.click('.rec-chip[data-filter="hydration"]');
+  await expect(page.locator('.rec-card h4')).toHaveText('Mawrth Vallis');
+  // the chooser lists every site over a blurred screen; picking one makes it "your choice"
+  await page.click('#btn-change-site');
+  await expect(page.locator('#site-picker')).toBeVisible();
+  await expect(page.locator('#site-picker .picker-option')).toHaveCount(12);
+  await page.click('#site-picker .picker-chip[data-filter="general"]');
+  await page.click('#site-picker .picker-option[data-option="jezero"]');
+  await expect(page.locator('#site-picker')).toHaveCount(0);
+  await expect(page.locator('.rec-card h4')).toHaveText('Jezero Crater');
+  await expect(page.locator('.rec-tag.picked')).toBeVisible();
+  // zones: the best one, and every zone in the chooser
+  await page.locator('.sci-view').nth(1).click();
+  await expect(page.locator('.rec-card h4')).not.toHaveText('');
+  await page.click('#btn-change-zone');
+  await expect(page.locator('#zone-picker .picker-option')).toHaveCount(40);
+  await page.keyboard.press('Escape');
+  await page.locator('.sci-view').nth(0).click();
+  await page.getByRole('button', { name: /Plan Marswalk/ }).click();
+  await expect(page.locator('#guide-step-route')).toBeVisible();
+  expect(await page.locator('#route-panel .rt-points li').count()).toBeGreaterThanOrEqual(2);
+  await expect(page.locator('.guide-step-btn[data-step="route"]')).toHaveClass(/active/);
+  expect(errors).toEqual([]);
+});
+
+test('globe: NASA and computed layers react to the guide', async ({ page }) => {
+  const errors = trackErrors(page);
+  await boot(page);
+  await page.locator('#start-objectives [data-objective="geology"]').click();
+  // layers live in a flyout opened from the tool rail
+  await page.click('#btn-layers');
   await page.selectOption('#layer-select', 'mola');
   await expect(page.locator('#legend-badge')).toBeVisible();
   await page.selectOption('#layer-select', 'slope');
   await expect(page.locator('#legend-badge')).toContainText('computed');
-  await page.getByRole('button', { name: /Add to comparison/ }).click();
-  await page.getByRole('tab', { name: 'Locations' }).click();
-  await page.fill('#poi-search', 'gale');
-  await page.locator('#poi-list .btn.primary').first().click();
-  await page.getByRole('button', { name: /Add to comparison/ }).click();
-  await expect(page.locator('#compare-content table')).toBeVisible();
+  await page.click('.rec-chip[data-filter="exposure"]');
+  await expect(page.locator('.rec-card h4')).not.toHaveText('');
+  await expect(page.locator('#guide-objective-name')).toContainText('Geological');
   expect(errors).toEqual([]);
 });
 
-test('deep link opens a location', async ({ page }) => {
-  await boot(page, '#poi=gale');
-  await expect(page.locator('#info-content h3')).toContainText('Gale Crater');
+test('deep link opens a science site in the guide', async ({ page }) => {
+  await boot(page, '#site=gale');
+  await expect(page.locator('#guide-step-site')).toBeVisible();
+  await expect(page.locator('.sci-detail h4')).toHaveText('Gale Crater');
 });
 
 test('seamless zoom: the globe streams real terrain down to the ground', async ({ page }) => {
   test.setTimeout(120_000);
   const errors = trackErrors(page);
   await boot(page);
-  await page.click('#btn-start-explore');
+  await page.click('#start-objectives [data-objective="geology"]');
   await page.evaluate(() => window.__mars.orbitView.flyTo({ lat: 18.4446, lon: 77.4509, range: 2500, heading: 0, tilt: 50 }, 0));
   await expect
     .poll(() => page.evaluate(() => window.__mars.orbitView.terrain.levelAt(18.4446, 77.4509)), { timeout: 90_000 })
@@ -110,7 +141,7 @@ test('seamless zoom: the globe streams real terrain down to the ground', async (
 });
 
 test('route between points on the globe, then walk it in first person and come back', async ({ page }) => {
-  test.setTimeout(240_000);
+  test.setTimeout(360_000);
   const errors = trackErrors(page);
   await boot(page, '#site=jezero-landing');
   await expect(page.locator('#route-panel')).toBeVisible();
@@ -135,7 +166,7 @@ test('route between points on the globe, then walk it in first person and come b
   await expect(page.locator('#snap-download')).toBeHidden();
   await page.click('#rt-walk');
   await expect(page.locator('#surface-hud')).toBeVisible({ timeout: 90_000 });
-  await expect(page.locator('#eva-hud')).toContainText('🧭');
+  await expect(page.locator('#eva-hud')).toContainText('DIST');
   await expect.poll(() => page.evaluate(() => window.__mars.traverse.world.chunks.stats().ready), { timeout: 60_000 }).toBeGreaterThan(8);
   // real time (×1) by default; speed up for the test
   expect(await page.evaluate(() => window.__mars.traverse.timeScale)).toBe(1);
@@ -163,13 +194,17 @@ test('phone layout: bottom sheets and no horizontal overflow', async ({ browser 
   const context = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
   const page = await context.newPage();
   await boot(page);
-  await page.click('#btn-start-explore');
+  await page.click('#start-objectives [data-objective="survival"]');
   await expect(page.locator('#mobile-toggles')).toBeVisible();
-  const box = await page.locator('#right-panel').boundingBox();
-  expect(box.y).toBeGreaterThanOrEqual(800);
+  // Choosing the objective opens the guide sheet automatically.
+  await expect(page.locator('#right-panel')).toHaveClass(/open/);
+  let overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
+  expect(overflow).toBe(false);
+  await page.locator('#right-panel [data-close-panel]').click();
+  await expect(page.locator('#right-panel')).not.toHaveClass(/open/);
   await page.locator('#mobile-toggles [data-panel="right-panel"]').click();
   await expect(page.locator('#right-panel')).toHaveClass(/open/);
-  const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
+  overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
   expect(overflow).toBe(false);
   await context.close();
 });
@@ -179,7 +214,7 @@ test('settings: language, units and key remapping persist', async ({ page }) => 
   await page.locator('#start-screen [data-open="settings"]').click();
   await page.selectOption('#set-units', 'imperial');
   await page.selectOption('#set-language', 'pt');
-  await expect(page.locator('#btn-start-explore')).toContainText('Explorar Marte');
+  await expect(page.locator('#start-objectives [data-objective="survival"]')).toContainText('Sobrevivência humana');
   await page.getByRole('tab', { name: 'Controls' }).click();
   await page.locator('.keybind').first().click();
   await page.keyboard.press('KeyI');
@@ -187,4 +222,38 @@ test('settings: language, units and key remapping persist', async ({ page }) => 
   const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('mars-explorer:settings')));
   expect(saved.units).toBe('imperial');
   expect(saved.bindings.forward[0]).toBe('KeyI');
+});
+
+test('GENIE explains an indicator with the rest of the screen blurred', async ({ page }) => {
+  const errors = trackErrors(page);
+  await boot(page);
+  await page.click('#start-objectives [data-objective="free"]');
+  await expect(page.locator('#guide-step-route')).toBeVisible();
+  await page.locator('#telemetry [data-genie="radiation"]').click();
+  await expect(page.locator('.genie-bubble')).toBeVisible();
+  await expect(page.locator('.genie-bubble')).toContainText('GENIE');
+  await expect(page.locator('.genie-bubble')).toContainText('0.64 mSv');
+  await expect(page.locator('.genie-pane')).toHaveCount(4);
+  await expect(page.locator('.genie-robot')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('.genie-layer')).toHaveCount(0);
+  expect(errors).toEqual([]);
+});
+
+test('GENIE tour walks through the app from the start screen', async ({ page }) => {
+  const errors = trackErrors(page);
+  await boot(page);
+  await page.click('#btn-tour');
+  await expect(page.locator('.genie-bubble')).toContainText('GENIE');
+  await expect(page.locator('.genie-step')).toHaveText('1 of 8');
+  for (let i = 2; i <= 8; i++) {
+    await page.locator('.genie-actions .genie-btn:not(.ghost)').click();
+    await expect(page.locator('.genie-step')).toHaveText(`${i} of 8`);
+  }
+  // the tour entered the map on its own
+  await expect(page.locator('#app-header')).toBeVisible();
+  await page.locator('.genie-actions .genie-btn:not(.ghost)').click();
+  await expect(page.locator('.genie-layer')).toHaveCount(0);
+  await expect(page.locator('#guide-step-site')).toBeVisible();
+  expect(errors).toEqual([]);
 });

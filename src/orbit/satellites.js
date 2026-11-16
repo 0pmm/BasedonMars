@@ -39,7 +39,7 @@ export function createSatellites(equatorFrame, orbiters) {
   ]) {
     const radius = def.orbitRadiusMarsRadii * ORBIT.planetRadius;
     const mesh = moonMesh(Math.max(1.2, def.radiusKm * KM * 15), color, seed);
-    const label = createLabelSprite(`🌑 ${name}`, '#c9b8a6');
+    const label = createLabelSprite(name, '#c9b8a6');
     group.add(mesh, label);
     const ring = new THREE.Mesh(
       new THREE.RingGeometry(radius - 0.15, radius + 0.15, 180),
@@ -73,7 +73,7 @@ export function createSatellites(equatorFrame, orbiters) {
       new THREE.LineBasicMaterial({ color: o.color, transparent: true, opacity: 0.35 })
     );
     const dot = new THREE.Mesh(new THREE.SphereGeometry(0.45, 10, 10), new THREE.MeshBasicMaterial({ color: o.color, toneMapped: false }));
-    const label = createLabelSprite(`🛰️ ${o.name}`, o.color);
+    const label = createLabelSprite(o.name, o.color);
     label.scale.multiplyScalar(0.85);
     frame.add(line, dot, label);
     bodies.push({ mesh: dot, label, radius: a, ecc, periodS: o.periodMin * 60, frame, phase: Math.random() * 6 });

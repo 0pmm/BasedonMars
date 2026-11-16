@@ -22,7 +22,7 @@ const ATMOSPHERE_FRAG = /* glsl */ `
   void main() {
     vec3 viewDir = normalize(-vPosition);
     float rim = 1.0 - max(dot(viewDir, vNormal), 0.0);
-    gl_FragColor = vec4(glowColor, pow(rim, 2.5) * 0.55);
+    gl_FragColor = vec4(glowColor, pow(rim, 3.0) * 0.22);
     #include <colorspace_fragment>
   }`;
 
@@ -93,9 +93,9 @@ export function createPlanet(renderer) {
 
 export function createAtmosphere() {
   return new THREE.Mesh(
-    new THREE.SphereGeometry(ORBIT.planetRadius * 1.03, 64, 64),
+    new THREE.SphereGeometry(ORBIT.planetRadius * 1.012, 96, 96),
     new THREE.ShaderMaterial({
-      uniforms: { glowColor: { value: new THREE.Color(0xff9566) } },
+      uniforms: { glowColor: { value: new THREE.Color(0xd7a27c) } },
       vertexShader: ATMOSPHERE_VERT,
       fragmentShader: ATMOSPHERE_FRAG,
       blending: THREE.AdditiveBlending,

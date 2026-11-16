@@ -344,3 +344,237 @@ dialog.modal::backdrop {
   border: 1px solid var(--panel-border);
   background: #000;
 }
+
+/* ===================== GENIE ===================== */
+.genie-q {
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  margin-left: 4px;
+  border-radius: 50%;
+  border: 1px solid rgba(79, 209, 255, 0.7);
+  background: rgba(79, 209, 255, 0.12);
+  color: #8fe3ff;
+  font: 700 11px/1 var(--font-mono, monospace);
+  cursor: help;
+  vertical-align: middle;
+  flex: none;
+  transition:
+    transform 0.15s,
+    background 0.15s;
+}
+.genie-q:hover,
+.genie-q:focus-visible {
+  background: rgba(79, 209, 255, 0.35);
+  transform: scale(1.12);
+  outline: none;
+}
+.tele-item {
+  position: relative;
+}
+.tele-item > .genie-q {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+}
+.rt-profile-wrap {
+  position: relative;
+}
+.genie-q-float {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+}
+.genie-q-hud {
+  pointer-events: auto;
+}
+.genie-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  pointer-events: none;
+}
+.genie-pane {
+  position: fixed;
+  pointer-events: auto;
+  background: rgba(4, 6, 12, 0.45);
+  backdrop-filter: blur(5px) saturate(0.8);
+  -webkit-backdrop-filter: blur(5px) saturate(0.8);
+  opacity: 0;
+  transition: opacity 0.22s ease;
+}
+.genie-frame {
+  position: fixed;
+  border-radius: 12px;
+  box-shadow:
+    0 0 0 2px #4fd1ff,
+    0 0 22px 4px rgba(79, 209, 255, 0.45);
+  opacity: 0;
+  transition: opacity 0.22s ease;
+  animation: genie-pulse 1.8s ease-in-out infinite;
+}
+.genie-bubble {
+  position: fixed;
+  pointer-events: auto;
+  padding: 16px 18px 14px;
+  border-radius: 18px;
+  background: linear-gradient(160deg, rgba(20, 28, 44, 0.97), rgba(10, 14, 24, 0.97));
+  border: 1px solid rgba(79, 209, 255, 0.45);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
+  color: #eaf2ff;
+  opacity: 0;
+  transform: translateY(8px) scale(0.98);
+  transition:
+    opacity 0.22s ease,
+    transform 0.22s ease;
+}
+.genie-name {
+  font:
+    700 0.72rem/1 var(--font-mono),
+    sans-serif;
+  letter-spacing: 0.18em;
+  color: #4fd1ff;
+  margin-bottom: 6px;
+}
+.genie-title {
+  margin: 0 22px 6px 0;
+  font-size: 1.05rem;
+  color: #ff8a55;
+}
+.genie-text,
+.genie-extra {
+  margin: 0 0 8px;
+  line-height: 1.45;
+  font-size: 0.95rem;
+}
+.genie-extra {
+  color: #b9c4d6;
+}
+.genie-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 6px;
+}
+.genie-btn {
+  border: 1px solid var(--orange-glow, #ff8a55);
+  background: linear-gradient(135deg, var(--orange, #ff6b35), #d9481a);
+  color: #fff;
+  border-radius: 10px;
+  padding: 6px 14px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.genie-btn.ghost {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+.genie-close {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  background: none;
+  border: none;
+  color: #b9c4d6;
+  font-size: 1rem;
+  cursor: pointer;
+}
+.genie-bot {
+  position: fixed;
+  width: 96px;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 0.25s ease,
+    transform 0.3s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+.genie-robot {
+  width: 96px;
+  height: auto;
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.45));
+}
+.genie-layer.in .genie-pane,
+.genie-layer.in .genie-frame,
+.genie-layer.in .genie-bot {
+  opacity: 1;
+  transform: none;
+}
+.genie-layer.in .genie-bubble {
+  opacity: 1;
+  transform: none;
+}
+.genie-float {
+  animation: genie-float 3s ease-in-out infinite;
+  transform-origin: 60px 70px;
+}
+.genie-eyes {
+  animation: genie-blink 4.5s infinite;
+  transform-origin: 60px 52px;
+}
+.genie-light {
+  fill: #ff6b35;
+  animation: genie-light 1.4s ease-in-out infinite;
+}
+.genie-wave {
+  animation: genie-wave 1.6s ease-in-out infinite;
+  transform-origin: 38px 96px;
+}
+.genie-layer.no-motion *,
+.reduce-motion .genie-layer * {
+  animation: none !important;
+  transition: none !important;
+}
+@keyframes genie-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+@keyframes genie-blink {
+  0%,
+  92%,
+  100% {
+    transform: scaleY(1);
+  }
+  95% {
+    transform: scaleY(0.1);
+  }
+}
+@keyframes genie-light {
+  0%,
+  100% {
+    fill: #ff6b35;
+  }
+  50% {
+    fill: #ffd27a;
+  }
+}
+@keyframes genie-wave {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-18deg);
+  }
+}
+@keyframes genie-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 2px #4fd1ff,
+      0 0 18px 3px rgba(79, 209, 255, 0.35);
+  }
+  50% {
+    box-shadow:
+      0 0 0 2px #8fe3ff,
+      0 0 28px 6px rgba(79, 209, 255, 0.55);
+  }
+}

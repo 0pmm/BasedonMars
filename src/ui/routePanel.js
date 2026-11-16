@@ -10,12 +10,14 @@
  */
 import { h, $, clear } from '../core/dom.js';
 import { t, tr, getLocale } from '../core/i18n.js';
-import { on } from '../core/events.js';
+import { on, emit } from '../core/events.js';
 import { getState } from '../core/state.js';
 import { getSettings } from '../core/settings.js';
 import { load, save } from '../core/storage.js';
 import { formatDistance, formatElevation, formatTemperature, formatPressure } from '../core/units.js';
 import { toast } from './feedback.js';
+import { helpButton } from './genie.js';
+import { icon } from './icons.js';
 import { orbitView } from '../orbit/orbitView.js';
 import { createRouteLayer } from '../orbit/routeLayer.js';
 import { formatLatLon, distanceM } from '../geo/mars.js';
@@ -32,6 +34,7 @@ import {
 import { loadWeather, loadSpaceWeather } from '../geo/missionData.js';
 import { computeRoute, rangeRadius, MAX_LEG_M } from '../planner/route.js';
 import { DEFAULT_EVA, surfaceDoseRate, surfacePressure } from '../planner/eva.js';
+import { PROFILES } from '../planner/routing.js';
 import { RAMPS, rampColor } from '../planner/overlays.js';
 import sites from '../data/sites.json';
 
@@ -57,6 +60,7 @@ const R = {
   error: null,
   weather: null,
   space: null,
+  sciencePotential: null,
 };
 
 let nav = { traverse: () => {} };
@@ -72,7 +76,11 @@ let timer = 0;
 export function initRoutePanel(navigation) {
   nav = navigation;
   root = $('#route-panel');
-  layer = createRouteLayer(orbitView.frame, { heightAt: (la, lo) => orbitView.terrain.heightAt(la, lo) });
+  layer = createRouteLayer(orbitView.frame, {
+    heightAt: (la, lo) => orbitView.terrain.heightAt(la, lo),
+    displayedHeightAt: (la, lo) => orbitView.terrain.displayedHeightAt(la, lo),
+    version: () => orbitView.terrain.version,
+  });
   on('orbit:groundClick', (e) => {
     if (!R.editing || getState() !== 'dashboard') return;
     e.handled.value = true;
@@ -114,6 +122,38 @@ export function setEditing(on) {
   render();
 }
 
+/**
+ * Replace the whole route from code (science panel, deep links). Points may
+ * carry `science`, `value`, `targetId` and `label`; `sciencePotential` is the
+ * sum of the best target values for the objective, used for coverage.
+ * @param {Array<object>} points
+ * @param {{params?:object, returnToBase?:boolean, crew?:number, sciencePotential?:number, compute?:boolean}} [opts]
+ */
+export function setRoute(points, opts = {}) {
+  R.computing?.abort();
+  R.computing = null;
+  R.points = points.map((p, i) => ({
+    lat: p.lat,
+    lon: p.lon,
+    h: p.h,
+    science: !!p.science,
+    value: p.value,
+    targetId: p.targetId,
+    label: p.label,
+    kinds: p.kinds,
+    minutes: p.minutes ?? (i === 0 ? 0 : R.params.stopMinutes),
+    note: p.note || '',
+  }));
+  if (opts.params) R.params = { ...DEFAULT_EVA, ...opts.params };
+  if (typeof opts.returnToBase === 'boolean') R.returnToBase = opts.returnToBase;
+  if (Number.isFinite(opts.crew)) R.crew = opts.crew;
+  R.sciencePotential = Number.isFinite(opts.sciencePotential) ? opts.sciencePotential : null;
+  R.editing = false;
+  R.result = null;
+  R.error = null;
+  changed();
+}
+
 /** Hooks for automated tests (dev server only). */
 export const routeDebug = {
   state: R,
@@ -127,6 +167,7 @@ export const routeDebug = {
  * ==================================================================== */
 
 function addPoint(p) {
+  R.sciencePotential = null;
   R.points.push({
     lat: p.lat,
     lon: p.lon,
@@ -138,10 +179,23 @@ function addPoint(p) {
   changed();
 }
 
+/** Slope limit of the current mode (the hazard layer on the globe follows it). */
+export function currentSlopeLimit() {
+  return R.params.mode === 'rover' ? R.params.maxSlopeRover : R.params.maxSlopeWalk;
+}
+
 function changed() {
+  orbitView.setLayer(undefined, { slopeLimit: currentSlopeLimit() });
   R.result = null;
+  R.alts = null;
   R.error = null;
-  layer.set({ points: R.points, path: null, returnToBase: R.returnToBase, ring: R.points.length ? rangeRadius(R.params) : null });
+  layer.set({
+    points: R.points,
+    path: null,
+    alts: null,
+    returnToBase: R.returnToBase,
+    ring: R.points.length ? rangeRadius(R.params) : null,
+  });
   render();
   clearTimeout(timer);
   if (R.points.length >= 2) timer = setTimeout(compute, 450);
@@ -151,6 +205,7 @@ function clearRoute() {
   R.computing?.abort();
   R.computing = null;
   R.points = [];
+  R.sciencePotential = null;
   changed();
 }
 
@@ -215,6 +270,7 @@ async function compute() {
       returnToBase: R.returnToBase,
       crew: R.crew,
       timeMs: R.timeMs,
+      sciencePotential: R.sciencePotential,
       signal: ctrl.signal,
       onProgress: (f, stage) => {
         R.progress = f;
@@ -224,11 +280,13 @@ async function compute() {
     });
     if (ctrl.signal.aborted) return;
     R.result = result;
+    R.alts = { [R.params.priority || 'safety']: summarise(result) };
     const e = result.evaluation;
     layer.set({
       points: R.points,
       path: result.path,
-      color: result.failedLeg ? 0xff3b5c : e.withinO2 ? 0x4fd1ff : 0xffb020,
+      alts: null,
+      color: result.failedLeg ? 0xe0524b : result.overLimitM > 0 || !e.withinO2 ? 0xd8a64a : 0x8bd0e6,
       returnToBase: R.returnToBase,
       ring: rangeRadius(R.params),
     });
@@ -241,7 +299,100 @@ async function compute() {
   } finally {
     if (R.computing === ctrl) R.computing = null;
     render();
+    emit('route:change', getRouteSummary());
   }
+  if (R.result && !ctrl.signal.aborted) computeAlternatives(ctrl);
+}
+
+const MODE_COLORS = { fast: 0xf0b45a, balanced: 0x9fb4c8, safety: 0x6fd39b };
+
+function summarise(r) {
+  return {
+    length: r.evaluation.length,
+    seconds: r.evaluation.totalSeconds,
+    climb: r.evaluation.climb,
+    maxSlope: r.maxSlope,
+    o2: r.evaluation.o2UsablePct,
+    path: r.path,
+    ok: !r.failedLeg,
+  };
+}
+
+/** The two other route profiles, computed after the chosen one (terrain is cached). */
+async function computeAlternatives(ctrl) {
+  const chosen = R.params.priority || 'safety';
+  for (const prio of ['fast', 'balanced', 'safety']) {
+    if (prio === chosen) continue;
+    try {
+      const r = await computeRoute(R.points, {
+        params: { ...R.params, priority: prio },
+        returnToBase: R.returnToBase,
+        crew: R.crew,
+        timeMs: R.timeMs,
+        sciencePotential: R.sciencePotential,
+        signal: ctrl.signal,
+      });
+      if (ctrl.signal.aborted || !R.result) return;
+      R.alts = { ...R.alts, [prio]: summarise(r) };
+    } catch {
+      if (ctrl.signal.aborted) return;
+    }
+    renderModes();
+    layer.set({
+      alts: Object.entries(R.alts)
+        .filter(([k]) => k !== chosen)
+        .map(([k, a]) => ({ path: a.path, color: MODE_COLORS[k] })),
+    });
+  }
+}
+
+/** Small table comparing the three profiles; click a row to switch. */
+function renderModes() {
+  const box = root?.querySelector('#rt-modes');
+  if (!box) return;
+  clear(box);
+  const chosen = R.params.priority || 'safety';
+  const units = getSettings().units;
+  const rows = ['fast', 'balanced', 'safety'].map((k) => {
+    const a = R.alts?.[k];
+    const swatch = h('span.mode-swatch', { style: { background: `#${MODE_COLORS[k].toString(16).padStart(6, '0')}` } });
+    return h(
+      'tr',
+      {
+        class: k === chosen ? 'active' : '',
+        attrs: { tabindex: k === chosen ? -1 : 0, role: 'button', 'aria-label': t(`rt.priority.${k}`) },
+        on: {
+          click: () => k !== chosen && ((R.params.priority = k), changed()),
+          keydown: (e) => (e.key === 'Enter' || e.key === ' ') && k !== chosen && ((R.params.priority = k), changed()),
+        },
+      },
+      h('th', { attrs: { scope: 'row' } }, swatch, t(`rt.priority.${k}`)),
+      h('td', null, a ? formatDistance(a.length, units) : '…'),
+      h('td', null, a ? `${Math.floor(a.seconds / 3600)}h${String(Math.round(a.seconds / 60) % 60).padStart(2, '0')}` : '…'),
+      h('td', null, a ? `${Math.round(a.climb)} m` : '…'),
+      h('td', null, a ? `${a.maxSlope.toFixed(0)}°` : '…')
+    );
+  });
+  box.append(
+    h(
+      'table.mode-table',
+      null,
+      h(
+        'thead',
+        null,
+        h(
+          'tr',
+          null,
+          h('th', null, t('rt.modes.profile'), ' ', helpButton('modes', { targets: () => [box], label: t('rt.modes.profile') })),
+          h('th', null, t('rt.modes.dist')),
+          h('th', null, t('rt.modes.time')),
+          h('th', null, t('rt.modes.climb')),
+          h('th', null, t('rt.modes.slope'))
+        )
+      ),
+      h('tbody', null, ...rows)
+    )
+  );
 }
 
 /* ======================================================================
@@ -285,6 +436,7 @@ function summary() {
         o2: r.evaluation.o2UsablePct,
         maxSlope: r.maxSlope,
         coverage: r.coverage,
+        scienceCoverage: r.scienceCoverage,
         dose: r.doseMsv,
         score: r.score.total,
       }
@@ -394,7 +546,7 @@ function checklistText() {
   lines.push('', `## ${t('pl.checklist.stops')}`);
   R.points.forEach((p, i) =>
     lines.push(
-      `${i}. ${i === 0 ? '🏠' : p.science ? '🔬' : '🚩'} ${formatLatLon(p.lat, p.lon)}${i ? ` · ${p.minutes} min` : ''}${p.note ? ` · ${p.note}` : ''}`
+      `${i}. ${i === 0 ? 'BASE' : p.science ? 'SCI' : 'STOP'} ${formatLatLon(p.lat, p.lon)}${i ? ` · ${p.minutes} min` : ''}${p.note ? ` · ${p.note}` : ''}`
     )
   );
   lines.push('', `## ${t('pl.checklist.abort')}`);
@@ -407,9 +559,25 @@ function checklistText() {
  * Rendering
  * ==================================================================== */
 
-const kv = (k, v) => [h('dt', null, k), h('dd', null, v)];
+const kv = (k, v, topic) => {
+  const dt = h('dt', null, k);
+  const dd = h('dd', null, v);
+  if (topic) dt.append(' ', helpButton(topic, { targets: () => [dt, dd], label: k }));
+  return [dt, dd];
+};
+/** Title + "?" (the whole parent block is highlighted). */
+const withHelp = (el, topic, label) => {
+  el.setAttribute('data-genie-target', '');
+  el.append(' ', helpButton(topic, { label }));
+  return el;
+};
+/** Button with an optional leading line icon: btn([iconName, label], …) or btn(label, …). */
 const btn = (label, onClick, cls = 'pl-btn', attrs = {}) =>
-  h(`button.${cls.split(' ').join('.')}`, { attrs: { type: 'button', ...attrs }, on: { click: onClick } }, label);
+  h(
+    `button.${cls.split(' ').join('.')}`,
+    { attrs: { type: 'button', ...attrs }, on: { click: onClick } },
+    ...(Array.isArray(label) ? [icon(label[0], { size: 16 }), label[1] ? ` ${label[1]}` : ''] : [label])
+  );
 
 function renderProgress() {
   const bar = root?.querySelector('.rt-progress-bar');
@@ -428,36 +596,23 @@ function render() {
     h(
       'div.rt-tools',
       null,
-      btn(R.editing ? `✅ ${t('rt.editing')}` : `✏️ ${t('rt.edit')}`, () => setEditing(!R.editing), 'pl-btn primary', {
+      btn(R.editing ? ['check', t('rt.editing')] : ['edit', t('rt.edit')], () => setEditing(!R.editing), 'pl-btn primary', {
         'aria-pressed': String(R.editing),
         id: 'rt-edit',
       }),
-      btn(`🎯 ${t('rt.fit')}`, fitRoute, 'pl-btn', { disabled: !R.points.length }),
-      btn(`🗑 ${t('pl.clear')}`, clearRoute, 'pl-btn', { disabled: !R.points.length })
+      btn(['frame', t('rt.fit')], fitRoute, 'pl-btn', { disabled: !R.points.length }),
+      btn(['trash', t('pl.clear')], clearRoute, 'pl-btn', { disabled: !R.points.length })
     ),
     h('p.pl-hint', null, R.editing ? t('rt.hintEditing') : t('rt.hint'))
   );
 
   // Walk button right at the top once a route exists
-  if (R.result)
-    root.append(
-      btn(
-        `🚶 ${t('rt.walk')}`,
-        () =>
-          nav.traverse({
-            route: R.result,
-            points: R.points.map((p) => ({ ...p })),
-            heightAtLL: (la, lo) => orbitView.terrain.heightAt(la, lo),
-          }),
-        'pl-btn primary big',
-        { id: 'rt-walk' }
-      )
-    );
+  if (R.result) root.append(btn(['walk', t('rt.walk')], () => walkCurrentRoute(), 'pl-btn primary big', { id: 'rt-walk' }));
 
   // --- Suggested places (empty route)
   if (!R.points.length) {
     const list = h('div.rt-sites');
-    for (const s of sites) list.append(btn(`📍 ${tr(s.name)}`, () => goToSite(s), 'pl-btn small', { title: tr(s.goal) || '' }));
+    for (const s of sites) list.append(btn(['pin', tr(s.name)], () => goToSite(s), 'rt-site', { title: tr(s.goal) || '' }));
     root.append(h('h3.rt-h', null, t('rt.suggested')), list);
   }
 
@@ -471,12 +626,14 @@ function render() {
           'li',
           null,
           i === 0
-            ? h('span.pl-icon', { attrs: { title: t('rt.base') } }, '🏠')
-            : btn(p.science ? '🔬' : '🚩', () => ((p.science = !p.science), changed()), 'pl-icon', {
+            ? h('span.pl-icon', { attrs: { title: t('rt.base') } }, icon('home', { size: 15 }))
+            : btn([p.science ? 'life' : 'flag'], () => ((p.science = !p.science), changed()), 'pl-icon', {
                 title: t('pl.science'),
                 'aria-pressed': String(!!p.science),
               }),
-          btn(i === 0 ? t('rt.base') : formatLatLon(p.lat, p.lon, 3), fly, 'rt-coord', { title: formatLatLon(p.lat, p.lon, 5) }),
+          btn(i === 0 ? p.label || t('rt.base') : p.label || formatLatLon(p.lat, p.lon, 3), fly, 'rt-coord', {
+            title: `${p.label ? `${p.label} · ` : ''}${formatLatLon(p.lat, p.lon, 5)}`,
+          }),
           i > 0
             ? h('input', {
                 attrs: { type: 'number', min: 0, max: 240, step: 5, value: p.minutes, 'aria-label': t('pl.stopMinutes') },
@@ -489,7 +646,7 @@ function render() {
                 title: t('pl.up'),
               })
             : null,
-          btn('✕', () => (R.points.splice(i, 1), changed()), 'pl-icon', { title: t('pl.remove') })
+          btn(['close'], () => (R.points.splice(i, 1), changed()), 'pl-icon', { title: t('pl.remove') })
         )
       );
     });
@@ -502,7 +659,7 @@ function render() {
     'div.pl-seg',
     { attrs: { role: 'radiogroup', 'aria-label': t('pl.mode') } },
     ...['walk', 'rover'].map((m) =>
-      btn(m === 'walk' ? `🚶 ${t('pl.mode.walk')}` : `🚙 ${t('pl.mode.rover')}`, () => ((R.params.mode = m), changed()), 'pl-btn', {
+      btn(m === 'walk' ? ['walk', t('pl.mode.walk')] : ['rover', t('pl.mode.rover')], () => ((R.params.mode = m), changed()), 'pl-btn', {
         role: 'radio',
         'aria-checked': String(R.params.mode === m),
       })
@@ -553,7 +710,28 @@ function render() {
     }),
     h('span.pl-unit', null, lt ? formatHours(lt.ltst) : '—')
   );
-  root.append(h('div.rt-options', null, modeSel, ret, crew, time));
+  const prio = h(
+    'div.rt-prio',
+    null,
+    withHelp(h('span.rt-label', null, t('rt.priority')), 'priority', t('rt.priority')),
+    h(
+      'div.pl-seg',
+      { attrs: { role: 'radiogroup', 'aria-label': t('rt.priority') } },
+      ...['fast', 'balanced', 'safety'].map((k) =>
+        btn(t(`rt.priority.${k}`), () => ((R.params.priority = k), changed()), 'pl-btn small', {
+          role: 'radio',
+          'aria-checked': String((R.params.priority || 'safety') === k),
+        })
+      )
+    )
+  );
+  modeSel.append(helpButton('mode', { targets: () => [modeSel], label: t('pl.mode') }));
+  ret.append(' ', helpButton('returnToBase', { targets: () => [ret], label: t('pl.returnToBase') }));
+  crew.firstChild.append(' ', helpButton('crew', { targets: () => [crew], label: t('pl.crew') }));
+  time.firstChild.append(' ', helpButton('ltst', { targets: () => [time], label: t('rt.ltst') }));
+  if (R.result) prio.append(h('div#rt-modes.rt-modes'));
+  root.append(h('div.rt-options', null, modeSel, prio, ret, crew, time));
+  renderModes();
 
   // --- Progress / errors
   if (R.computing) {
@@ -570,18 +748,26 @@ function render() {
       )
     );
   }
-  if (R.error) root.append(h('p.pl-warn', { attrs: { role: 'alert' } }, `⚠️ ${R.error}`));
+  if (R.error) root.append(h('p.pl-warn', { attrs: { role: 'alert' } }, R.error));
 
   // --- Results
   const r = R.result;
   if (r) {
     const e = r.evaluation;
-    const warn = (cond, text) => (cond ? h('p.pl-warn', { attrs: { role: 'alert' } }, `⚠️ ${text}`) : null);
+    const warn = (cond, text) => (cond ? h('p.pl-warn', { attrs: { role: 'alert' } }, text) : null);
     const lim = R.params.mode === 'rover' ? R.params.maxSlopeRover : R.params.maxSlopeWalk;
     root.append(
       ...[
         warn(r.tooLong, t('rt.warn.tooLong', { km: MAX_LEG_M / 1000 })),
         warn(r.failedLeg, t('pl.warn.noPath')),
+        warn(
+          r.overLimitM > 0,
+          t('rt.warn.overLimit', {
+            lim: Math.round(lim * (PROFILES[R.params.priority]?.hardSlope ?? 1)),
+            over: formatDistance(r.overLimitM, units),
+            direct: formatDistance(r.directOverM, units),
+          })
+        ),
         warn(!e.withinO2, t('pl.warn.o2')),
         warn(!e.withinTime, t('pl.warn.time', { h: R.params.maxEvaHours })),
         warn(r.coverage < 0.8, t('pl.warn.comms', { pct: Math.round(r.coverage * 100) })),
@@ -601,42 +787,57 @@ function render() {
       h(
         'dl.pl-kv',
         null,
-        ...kv(t('pl.sum.length'), formatDistance(e.length, units)),
-        ...kv(t('pl.sum.duration'), `${formatDuration(e.totalSeconds)} (${formatDuration(e.moveSeconds)} ${t('pl.sum.moving')})`),
-        ...kv(t('pl.sum.climb'), `↑ ${formatElevation(e.climb, units)} · ↓ ${formatElevation(e.descent, units)}`),
-        ...kv(t('pl.sum.maxSlope'), `${r.maxSlope.toFixed(1)}° / ${lim}°`),
-        ...kv(t('pl.sum.o2'), `${e.o2UsablePct.toFixed(0)}% ${t('pl.sum.ofUsable')} (${(e.o2Kg * 1000).toFixed(0)} g)`),
-        ...kv(t('pl.sum.pnr'), formatDistance(r.pnr, units)),
-        ...kv(t('pl.sum.shelter'), formatDuration(r.shelterS)),
-        ...kv(t('pl.sum.range'), formatDistance(rangeRadius(R.params), units)),
-        ...kv(t('pl.sum.comms'), `${Math.round(r.coverage * 100)}%`),
-        ...kv(t('pl.sum.dose'), `${r.doseMsv.toFixed(3)} mSv`)
+        ...kv(t('pl.sum.length'), formatDistance(e.length, units), 'distance'),
+        ...kv(
+          t('pl.sum.duration'),
+          `${formatDuration(e.totalSeconds)} (${formatDuration(e.moveSeconds)} ${t('pl.sum.moving')})`,
+          'duration'
+        ),
+        ...kv(t('pl.sum.climb'), `↑ ${formatElevation(e.climb, units)} · ↓ ${formatElevation(e.descent, units)}`, 'climb'),
+        ...kv(t('pl.sum.maxSlope'), `${r.maxSlope.toFixed(1)}° / ${lim}°`, 'maxSlope'),
+        ...kv(t('pl.sum.o2'), `${e.o2UsablePct.toFixed(0)}% ${t('pl.sum.ofUsable')} (${(e.o2Kg * 1000).toFixed(0)} g)`, 'o2'),
+        ...kv(t('pl.sum.pnr'), formatDistance(r.pnr, units), 'pnr'),
+        ...kv(t('pl.sum.shelter'), formatDuration(r.shelterS), 'shelter'),
+        ...kv(t('pl.sum.range'), formatDistance(rangeRadius(R.params), units), 'range'),
+        ...kv(t('pl.sum.comms'), `${Math.round(r.coverage * 100)}%`, 'comms'),
+        ...(Number.isFinite(r.scienceCoverage)
+          ? kv(t('pl.sum.scienceCoverage'), `${Math.round(r.scienceCoverage * 100)}%`, 'scienceCoverage')
+          : []),
+        ...kv(t('pl.sum.dose'), `${r.doseMsv.toFixed(3)} mSv`, 'dose')
       )
     );
+    if (r.why) root.append(renderWhy(r.why));
     profileCanvas = h('canvas.pl-profile', { attrs: { width: 320, height: 120, role: 'img', 'aria-label': t('pl.profile') } });
+    const profHelp = helpButton('profile', { targets: () => [profileCanvas], label: t('pl.profile') });
+    profHelp.classList.add('genie-q-float');
     root.append(
-      profileCanvas,
+      h('div.rt-profile-wrap', null, profileCanvas, profHelp),
       h(
         'div.pl-score',
-        { attrs: { title: t('pl.score.help') } },
+        { attrs: { title: t('pl.score.help'), 'data-genie-target': '' } },
         h('strong', null, `${t('pl.score.total')}: ${r.score.total}`),
-        h('span', null, `🛡 ${t('pl.score.safety')} ${r.score.safety}`),
-        h('span', null, `🔬 ${t('pl.score.science')} ${r.score.science}`),
-        h('span', null, `⚡ ${t('pl.score.efficiency')} ${r.score.efficiency}`)
+        helpButton('score', { label: t('pl.score.total') }),
+        h('span', null, `${t('pl.score.safety')} ${r.score.safety}`),
+        h('span', null, `${t('pl.score.science')} ${r.score.science}`),
+        h('span', null, `${t('pl.score.efficiency')} ${r.score.efficiency}`)
       ),
       h(
         'div.pl-row',
         null,
-        btn(`💾 ${t('pl.save')}`, saveRoute),
-        btn('⬇ GeoJSON', exportGeoJSON),
-        btn(`☑ ${t('pl.checklist.short')}`, () => download('eva-checklist.md', checklistText(), 'text/markdown'))
+        btn(['save', t('pl.save')], saveRoute),
+        btn(['download', 'GeoJSON'], exportGeoJSON),
+        btn(['list', t('pl.checklist.short')], () => download('eva-checklist.md', checklistText(), 'text/markdown'))
       )
     );
     drawProfile();
   }
 
   // --- Suit parameters
-  const params = h('details.rt-details', null, h('summary', null, `⚙️ ${t('pl.paramsTitle')}`));
+  const params = h(
+    'details.rt-details',
+    null,
+    h('summary', null, `${t('pl.paramsTitle')} `, helpButton('params', { label: t('pl.paramsTitle') }))
+  );
   const fields = [
     ['walkSpeed', 0.3, 2, 0.05, 'm/s'],
     ['roverSpeed', 0.5, 6, 0.1, 'm/s'],
@@ -678,7 +879,7 @@ function render() {
 
   // --- Saved routes
   const saved = load(ROUTES_KEY, []);
-  const plans = h('details.rt-details', null, h('summary', null, `💾 ${t('rt.saved')} (${saved.length})`));
+  const plans = h('details.rt-details', null, h('summary', null, `${t('rt.saved')} (${saved.length})`));
   if (!saved.length) plans.append(h('p.pl-meta', null, t('pl.plans.none')));
   else
     plans.append(
@@ -714,8 +915,8 @@ function render() {
                 h(
                   'td',
                   null,
-                  btn('📂', () => openRoute(p), 'pl-icon', { title: t('pl.plans.open') }),
-                  btn('✕', () => deleteRoute(p.id), 'pl-icon', { title: t('pl.remove') })
+                  btn(['chevron'], () => openRoute(p), 'pl-icon', { title: t('pl.plans.open') }),
+                  btn(['close'], () => deleteRoute(p.id), 'pl-icon', { title: t('pl.remove') })
                 )
               )
             )
@@ -734,22 +935,22 @@ function renderEnvironment(base) {
   const rs = sunriseSunset(R.timeMs, lat, lon);
   const elev = base.h ?? R.result?.path?.[0]?.h ?? orbitView.terrain.heightAt(lat, lon) ?? 0;
   const irr = solarIrradiance(sun.helioDistanceAU);
-  const box = h('details.rt-details', { attrs: { open: true } }, h('summary', null, `🌡 ${t('pl.env.title')}`));
+  const box = h('details.rt-details', { attrs: { open: true } }, h('summary', null, `${t('pl.env.title')}`));
   box.append(
     h(
       'dl.pl-kv',
       null,
-      ...kv(t('pl.env.ltst'), `${formatHours(lt.ltst)} (LMST ${formatHours(lt.lmst)})`),
-      ...kv(t('pl.env.season'), `${t(`season.${seasonKey(sun.Ls, lat)}`)} · Ls ${sun.Ls.toFixed(1)}°`),
-      ...kv(t('pl.env.sun'), `${t('pl.env.elev')} ${sun.elevation.toFixed(1)}° · az ${sun.azimuth.toFixed(0)}°`),
-      ...kv(t('pl.env.daylight'), `${formatHours(rs.sunrise)} → ${formatHours(rs.sunset)}`),
-      ...kv(t('pl.env.irradiance'), `${Math.round(irr)} W/m² (${t('pl.env.toa')})`),
-      ...kv(t('pl.env.pressure'), `≈ ${formatPressure(surfacePressure(elev, sun.Ls))} (${t('pl.estimate')})`),
-      ...kv(t('pl.env.dose'), `${surfaceDoseRate(elev).toFixed(2)} mSv/${t('pl.env.day')} (RAD, ${t('pl.estimate')})`)
+      ...kv(t('pl.env.ltst'), `${formatHours(lt.ltst)} (LMST ${formatHours(lt.lmst)})`, 'ltst'),
+      ...kv(t('pl.env.season'), `${t(`season.${seasonKey(sun.Ls, lat)}`)} · Ls ${sun.Ls.toFixed(1)}°`, 'season'),
+      ...kv(t('pl.env.sun'), `${t('pl.env.elev')} ${sun.elevation.toFixed(1)}° · az ${sun.azimuth.toFixed(0)}°`, 'sun'),
+      ...kv(t('pl.env.daylight'), `${formatHours(rs.sunrise)} → ${formatHours(rs.sunset)}`, 'daylight'),
+      ...kv(t('pl.env.irradiance'), `${Math.round(irr)} W/m² (${t('pl.env.toa')})`, 'irradiance'),
+      ...kv(t('pl.env.pressure'), `≈ ${formatPressure(surfacePressure(elev, sun.Ls))} (${t('pl.estimate')})`, 'pressure'),
+      ...kv(t('pl.env.dose'), `${surfaceDoseRate(elev).toFixed(2)} mSv/${t('pl.env.day')} (RAD, ${t('pl.estimate')})`, 'doseRate')
     )
   );
-  if (isDustSeason(sun.Ls)) box.append(h('p.pl-warn', null, `🌪 ${t('pl.env.dustSeason')}`));
-  if (R.weather === 'error') box.append(h('p.pl-meta', null, `🌡 MEDA: ${t('pl.unavailable')}`));
+  if (isDustSeason(sun.Ls)) box.append(h('p.pl-warn', null, `${t('pl.env.dustSeason')}`));
+  if (R.weather === 'error') box.append(h('p.pl-meta', null, `MEDA: ${t('pl.unavailable')}`));
   else if (Array.isArray(R.weather)) {
     const w = R.weather.find((s) => s.maxTemp != null || s.pressure != null);
     if (w)
@@ -757,7 +958,7 @@ function renderEnvironment(base) {
         h(
           'p.pl-meta',
           null,
-          `🌡 MEDA (Perseverance) · Sol ${w.sol} · ${w.date}: `,
+          `MEDA (Perseverance) · Sol ${w.sol} · ${w.date}: `,
           w.minTemp != null ? `${formatTemperature(w.minTemp, units)} / ` : '',
           w.maxTemp != null ? `${formatTemperature(w.maxTemp, units)} · ` : '',
           w.pressure != null ? formatPressure(w.pressure) : '',
@@ -765,14 +966,14 @@ function renderEnvironment(base) {
         )
       );
   }
-  if (R.space === 'error') box.append(h('p.pl-meta', null, `☀️ DONKI: ${t('pl.unavailable')}`));
+  if (R.space === 'error') box.append(h('p.pl-meta', null, `DONKI: ${t('pl.unavailable')}`));
   else if (R.space) {
     const n = R.space.sep.length;
     box.append(
       h(
         n ? 'p.pl-warn' : 'p.pl-meta',
         null,
-        `☀️ DONKI (30 ${t('pl.env.days')}): ${t('pl.env.sep', { n })} · ${t('pl.env.flares', { n: R.space.flares.length })}`,
+        `DONKI (30 ${t('pl.env.days')}): ${t('pl.env.sep', { n })} · ${t('pl.env.flares', { n: R.space.flares.length })}`,
         n ? ` — ${t('pl.env.sepAdvice')}` : ''
       )
     );
@@ -831,7 +1032,7 @@ function drawProfile() {
   ctx.setLineDash([]);
   const units = getSettings().units;
   ctx.fillStyle = '#ddd';
-  ctx.font = '11px "Share Tech Mono", monospace';
+  ctx.font = '11px IBM Plex Mono, monospace';
   ctx.fillText(formatElevation(max - pad, units), 2, 14);
   ctx.fillText(formatElevation(min + pad, units), 2, H - 20);
   ctx.fillText('0', 40, H - 4);
@@ -853,7 +1054,7 @@ export function routeCard() {
   const lim = R.params.mode === 'rover' ? R.params.maxSlopeRover : R.params.maxSlopeWalk;
   return {
     title: t('snap.routeTitle'),
-    subtitle: `🏠 ${formatLatLon(b.lat, b.lon, 4)} · ${t('snap.stops', { n: R.points.length - 1 })} · ${mode} · ${
+    subtitle: `BASE ${formatLatLon(b.lat, b.lon, 4)} · ${t('snap.stops', { n: R.points.length - 1 })} · ${mode} · ${
       R.crew < 2 ? t('pl.crew.solo') : t('pl.crew.pair')
     }`,
     rows: [
@@ -865,6 +1066,7 @@ export function routeCard() {
       [t('pl.sum.pnr'), formatDistance(r.pnr, units)],
       [t('pl.sum.shelter'), formatDuration(r.shelterS)],
       [t('pl.sum.comms'), `${Math.round(r.coverage * 100)}%`],
+      ...(Number.isFinite(r.scienceCoverage) ? [[t('pl.sum.scienceCoverage'), `${Math.round(r.scienceCoverage * 100)}%`]] : []),
       [t('pl.sum.dose'), `${r.doseMsv.toFixed(3)} mSv`],
       [t('pl.score.total'), `${r.score.total}/100`],
       [t('rt.ltst'), `${formatHours(lt.ltst)} · Ls ${sun.Ls.toFixed(0)}°`],
@@ -872,4 +1074,109 @@ export function routeCard() {
     ],
     profile: { pts: r.profile, pnr: r.pnr, stops: r.stopD.slice(0, R.points.length - 1) },
   };
+}
+
+/** "Why this route?": the chosen path against the straight line, factor by factor. */
+function renderWhy(why) {
+  const units = getSettings().units;
+  const { route, direct, layers } = why;
+  const box = h(
+    'details.rt-details.rt-why',
+    { attrs: { open: true } },
+    h('summary', null, `${t('rt.why.title')} `, helpButton('why', { targets: () => [box], label: t('rt.why.title') }))
+  );
+  const saved = direct.cost > 0 ? Math.round((1 - route.cost / direct.cost) * 100) : 0;
+  let verdict;
+  if (direct.blocked > 0) verdict = t('rt.why.blocked', { d: formatDistance(direct.blocked, units) });
+  else if (saved > 3) verdict = t('rt.why.better', { pct: saved });
+  else verdict = t('rt.why.straight');
+  box.append(h('p.pl-meta', null, verdict));
+  const row = (label, a, b, better) =>
+    h(
+      'tr',
+      null,
+      h('th', { attrs: { scope: 'row' } }, label),
+      h('td', { class: better === 0 ? 'win' : '' }, a),
+      h('td', { class: better === 1 ? 'win' : '' }, b)
+    );
+  const cmp = (x, y) => (Math.abs(x - y) < 1e-6 ? -1 : x < y ? 0 : 1);
+  const rows = [
+    row(t('pl.sum.length'), formatDistance(route.length, units), formatDistance(direct.length, units), cmp(route.length, direct.length)),
+    row(t('rt.why.time'), formatDuration(route.seconds), formatDuration(direct.seconds), cmp(route.seconds, direct.seconds)),
+    row(t('rt.why.climb'), formatElevation(route.climb, units), formatElevation(direct.climb, units), cmp(route.climb, direct.climb)),
+    row(
+      t('rt.why.forbidden'),
+      formatDistance(route.blocked, units),
+      formatDistance(direct.blocked, units),
+      cmp(route.blocked, direct.blocked)
+    ),
+  ];
+  for (const [k, v] of Object.entries(route.factors)) {
+    if (k === 'sand' && !layers.sand) continue;
+    if (k === 'comms' && !layers.comms) continue;
+    if (k === 'rocks' && !layers.rocks) continue;
+    rows.push(row(t(`rt.factor.${k}`), formatDistance(v, units), formatDistance(direct.factors[k], units), cmp(v, direct.factors[k])));
+  }
+  rows.push(
+    row(t('rt.why.cost'), Math.round(route.cost).toLocaleString(), Math.round(direct.cost).toLocaleString(), cmp(route.cost, direct.cost))
+  );
+  box.append(
+    h(
+      'div.pl-table-wrap',
+      null,
+      h(
+        'table.pl-compare.rt-why-table',
+        null,
+        h(
+          'thead',
+          null,
+          h(
+            'tr',
+            null,
+            h('th', null, ''),
+            h('th', { attrs: { scope: 'col' } }, t('rt.why.route')),
+            h('th', { attrs: { scope: 'col' } }, t('rt.why.direct'))
+          )
+        ),
+        h('tbody', null, ...rows)
+      )
+    ),
+    h('p.pl-meta', null, t('rt.why.note'))
+  );
+  return box;
+}
+
+/** Read-only view of the route state (GENIE explanations). */
+export function routeState() {
+  return R;
+}
+
+/** Compact summary for the guide's "walk" step (null before a route exists). */
+export function getRouteSummary() {
+  const r = R.result;
+  if (!r) return null;
+  return {
+    length: r.evaluation.length,
+    seconds: r.evaluation.totalSeconds,
+    o2Pct: r.evaluation.o2UsablePct,
+    dose: r.doseMsv,
+    pnr: r.pnr,
+    score: r.score,
+    coverage: r.scienceCoverage,
+    mode: R.params.mode,
+    points: R.points.map((p) => ({ lat: p.lat, lon: p.lon, label: p.label, science: p.science })),
+    failed: r.failedLeg,
+    tooLong: r.tooLong,
+  };
+}
+
+/** Start the first-person rehearsal of the current route. */
+export function walkCurrentRoute() {
+  if (!R.result) return false;
+  nav.traverse({
+    route: R.result,
+    points: R.points.map((p) => ({ ...p })),
+    heightAtLL: (la, lo) => orbitView.terrain.heightAt(la, lo),
+  });
+  return true;
 }

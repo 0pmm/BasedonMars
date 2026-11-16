@@ -129,7 +129,7 @@ export const orbitView = {
 
     onResize((w, h) => {
       this.camera.aspect = w / h;
-      this.camera.updateProjectionMatrix();
+      this.applyFraming();
     });
 
     return Promise.all([this.planet.loadTexture(quality.planetTexture), this.planet.loadDetail()]).then(() => {});
@@ -200,42 +200,58 @@ export const orbitView = {
   updateLabelOcclusion(alt) {
     this.labelFrame = (this.labelFrame || 0) + 1;
     if (!this.labelList || this.labelFrame % 30 === 0) {
+      // every child of the planet frame except the (huge) terrain tile tree
       this.labelList = [];
-      this.frame.traverse((o) => o.isSprite && o.userData.isLabel && this.labelList.push(o));
+      for (const root of this.frame.children)
+        if (root !== this.terrain.group) root.traverse((o) => o.isSprite && o.userData.isLabel && this.labelList.push(o));
     }
+    const shown = (o) => {
+      for (let p = o; p && p !== this.frame; p = p.parent) if (!p.visible) return false;
+      return true;
+    };
+    // the (cheap) fade runs every frame; the occlusion test 10–15 times per second
+    const test = this.labelFrame % 4 === 0;
     const cam = this.camera.position;
-    const centre = this.frame.getWorldPosition(new THREE.Vector3());
+    const centre = this.labelCentre || (this.labelCentre = new THREE.Vector3());
+    this.frame.getWorldPosition(centre);
+    const oc = new THREE.Vector3().subVectors(cam, centre);
     const r = ORBIT.planetRadius * 0.992;
+    const c = oc.lengthSq() - r * r;
     const a = new THREE.Vector3();
     const d = new THREE.Vector3();
     const ray = this.labelRay || (this.labelRay = new THREE.Raycaster());
     const near = alt < 400e3;
-    const meshes = near ? this.terrain.visibleMeshes() : null;
-    this.labelList.forEach((s, k) => {
-      s.getWorldPosition(a);
-      d.subVectors(a, cam);
-      const len = d.length();
-      d.divideScalar(len);
-      // segment–sphere test
-      const oc = new THREE.Vector3().subVectors(cam, centre);
-      const b = oc.dot(d);
-      const c = oc.lengthSq() - r * r;
-      const disc = b * b - c;
-      let hidden = false;
-      if (disc > 0) {
-        const t = -b - Math.sqrt(disc);
-        hidden = t > 0 && t < len;
+    const meshes = near && test ? this.terrain.visibleMeshes() : null;
+    let rays = 0;
+    for (const s of this.labelList) {
+      if (!shown(s)) continue;
+      if (test) {
+        s.getWorldPosition(a);
+        d.subVectors(a, cam);
+        const len = d.length();
+        d.divideScalar(len);
+        // segment–sphere test: is the planet between the camera and the anchor?
+        const b = oc.dot(d);
+        const disc = b * b - c;
+        let hidden = false;
+        if (disc > 0) {
+          const t = -b - Math.sqrt(disc);
+          hidden = t > 0 && t < len;
+        }
+        s.userData.planetHidden = hidden;
+        if (!near) s.userData.terrainHidden = false;
+        else if (!hidden && meshes.length && rays < 3 && ((s.id + this.labelFrame) & 7) === 0) {
+          // a few terrain rays per test, round-robin over the labels
+          rays++;
+          ray.set(cam, d);
+          ray.far = len * 0.995;
+          s.userData.terrainHidden = ray.intersectObjects(meshes, false).length > 0;
+        }
       }
-      if (!hidden && near && meshes.length && (k + this.labelFrame) % 6 === 0) {
-        ray.set(cam, d);
-        ray.far = len * 0.995;
-        s.userData.terrainHidden = ray.intersectObjects(meshes, false).length > 0;
-      }
-      if (!near) s.userData.terrainHidden = false;
-      const target = hidden || s.userData.terrainHidden ? 0 : 1;
+      const target = s.userData.planetHidden || s.userData.terrainHidden ? 0 : 1;
       s.material.opacity += (target - s.material.opacity) * 0.35;
       s.material.visible = s.material.opacity > 0.03;
-    });
+    }
   },
 
   render() {
@@ -250,6 +266,24 @@ export const orbitView = {
       this.markers.setSelected(null);
       this.setHover(null);
     }
+  },
+
+  /**
+   * Start screen framing: shift the projection so the planet sits to the
+   * right of the title block (the camera itself does not move).
+   */
+  setStartFraming(on) {
+    this.startFraming = on;
+    this.applyFraming();
+  },
+
+  applyFraming() {
+    const c = this.camera;
+    const w = innerWidth;
+    const h = innerHeight;
+    if (this.startFraming && w > 800) c.setViewOffset(w, h, -w * 0.2, 0, w, h);
+    else c.clearViewOffset();
+    c.updateProjectionMatrix();
   },
 
   setAutoRotate(on) {

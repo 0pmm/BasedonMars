@@ -16,6 +16,7 @@ import { formatHours } from '../geo/mars24.js';
 import { formatDistance, formatElevation } from '../core/units.js';
 import { formatClock } from '../ui/hud.js';
 import { traverse, TIME_SCALES } from './traverse.js';
+import { helpButton } from '../ui/genie.js';
 
 let nav = { show: async () => true, exitTo: () => {} };
 let active = false;
@@ -44,9 +45,34 @@ export function initTraverseApp(navigation) {
     ['#btn-faster', 'speedUp'],
   ])
     document.querySelector(id)?.addEventListener('click', () => emit('input:action', { action }));
+  // GENIE "?" on the helmet HUD
+  const hud = [
+    ['#o2-gauge', 'hudO2'],
+    ['#hud-dose', 'hudDose'],
+    ['#hud-timer', 'hudClock'],
+    ['#objective-status', 'hudGround'],
+    ['#objective-distance', 'hudEnv'],
+  ];
+  for (const [sel, topic] of hud) {
+    const el = document.querySelector(sel);
+    const host = el?.closest('.hud-stat, .gauge') || el;
+    if (!host) continue;
+    const b = helpButton(topic, { targets: () => [host] });
+    b.classList.add('genie-q-hud');
+    host.after(b);
+  }
+  // the rehearsal pauses while GENIE talks
+  on('genie:open', () => {
+    if (!active || !traverse.world) return;
+    input.exitPointerLock();
+    if (!traverse.world.paused) traverse.world.paused = 'genie';
+  });
+  on('genie:close', () => {
+    if (traverse.world?.paused === 'genie') traverse.world.paused = false;
+  });
   on('traverse:mode', ({ mode }) => {
     const b = document.querySelector('#mobile-controls [data-action="interact"] span');
-    if (b) b.textContent = mode === 'follow' ? '🚶' : '🧭';
+    if (b) b.textContent = mode === 'follow' ? '▶' : '◎';
   });
 }
 
@@ -116,7 +142,7 @@ export function traverseCard() {
   const ground = i.chunk?.layer ? `${i.chunk.layer.instrument.replace(/ \(.*\)/, '')} ${i.chunk.mpp.toFixed(1)} m/px` : t('tr.noImage');
   return {
     title: t('snap.evaTitle'),
-    subtitle: `📍 ${formatLatLon(i.latLon.lat, i.latLon.lon, 5)} · ${i.mode === 'follow' ? t('tr.followOn') : t('tr.freeOn')} · ×${i.timeScale}`,
+    subtitle: `${formatLatLon(i.latLon.lat, i.latLon.lon, 5)} · ${i.mode === 'follow' ? t('tr.followOn') : t('tr.freeOn')} · ×${i.timeScale}`,
     rows: [
       [t('snap.progress'), `${formatDistance(i.s, units)} / ${formatDistance(i.total, units)}`],
       [t('snap.evaClock'), formatClock(i.evaSeconds)],
@@ -126,11 +152,16 @@ export function traverseCard() {
       [t('snap.slope'), `${i.slope.toFixed(1)}°`],
       [t('pl.env.ltst'), formatHours(i.ltst)],
       i.nextStop
-        ? [t('snap.nextStop'), `${i.nextStop.science ? '🔬' : '🚩'} ${i.nextStop.i} · ${formatDistance(i.nextStop.dist, units)}`]
+        ? [t('snap.nextStop'), `${i.nextStop.science ? '◆' : '▲'}${i.nextStop.i} · ${formatDistance(i.nextStop.dist, units)}`]
         : [t('snap.base'), formatDistance(i.base.dist, units)],
       [t('tr.ground'), ground],
       [t('snap.walked'), formatDistance(i.walked, units)],
     ],
     profile: { pts: w.route.profile, pnr: w.route.pnr, stops: w.stops.map((s) => s.d), marker: i.s },
   };
+}
+
+/** Latest HUD values (GENIE explanations). */
+export function lastTraverseInfo() {
+  return lastInfo;
 }

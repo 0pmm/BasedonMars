@@ -50,125 +50,110 @@
     <!-- ============ START SCREEN ============ -->
     <main id="start-screen" hidden>
       <div class="start-content" id="start-content" tabindex="-1">
-        <div class="start-emblem" aria-hidden="true">
-          <div class="ring"></div>
-          <div class="core"></div>
-        </div>
-        <p class="start-eyebrow" data-i18n="start.eyebrow">Interplanetary Survival Guide</p>
-        <h1>MARS EXPLORER</h1>
-        <p class="start-subtitle" data-i18n="start.subtitle">Martian map · Survival guide</p>
+        <p class="start-eyebrow">
+          <span class="eyebrow-code">MX-03</span> <span data-i18n="start.eyebrow">Interplanetary Survival Guide</span>
+        </p>
+        <h1 class="start-title">Mars Explorer</h1>
         <p class="lead" data-i18n="start.lead"></p>
-        <div class="start-divider" aria-hidden="true"></div>
-        <div class="start-actions">
-          <button class="start-btn primary" id="btn-start-explore" type="button">
-            <span aria-hidden="true">🪐</span> <span data-i18n="start.explore">Explore Mars and plan a route</span>
-            <small data-i18n="start.exploreDetail"></small>
-            <span class="btn-arrow" aria-hidden="true">➜</span>
-          </button>
-        </div>
+        <button type="button" class="tour-btn" id="btn-tour">
+          <span class="tour-btn-icon" data-icon="play" data-icon-size="14"></span>
+          <span class="tour-btn-text"
+            ><strong data-i18n="tour.start">Take the tour with GENIE</strong
+            ><small data-i18n="tour.startSub">A 2-minute walk through the app</small></span
+          >
+        </button>
+        <p class="start-question" data-i18n="start.objectiveQuestion">What do you want to discover on Mars?</p>
+        <div class="start-objectives" id="start-objectives"></div>
         <nav class="start-links" data-i18n-attr="aria-label:start.more">
           <button type="button" class="link-btn" data-open="settings">
-            <span aria-hidden="true">⚙️</span> <span data-i18n="menu.settings">Settings</span>
+            <span data-icon="settings" data-icon-size="15"></span> <span data-i18n="menu.settings">Settings</span>
           </button>
           <button type="button" class="link-btn" data-open="help">
-            <span aria-hidden="true">⌨️</span> <span data-i18n="menu.controls">Controls</span>
+            <span data-icon="keyboard" data-icon-size="15"></span> <span data-i18n="menu.controls">Controls</span>
           </button>
           <button type="button" class="link-btn" data-open="sources">
-            <span aria-hidden="true">📚</span> <span data-i18n="menu.sources">Sources &amp; methodology</span>
+            <span data-icon="book" data-icon-size="15"></span> <span data-i18n="menu.sources">Sources &amp; methodology</span>
           </button>
           <button type="button" class="link-btn" id="btn-language">
-            <span aria-hidden="true">🌐</span> <span id="language-label">EN</span>
+            <span class="mono" id="language-label">EN</span>
           </button>
         </nav>
         <p class="disclaimer" data-i18n="start.disclaimer"></p>
       </div>
+      <div class="start-coords mono" aria-hidden="true"><span>R 3396.2 km</span><span>g 3.72 m/s²</span><span>SOL 24h39m35s</span></div>
     </main>
 
     <!-- ============ DASHBOARD (free exploration) ============ -->
     <header id="app-header" hidden>
       <div class="brand">
-        <span class="dot" aria-hidden="true"></span>
-        <div>
-          <p class="brand-title">MARS EXPLORER</p>
-          <p class="brand-sub" data-i18n="start.subtitle">Martian map · Survival guide</p>
-        </div>
+        <span class="brand-mark" aria-hidden="true"></span>
+        <p class="brand-title">Mars Explorer</p>
       </div>
+      <button
+        class="objective-chip"
+        id="btn-objective"
+        type="button"
+        data-i18n-attr="aria-label:guide.changeObjective;title:guide.changeObjective"
+      >
+        <span class="chip-icon" id="header-objective-icon" aria-hidden="true"></span>
+        <span class="chip-text"
+          ><small data-i18n="guide.objective">Objective</small><span id="header-objective-name">Ancient life</span></span
+        >
+      </button>
+      <section class="telemetry" id="telemetry" data-i18n-attr="aria-label:tele.title">
+        <div class="tele-item"><span class="t-label">SOL</span><span class="t-value" id="tele-sol">–</span></div>
+        <div class="tele-item">
+          <span class="t-label" data-i18n="tele.time">Local time</span><span class="t-value" id="tele-time">–</span>
+        </div>
+        <div class="tele-item"><span class="t-label" data-i18n="tele.wind">Season</span><span class="t-value" id="tele-wind">–</span></div>
+        <div class="tele-item opt">
+          <span class="t-label" data-i18n="tele.temp">Temperature</span><span class="t-value" id="tele-temp">–</span>
+        </div>
+        <div class="tele-item opt">
+          <span class="t-label" data-i18n="tele.pressure">Pressure</span><span class="t-value" id="tele-pressure">–</span>
+        </div>
+        <div class="tele-item">
+          <span class="t-label" data-i18n="tele.radiation">Radiation</span><span class="t-value" id="tele-rad">–</span>
+        </div>
+        <span class="tele-note" id="tele-note"></span>
+        <span class="sim-badge" data-i18n="badge.simulated" hidden>Simulated</span>
+      </section>
       <div class="header-right">
-        <button class="icon-btn" id="btn-home" type="button" data-i18n-attr="aria-label:menu.home;title:menu.home">
-          <span aria-hidden="true">🏠</span>
-        </button>
-        <button class="icon-btn" type="button" data-open="settings" data-i18n-attr="aria-label:menu.settings;title:menu.settings">
-          <span aria-hidden="true">⚙️</span>
+        <button class="icon-btn" type="button" data-open="sources" data-i18n-attr="aria-label:menu.sources;title:menu.sources">
+          <span data-icon="book"></span>
         </button>
         <button class="icon-btn" type="button" data-open="help" data-i18n-attr="aria-label:menu.controls;title:menu.controls">
-          <span aria-hidden="true">⌨️</span>
+          <span data-icon="keyboard"></span>
         </button>
-        <button class="icon-btn" type="button" data-open="sources" data-i18n-attr="aria-label:menu.sources;title:menu.sources">
-          <span aria-hidden="true">📚</span>
+        <button class="icon-btn" type="button" data-open="settings" data-i18n-attr="aria-label:menu.settings;title:menu.settings">
+          <span data-icon="settings"></span>
         </button>
-        <button class="cta-header-btn" id="btn-open-route" type="button">
-          <span aria-hidden="true">🧭</span> <span data-i18n="menu.route">Plan a route</span>
+        <button class="icon-btn" id="btn-home" type="button" data-i18n-attr="aria-label:menu.home;title:menu.home">
+          <span data-icon="home"></span>
         </button>
       </div>
     </header>
 
     <div class="mobile-panel-toggles" id="mobile-toggles" hidden>
       <button type="button" class="pill-btn" data-panel="layers-panel">
-        <span aria-hidden="true">🗂️</span> <span data-i18n="panel.layers">Layers</span>
+        <span data-icon="layers"></span> <span data-i18n="panel.layers">Layers</span>
       </button>
       <button type="button" class="pill-btn" data-panel="right-panel">
-        <span aria-hidden="true">🧭</span> <span data-i18n="tab.route">Route</span>
+        <span data-icon="route"></span> <span data-i18n="guide.title">Mission guide</span>
       </button>
     </div>
 
-    <aside class="panel" id="layers-panel" hidden data-i18n-attr="aria-label:panel.layers">
-      <div class="panel-head">
-        <h2 class="panel-title"><span aria-hidden="true">🗂️</span> <span data-i18n="panel.layers">Data layers</span></h2>
-        <button type="button" class="close-sheet" data-close-panel data-i18n-attr="aria-label:common.close">
-          <span aria-hidden="true">✕</span>
-        </button>
-      </div>
-      <div id="layers-list"></div>
-      <div id="legend-box">
-        <div class="legend-head">
-          <span id="legend-title"></span>
-          <span class="badge" id="legend-badge" data-i18n="badge.illustrative" hidden>Illustrative</span>
-        </div>
-        <div class="legend-bar" id="legend-gradient"></div>
-        <div class="legend-labels"><span id="legend-min"></span><span id="legend-max"></span></div>
-        <p class="legend-source" id="legend-source"></p>
-        <p class="globe-cursor" id="globe-cursor" aria-live="off"></p>
-      </div>
-      <div class="control-grid">
-        <button
-          class="icon-btn on"
-          id="btn-rotate"
-          type="button"
-          aria-pressed="true"
-          data-i18n-attr="aria-label:ctrl.rotate;title:ctrl.rotate"
-        >
-          <span aria-hidden="true">🔄</span>
-        </button>
-        <button class="icon-btn" id="btn-reset" type="button" data-i18n-attr="aria-label:ctrl.reset;title:ctrl.reset">
-          <span aria-hidden="true">🎯</span>
-        </button>
+    <aside class="tool-rail" id="layers-panel" hidden data-i18n-attr="aria-label:panel.layers">
+      <div class="rail-group">
         <button
           class="icon-btn"
-          id="btn-labels"
+          id="btn-layers"
           type="button"
-          aria-pressed="false"
-          data-i18n-attr="aria-label:ctrl.labels;title:ctrl.labels"
+          aria-expanded="false"
+          aria-controls="layer-flyout"
+          data-i18n-attr="aria-label:panel.layers;title:panel.layers"
         >
-          <span aria-hidden="true">🏷️</span>
-        </button>
-        <button
-          class="icon-btn"
-          id="btn-orbiters"
-          type="button"
-          aria-pressed="false"
-          data-i18n-attr="aria-label:ctrl.orbiters;title:ctrl.orbiters"
-        >
-          <span aria-hidden="true">🛰️</span>
+          <span data-icon="layers"></span>
         </button>
         <button
           class="icon-btn on"
@@ -177,113 +162,151 @@
           aria-pressed="true"
           data-i18n-attr="aria-label:ctrl.markers;title:ctrl.markers"
         >
-          <span aria-hidden="true">📍</span>
+          <span data-icon="pin"></span>
+        </button>
+        <button
+          class="icon-btn"
+          id="btn-labels"
+          type="button"
+          aria-pressed="false"
+          data-i18n-attr="aria-label:ctrl.labels;title:ctrl.labels"
+        >
+          <span data-icon="label"></span>
+        </button>
+        <button
+          class="icon-btn"
+          id="btn-orbiters"
+          type="button"
+          aria-pressed="false"
+          data-i18n-attr="aria-label:ctrl.orbiters;title:ctrl.orbiters"
+        >
+          <span data-icon="satellite"></span>
+        </button>
+      </div>
+      <div class="rail-group">
+        <button
+          class="icon-btn on"
+          id="btn-rotate"
+          type="button"
+          aria-pressed="true"
+          data-i18n-attr="aria-label:ctrl.rotate;title:ctrl.rotate"
+        >
+          <span data-icon="rotate"></span>
         </button>
         <button class="icon-btn" id="btn-north" type="button" data-i18n-attr="aria-label:ctrl.north;title:ctrl.north">
-          <span aria-hidden="true">🧭</span>
+          <span data-icon="compass"></span>
         </button>
+        <button class="icon-btn" id="btn-reset" type="button" data-i18n-attr="aria-label:ctrl.reset;title:ctrl.reset">
+          <span data-icon="target"></span>
+        </button>
+      </div>
+      <div class="rail-group">
         <button class="icon-btn" id="btn-screenshot" type="button" data-i18n-attr="aria-label:ctrl.screenshot;title:ctrl.screenshot">
-          <span aria-hidden="true">📸</span>
+          <span data-icon="camera"></span>
         </button>
         <button class="icon-btn" id="btn-fullscreen" type="button" data-i18n-attr="aria-label:ctrl.fullscreen;title:ctrl.fullscreen">
-          <span aria-hidden="true">⛶</span>
+          <span data-icon="expand"></span>
         </button>
       </div>
+      <div class="layer-flyout" id="layer-flyout" hidden>
+        <div class="panel-head">
+          <h2 class="panel-title" data-i18n="panel.layers">Data layers</h2>
+          <button type="button" class="close-sheet" data-close-panel data-i18n-attr="aria-label:common.close">
+            <span data-icon="close"></span>
+          </button>
+        </div>
+        <div id="layers-list"></div>
+      </div>
     </aside>
+
+    <div class="map-readout" id="map-readout" hidden>
+      <div id="legend-box">
+        <div class="legend-head">
+          <span id="legend-title"></span>
+          <span class="badge" id="legend-badge" data-i18n="badge.illustrative" hidden>Illustrative</span>
+        </div>
+        <div class="legend-bar" id="legend-gradient"></div>
+        <div class="legend-labels"><span id="legend-min"></span><span id="legend-max"></span></div>
+        <p class="legend-source" id="legend-source"></p>
+      </div>
+      <p class="globe-cursor mono" id="globe-cursor" aria-live="off"></p>
+    </div>
 
     <aside class="panel" id="right-panel" hidden data-i18n-attr="aria-label:panel.locations">
-      <div class="panel-head tabs" role="tablist">
-        <button
-          class="tab-btn active"
-          type="button"
-          role="tab"
-          id="tab-btn-route"
-          aria-controls="tab-route"
-          aria-selected="true"
-          data-tab="route"
-          data-i18n="tab.route"
-        >
-          Route
-        </button>
-        <button
-          class="tab-btn"
-          type="button"
-          role="tab"
-          id="tab-btn-poi"
-          aria-controls="tab-poi"
-          aria-selected="false"
-          data-tab="poi"
-          data-i18n="tab.locations"
-        >
-          Locations
-        </button>
-        <button
-          class="tab-btn"
-          type="button"
-          role="tab"
-          id="tab-btn-info"
-          aria-controls="tab-info"
-          aria-selected="false"
-          data-tab="info"
-          data-i18n="tab.details"
-        >
-          Details
-        </button>
-        <button
-          class="tab-btn"
-          type="button"
-          role="tab"
-          id="tab-btn-compare"
-          aria-controls="tab-compare"
-          aria-selected="false"
-          data-tab="compare"
-          data-i18n="tab.compare"
-        >
-          Compare
-        </button>
-        <button type="button" class="close-sheet" data-close-panel data-i18n-attr="aria-label:common.close">
-          <span aria-hidden="true">✕</span>
-        </button>
+      <div class="guide-head">
+        <div class="guide-objective">
+          <span class="guide-objective-icon" id="guide-objective-icon" aria-hidden="true"></span>
+          <div class="guide-objective-text">
+            <small data-i18n="guide.objective">Objective</small>
+            <strong id="guide-objective-name">Ancient life</strong>
+          </div>
+          <button class="guide-change" id="btn-change-objective" type="button" data-i18n="guide.change">Change</button>
+          <button type="button" class="close-sheet" data-close-panel data-i18n-attr="aria-label:common.close">
+            <span data-icon="close"></span>
+          </button>
+        </div>
+        <div class="guide-steps" role="tablist" data-i18n-attr="aria-label:guide.title">
+          <button
+            class="guide-step-btn"
+            type="button"
+            role="tab"
+            data-step="objective"
+            aria-selected="true"
+            data-i18n="guide.step.objective"
+            data-n="01"
+          >
+            Objective
+          </button>
+          <button
+            class="guide-step-btn"
+            type="button"
+            role="tab"
+            data-step="site"
+            aria-selected="false"
+            data-i18n="guide.step.site"
+            data-n="02"
+          >
+            Site
+          </button>
+          <button
+            class="guide-step-btn"
+            type="button"
+            role="tab"
+            data-step="route"
+            aria-selected="false"
+            data-i18n="guide.step.route"
+            data-n="03"
+          >
+            Route
+          </button>
+          <button
+            class="guide-step-btn"
+            type="button"
+            role="tab"
+            data-step="try"
+            aria-selected="false"
+            data-i18n="guide.step.try"
+            data-n="04"
+          >
+            Walk
+          </button>
+        </div>
       </div>
-      <section class="tab-content active" id="tab-route" role="tabpanel" aria-labelledby="tab-btn-route">
-        <div id="route-panel"></div>
-      </section>
-      <section class="tab-content" id="tab-poi" role="tabpanel" aria-labelledby="tab-btn-poi">
-        <label class="search">
-          <span class="sr-only" data-i18n="search.label">Search locations</span>
-          <input id="poi-search" type="search" autocomplete="off" data-i18n-attr="placeholder:search.placeholder" />
-        </label>
-        <div class="filter-chips" id="type-filters" role="group" data-i18n-attr="aria-label:search.filter"></div>
-        <p class="result-count" id="poi-count" aria-live="polite"></p>
-        <ul id="poi-list" class="poi-list"></ul>
-      </section>
-      <section class="tab-content" id="tab-info" role="tabpanel" aria-labelledby="tab-btn-info">
-        <p id="info-empty" class="empty" data-i18n="details.empty"></p>
-        <div id="info-content" hidden></div>
-      </section>
-      <section class="tab-content" id="tab-compare" role="tabpanel" aria-labelledby="tab-btn-compare">
-        <div id="compare-content"></div>
-      </section>
+      <div class="guide-body">
+        <section class="guide-step" data-step="objective" id="guide-step-objective" aria-label="Objective">
+          <div id="guide-objective"></div>
+        </section>
+        <section class="guide-step" data-step="site" id="guide-step-site" aria-label="Site">
+          <div id="guide-site"></div>
+        </section>
+        <section class="guide-step" data-step="route" id="guide-step-route" aria-label="Route">
+          <div id="route-panel"></div>
+        </section>
+        <section class="guide-step" data-step="try" id="guide-step-try" aria-label="Walk">
+          <div id="guide-try"></div>
+        </section>
+      </div>
     </aside>
-
-    <section class="panel" id="telemetry" hidden data-i18n-attr="aria-label:tele.title">
-      <span class="badge sim-badge" data-i18n="badge.simulated" data-i18n-attr="title:tele.simulatedHint">Simulated</span>
-      <div class="tele-item"><span class="t-label">SOL</span><span class="t-value" id="tele-sol">–</span></div>
-      <div class="tele-item">
-        <span class="t-label" data-i18n="tele.time">Local time</span><span class="t-value" id="tele-time">–</span>
-      </div>
-      <div class="tele-item">
-        <span class="t-label" data-i18n="tele.temp">Temperature</span><span class="t-value" id="tele-temp">–</span>
-      </div>
-      <div class="tele-item opt"><span class="t-label" data-i18n="tele.wind">Wind</span><span class="t-value" id="tele-wind">–</span></div>
-      <div class="tele-item opt">
-        <span class="t-label" data-i18n="tele.pressure">Pressure</span><span class="t-value" id="tele-pressure">–</span>
-      </div>
-      <div class="tele-item note"><span class="t-value small" id="tele-note"></span></div>
-      <div class="tele-item warn">
-        <span class="t-label" data-i18n="tele.radiation">Radiation</span><span class="t-value" id="tele-rad">–</span>
-      </div>
-    </section>
 
     <div id="focus-hud" role="status" hidden>
       <span class="focus-indicator" aria-hidden="true"></span>
@@ -299,7 +322,7 @@
       <div class="hud-stack">
         <div class="hud-top panel">
           <button class="icon-btn" id="btn-surface-exit" type="button" data-i18n-attr="aria-label:hud.exit;title:hud.exit">
-            <span aria-hidden="true">⬆️</span>
+            <span data-icon="close"></span>
           </button>
           <div class="hud-location">
             <span id="hud-location">–</span>
@@ -319,16 +342,18 @@
             <span class="gauge-track"><span class="gauge-fill" id="o2-fill"></span></span>
             <span class="gauge-value" id="o2-value">100%</span>
           </div>
-          <div class="hud-stat" data-i18n-attr="title:hud.dose"><span aria-hidden="true">☢️</span> <span id="hud-dose">0.00</span></div>
-          <div class="hud-stat" data-i18n-attr="title:hud.timer"><span aria-hidden="true">⏱️</span> <span id="hud-timer">0:00</span></div>
+          <div class="hud-stat" data-i18n-attr="title:hud.dose"><span class="hud-k mono">mSv</span> <span id="hud-dose">0.00</span></div>
+          <div class="hud-stat" data-i18n-attr="title:hud.timer">
+            <span data-icon="clock" data-icon-size="14"></span> <span id="hud-timer">0:00</span>
+          </div>
           <button class="icon-btn" id="btn-slower" type="button" data-i18n-attr="aria-label:tr.slower;title:tr.slower">
-            <span aria-hidden="true">⏪</span>
+            <span data-icon="rewind"></span>
           </button>
           <button class="icon-btn" id="btn-faster" type="button" data-i18n-attr="aria-label:tr.faster;title:tr.faster">
-            <span aria-hidden="true">⏩</span>
+            <span data-icon="forward"></span>
           </button>
           <button class="icon-btn" id="btn-pause" type="button" data-i18n-attr="aria-label:hud.pause;title:hud.pause">
-            <span aria-hidden="true">⏸</span>
+            <span data-icon="pause"></span>
           </button>
         </div>
 
@@ -358,16 +383,16 @@
         <div class="look-zone" id="look-zone" aria-hidden="true"></div>
         <div class="mobile-buttons">
           <button type="button" class="m-btn" data-action="interact" data-i18n-attr="aria-label:hud.interact">
-            <span aria-hidden="true">🚶</span>
+            <span data-icon="walk"></span>
           </button>
           <button type="button" class="m-btn" data-action="jump" data-i18n-attr="aria-label:hud.jump">
-            <span aria-hidden="true">⤒</span>
+            <span data-icon="plus"></span>
           </button>
           <button type="button" class="m-btn" data-action="sprint" data-toggle data-i18n-attr="aria-label:hud.sprint">
-            <span aria-hidden="true">⚡</span>
+            <span data-icon="bolt"></span>
           </button>
           <button type="button" class="m-btn" data-action="speedUp" data-i18n-attr="aria-label:tr.faster">
-            <span aria-hidden="true">⏩</span>
+            <span data-icon="forward"></span>
           </button>
         </div>
       </div>

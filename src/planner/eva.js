@@ -30,6 +30,7 @@ export const DEFAULT_EVA = Object.freeze({
   maxEvaHours: 7,
   commsMastHeight: 6, // habitat antenna height (m)
   mode: 'walk', // walk | rover
+  priority: 'safety', // safety | balanced | fast (route cost weights, routing.js)
 });
 
 const O2_KG_PER_W_H = 0.000247;
@@ -155,15 +156,28 @@ export function pointOfNoReturn(profile, p = DEFAULT_EVA) {
 
 /**
  * Score a plan 0..100 in three dimensions (gamified, but every input is a
- * real quantity of the plan).
+ * real quantity of the plan). When a science coverage is supplied (0..1, from
+ * planner/scout.js) it replaces the stop-count proxy.
  */
-export function scorePlan({ evaluation, maxSlope, slopeLimit, commsCoverage, stops, scienceStops, straightLine, doseMsv }) {
+export function scorePlan({
+  evaluation,
+  maxSlope,
+  slopeLimit,
+  commsCoverage,
+  stops,
+  scienceStops,
+  scienceCoverage,
+  straightLine,
+  doseMsv,
+}) {
   const o2 = evaluation.withinO2 ? Math.min(1, (100 - evaluation.o2UsablePct) / 40 + 0.5) : 0;
   const slope = maxSlope <= slopeLimit ? 1 - (maxSlope / slopeLimit) * 0.5 : 0;
   const comms = Math.max(0, Math.min(1, commsCoverage));
   const dose = Math.max(0, 1 - doseMsv / 1.5);
   const safety = Math.round(100 * (0.4 * o2 + 0.3 * slope + 0.2 * comms + 0.1 * dose));
-  const science = Math.round(100 * Math.min(1, (scienceStops * 0.25 + Math.min(stops, 6) * 0.05) / 1));
+  const science = Number.isFinite(scienceCoverage)
+    ? Math.round(100 * Math.max(0, Math.min(1, scienceCoverage)))
+    : Math.round(100 * Math.min(1, (scienceStops * 0.25 + Math.min(stops, 6) * 0.05) / 1));
   const efficiency = straightLine > 0 && evaluation.length > 0 ? Math.round(100 * Math.min(1, straightLine / evaluation.length)) : 0;
   const total = Math.round(safety * 0.5 + science * 0.3 + efficiency * 0.2);
   return { safety, science, efficiency, total };

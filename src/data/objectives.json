@@ -1,0 +1,110 @@
+{
+  "version": 1,
+  "attributes": {
+    "hydration": {
+      "labelKey": "science.attr.hydration",
+      "source": "CRISM / OMEGA hydrated-mineral detections (NASA/JPL Mars Trek)",
+      "kind": "derived"
+    },
+    "aqueousContext": {
+      "labelKey": "science.attr.aqueousContext",
+      "source": "Published mission and orbital studies",
+      "kind": "literature"
+    },
+    "unitDiversity": {
+      "labelKey": "science.attr.unitDiversity",
+      "source": "USGS SIM 3292 geology + published stratigraphy",
+      "kind": "literature"
+    },
+    "exposure": {
+      "labelKey": "science.attr.exposure",
+      "source": "TES dust cover / albedo + published images",
+      "kind": "literature"
+    },
+    "trafficability": {
+      "labelKey": "science.attr.trafficability",
+      "source": "Terrain slope/roughness (MOLA/HRSC/CTX) + published rover experience",
+      "kind": "literature"
+    },
+    "power": {
+      "labelKey": "science.attr.power",
+      "source": "Latitude + TES dust + Mars24 insolation",
+      "kind": "derived"
+    },
+    "comms": {
+      "labelKey": "science.attr.comms",
+      "source": "Orbiter relay geometry (approximate)",
+      "kind": "derived"
+    },
+    "shielding": {
+      "labelKey": "science.attr.shielding",
+      "source": "Atmospheric depth from elevation (RAD-based model)",
+      "kind": "derived"
+    },
+    "waterAccess": {
+      "labelKey": "science.attr.waterAccess",
+      "source": "Hydrated minerals / ground ice studies",
+      "kind": "literature"
+    }
+  },
+  "objectives": [
+    {
+      "id": "geology",
+      "icon": "🪨",
+      "name": {
+        "en": "Geological history",
+        "pt": "História geológica"
+      },
+      "question": {
+        "en": "How did Mars form and change over billions of years?",
+        "pt": "Como Marte se formou e mudou ao longo de bilhões de anos?"
+      },
+      "short": {
+        "en": "Read the planet's history in its rocks: layers, ancient water, volcanoes and climate change.",
+        "pt": "Ler a história do planeta nas rochas: camadas, água antiga, vulcões e mudanças de clima."
+      },
+      "targetKinds": ["diversity", "strata", "aqueous"],
+      "weights": {
+        "unitDiversity": 0.3,
+        "aqueousContext": 0.2,
+        "hydration": 0.15,
+        "exposure": 0.2,
+        "trafficability": 0.1,
+        "power": 0.025,
+        "comms": 0.025
+      },
+      "success": {
+        "en": "Measure a stratigraphic section spanning more than one geological unit.",
+        "pt": "Medir uma seção estratigráfica que atravesse mais de uma unidade geológica."
+      }
+    },
+    {
+      "id": "survival",
+      "icon": "🛡️",
+      "name": {
+        "en": "Human survival",
+        "pt": "Sobrevivência humana"
+      },
+      "question": {
+        "en": "Where would it make sense to build a human base?",
+        "pt": "Onde faria sentido montar uma base humana?"
+      },
+      "short": {
+        "en": "Find a place with water to extract, sunlight for power, protection from radiation, flat ground and radio contact.",
+        "pt": "Achar um lugar com água para extrair, sol para energia, proteção contra radiação, chão plano e contato por rádio."
+      },
+      "targetKinds": ["survival", "access", "water"],
+      "weights": {
+        "waterAccess": 0.25,
+        "power": 0.2,
+        "shielding": 0.2,
+        "trafficability": 0.2,
+        "comms": 0.15
+      },
+      "success": {
+        "en": "Complete a Marswalk with oxygen, time, dose and radio margins inside the suit limits.",
+        "pt": "Completar um Marswalk com oxigênio, tempo, dose e rádio dentro dos limites do traje."
+      }
+    }
+  ]
+}

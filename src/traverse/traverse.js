@@ -178,7 +178,7 @@ export const traverse = {
           fog: false,
         })
       );
-      const label = createLabelSprite(`${p.science ? '🔬' : '🚩'} ${i}`, p.science ? '#ffcc33' : '#4fd1ff');
+      const label = createLabelSprite(`${p.science ? '◆' : '▲'} ${i}`, p.science ? '#ffcc33' : '#4fd1ff');
       label.material.depthTest = true; // on the ground, hills hide the stop labels
       const g = new THREE.Group();
       g.add(pillar, label);

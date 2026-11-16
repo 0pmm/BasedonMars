@@ -1,6 +1,8 @@
 /** English UI strings. Keys must match src/i18n/pt.js (checked by tests). */
 import v3 from './v3.en.js';
 import routeTexts from './route.en.js';
+import genieTexts from './genie.en.js';
+import recTexts from './rec.en.js';
 
 export default {
   'a11y.skip': 'Skip to content',
@@ -113,11 +115,11 @@ export default {
   'log.data': 'Data',
   'log.system': 'System',
   'log.layer': 'Data layer: {layer}',
-  'log.focus': '🎯 Focused on {name}',
-  'log.orbiters': '🛰️ Showing Phobos, Deimos, orbiters and rovers.',
+  'log.focus': 'Focused on {name}',
+  'log.orbiters': 'Showing Phobos, Deimos, orbiters and rovers.',
   'log.explore': 'Free exploration mode active.',
-  'log.landed': '📍 Landed at {name} (chapter {n}/{total})',
-  'log.surface': '🚶 Surface walk: {name}',
+  'log.landed': 'Landed at {name} (chapter {n}/{total})',
+  'log.surface': 'Surface walk: {name}',
   'log.textureLoaded': 'Orbital texture loaded ({res}).',
   'log.textureFallback': 'Orbital texture unavailable: using procedural map.',
   'logmsg.relay': 'Signal from Perseverance received via MRO relay…',
@@ -137,7 +139,7 @@ export default {
   'photo.title': 'Photo',
   'photo.searching': "Searching NASA's image library…",
   'photo.none': 'No image found',
-  'photo.noneCaption': '📡 Real image unavailable right now.',
+  'photo.noneCaption': 'Real image unavailable right now.',
   'photo.error': 'Could not reach the NASA image library.',
   'photo.source': 'Source: NASA Image and Video Library',
   'photo.gallery': 'Photo gallery',
@@ -206,7 +208,7 @@ export default {
   'story.chapterShort': 'Chapter {n}',
   'story.minimize': 'Minimize',
   'story.expand': 'Expand',
-  'story.skip': 'Skip text ⏭',
+  'story.skip': 'Skip text ',
   'story.leg': 'Leg distance',
   'story.total': 'Total distance',
   'story.sample': 'Sample',
@@ -401,9 +403,9 @@ export default {
   'tut.moveTouch': 'Use the left joystick to walk.',
   'tut.look': 'Click the view and move the mouse to look around.',
   'tut.lookTouch': 'Drag on the right side of the screen to look around.',
-  'tut.compass': 'The 🎯 on the compass and minimap points to your objective.',
+  'tut.compass': 'The on the compass and minimap points to your objective.',
   'tut.interact': 'At the beacon, hold {key} to collect the sample.',
-  'tut.interactTouch': 'At the beacon, hold the ✋ button to collect the sample.',
+  'tut.interactTouch': 'At the beacon, hold the button to collect the sample.',
   'tut.skip': 'Skip tutorial',
 
   'caption.collect': 'sample collected chime',
@@ -444,4 +446,6 @@ export default {
   'about.resetDone': 'Progress erased.',
   ...v3,
   ...routeTexts,
+  ...genieTexts,
+  ...recTexts,
 };

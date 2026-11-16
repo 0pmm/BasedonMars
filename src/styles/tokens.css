@@ -1,38 +1,51 @@
-/* Design tokens: colours, typography, spacing. High-contrast and font
-   scale are applied by toggling classes / variables on <html>. */
+/* Design tokens.
+   Palette: carbon / graphite surfaces, Martian terracotta and burnt orange
+   for the few things that need attention, warm greys for text. Saturated
+   colours are reserved for state (go / caution / no-go) and selection.
+   Type: IBM Plex Sans for reading, Plex Sans Condensed for labels and
+   headings, Plex Mono for every number, coordinate and code. */
 :root {
-  --bg: #03050a;
-  --panel: rgba(8, 12, 22, 0.88);
-  --panel-solid: #0a0f1c;
-  --panel-border: rgba(255, 107, 53, 0.38);
-  --orange: #ff6b35;
-  --orange-glow: #ff9d5c;
-  --cyan: #4fd1ff;
-  --green: #39ff88;
-  --red: #ff3b5c;
-  --yellow: #ffcc33;
-  --text: #e6ecf5;
-  --muted: #a7b2c4; /* AA contrast on --panel */
-  --focus: #ffd166;
-  --radius: 14px;
-  --font-body: 'Rajdhani', system-ui, sans-serif;
-  --font-display: 'Orbitron', system-ui, sans-serif;
-  --font-mono: 'Share Tech Mono', ui-monospace, monospace;
+  --bg: #0a0b0d;
+  --bg-2: #101215;
+  --panel: rgba(14, 15, 18, 0.9);
+  --panel-solid: #121418;
+  --panel-raised: #171a1f;
+  --panel-border: rgba(255, 255, 255, 0.08);
+  --line: rgba(255, 255, 255, 0.07);
+  --line-strong: rgba(255, 255, 255, 0.14);
+  /* accents (names kept for compatibility: --orange is the brand terracotta) */
+  --orange: #c8553d;
+  --orange-glow: #e07a4f;
+  --accent-soft: rgba(200, 85, 61, 0.14);
+  --cyan: #8bb8c6; /* selection / information, desaturated */
+  --green: #6bb38a; /* go */
+  --red: #e0524b; /* no-go */
+  --yellow: #d8a64a; /* caution */
+  --text: #e8e4de;
+  --muted: #a39d95; /* AA on --panel */
+  --dim: #77726b;
+  --focus: #f0c27a;
+  --radius: 4px;
+  --font-body: 'IBM Plex Sans', system-ui, sans-serif;
+  --font-display: 'IBM Plex Sans Condensed', 'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
   --font-scale: 1;
+  --header-h: 48px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-left: env(safe-area-inset-left, 0px);
-  --gutter: 18px;
+  --gutter: 14px;
 }
 
 html.hc {
   --panel: #000;
   --panel-solid: #000;
   --panel-border: #fff;
+  --line: rgba(255, 255, 255, 0.4);
   --text: #fff;
   --muted: #e6e6e6;
-  --orange: #ffa64d;
-  --cyan: #7fe3ff;
+  --orange: #ff8a5c;
+  --cyan: #9fe3ff;
   --focus: #ffff00;
 }

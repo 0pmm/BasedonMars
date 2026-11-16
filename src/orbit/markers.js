@@ -12,23 +12,26 @@ const GLOW_SCALE = 4.5;
 export function createLabelSprite(text, color = '#ffffff') {
   const c = document.createElement('canvas');
   const ctx = c.getContext('2d');
-  const font = '600 34px Rajdhani, sans-serif';
+  // Instrument-style tag: dark plate, thin accent bar in the category colour,
+  // warm white text (colour is never the only cue: the text is always there)
+  const font = '500 30px IBM Plex Sans, sans-serif';
   ctx.font = font;
-  const w = Math.ceil(ctx.measureText(text).width) + 28;
+  const w = Math.ceil(ctx.measureText(text).width) + 30;
   c.width = w;
-  c.height = 52;
+  c.height = 48;
   ctx.font = font;
-  ctx.fillStyle = 'rgba(5,8,15,0.78)';
-  ctx.strokeStyle = color;
-  ctx.lineWidth = 2;
-  const r = 10;
+  ctx.fillStyle = 'rgba(12,13,15,0.84)';
   ctx.beginPath();
-  ctx.roundRect(1, 1, w - 2, 50, r);
+  ctx.roundRect(0, 0, w, 48, 4);
   ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,0.14)';
+  ctx.lineWidth = 1.5;
   ctx.stroke();
-  ctx.fillStyle = '#ffffff';
+  ctx.fillStyle = color;
+  ctx.fillRect(0, 6, 4, 36);
+  ctx.fillStyle = '#e8e4de';
   ctx.textBaseline = 'middle';
-  ctx.fillText(text, 14, 27);
+  ctx.fillText(text, 16, 25);
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
   // Constant on-screen size (sizeAttenuation off): readable both from far
@@ -45,7 +48,7 @@ export function createLabelSprite(text, color = '#ffffff') {
     })
   );
   sprite.userData.isLabel = true; // hidden as a whole when its anchor is occluded (see orbitView)
-  const height = 0.032;
+  const height = 0.028;
   sprite.scale.set((w / 52) * height, height, 1);
   sprite.center.set(0.5, -0.6);
   sprite.renderOrder = 10;
@@ -82,7 +85,7 @@ export function createMarkers(parent, pois, types, glowTexture) {
     glow.scale.set(GLOW_SCALE, GLOW_SCALE, 1);
     const hit = new THREE.Mesh(hitGeo, hitMat);
     hit.userData.owner = g;
-    const label = createLabelSprite(`${types[poi.type].icon} ${poi.name}`, color);
+    const label = createLabelSprite(poi.name, color);
     label.visible = false;
     g.add(core, glow, hit, label);
     g.userData = { poi, core, glow, label, phase: Math.random() * 6 };
@@ -159,7 +162,7 @@ export function createRoverMarkers(parent, rovers) {
     const p = latLonToXYZ(r.lat, r.lon, ORBIT.planetRadius + 0.5);
     const m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped: false }));
     m.position.set(p.x, p.y, p.z);
-    const label = createLabelSprite(`🤖 ${r.name}`, '#ffffff');
+    const label = createLabelSprite(r.name, '#ffffff');
     label.scale.multiplyScalar(0.8);
     label.position.copy(m.position);
     group.add(m, label);

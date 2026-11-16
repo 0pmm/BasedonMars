@@ -2,6 +2,66 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 
+## [3.3.0] — não publicado
+
+Integração com a branch `feat/guia-objetivos` e nova identidade visual.
+
+### Adicionado
+
+- **Tour com o GENIE** na tela inicial: 8 passos curtos que mostram o app inteiro, com o resto da tela desfocado
+- **Local recomendado**: o passo Local mostra só a melhor escolha para o objetivo, com os motivos em linguagem
+  simples e os pontos de atenção; "Trocar" abre uma janela sobre a tela desfocada com todas as opções e filtros
+  ("Destacar por": geral ou cada critério). O mesmo vale para as zonas
+- GENIE em mais lugares: aptidão, cada critério do local, filtros, zonas, verificação de pouso, objetivo, camadas
+  e comparação de perfis de rota
+- Objetivos de exploração (História geológica e Sobrevivência humana) com ranking de locais,
+  zonas de minerais hidratados e plano automático de Marswalk (vindos da branch `feat/guia-objetivos`)
+- **Exploração livre**: quarta opção, sem objetivo científico, que leva direto ao mapa para marcar qualquer rota
+- Comparação dos três perfis de rota no painel e no mapa (linhas alternativas)
+- Conjunto de ícones de linha próprio (sem emojis) e tipografia IBM Plex Sans / Condensed / Mono
+
+### Corrigido
+
+- Quando nenhum caminho cabia inteiro dentro do limite de declive (paredes de cânion, borda de cratera), o trecho
+  era desenhado em **linha reta** por cima do relevo. Agora a rota contorna tudo o que dá e, se ainda precisar,
+  cruza só o menor e mais suave trecho possível, marcado em vermelho no mapa e explicado no painel
+- O limite de rugosidade (0,6 m, pensado para pedras em grade de ~1 m) bloqueava regiões inteiras em trechos
+  longos (grade de dezenas a centenas de metros). Agora ele acompanha o tamanho da célula; o declive continua
+  sendo verificado em toda escala
+- A simplificação final da rota podia cortar cantos por dentro de terreno proibido; agora são usados os pontos
+  já verificados
+- Nomes das camadas apareciam com "undefined" na frente
+
+### Removido
+
+- Objetivo "Vida antiga" (as missões que o tinham continuam com esse registro histórico)
+
+### Alterado
+
+- Rotas: perfis Rápido, Equilibrado e Seguro com regras de perigo próprias (limite efetivo, margem de terreno
+  proibido, início do risco), A\* em 16 direções e endireitamento do caminho — rotas diferentes entre si,
+  desvios mais curtos e curvas mais naturais
+- Tela do mapa reorganizada: barra superior fina com objetivo e telemetria em uma linha, ferramentas em um trilho
+  à esquerda, camadas em um painel que abre sob demanda, legenda e coordenadas junto ao mapa, guia à direita com
+  etapas numeradas e listas com divisórias em vez de cartões
+- Tela inicial alinhada à esquerda com o globo à direita; rótulos do globo em estilo de instrumento
+
+## [3.2.0] — não publicado
+
+### Adicionado
+
+- GENIE, o robô assistente: botões "?" ao lado dos indicadores (rota, ambiente, camadas, telemetria e capacete);
+  ao clicar, o resto da tela fica desfocado, o indicador ganha destaque e o GENIE explica com os valores atuais
+- Prioridade da rota (Segurança, Equilíbrio, Rapidez) e o quadro "Por que esta rota?", comparando com a linha reta
+- Custo da rota com esforço (O₂ na subida) e risco: declive perto do limite, rugosidade, rochas, solo solto
+  (THEMIS noite), rádio com a base e sombra
+
+### Corrigido
+
+- A rota passava por cima de morros em vez de contorná-los (custo só de tempo e área de busca estreita)
+- A declividade sumia ao afastar o zoom (agora vem dos triângulos da malha da NASA, com o máximo por pixel)
+- A linha da rota podia ficar enterrada sob o relevo menos detalhado ao afastar o zoom
+
 ## [3.1.0] — não publicado
 
 Uma ferramenta só: **olhar Marte inteiro, planejar uma rota entre quaisquer pontos e percorrê-la em primeira pessoa**.
@@ -20,6 +80,13 @@ Uma ferramenta só: **olhar Marte inteiro, planejar uma rota entre quaisquer pon
   caminhante: blocos ativos, blocos carregando escondidos pela neblina e blocos descartados; relógio da EVA,
   O₂, dose e Sol avançando com o tempo da EVA; fator de tempo ×1 a ×200; modo livre
 - Ao sair da primeira pessoa, o globo volta exatamente ao ponto onde o caminhante estava
+- Aba "Ciência": três objetivos (vida antiga, história geológica, sobrevivência humana) com pesos e fontes
+  visíveis, ranking de 12 locais e ficha com os fatores que mais ajudam e mais limitam cada local
+- Zonas candidatas geradas a partir de todas as detecções de minerais hidratados do CRISM/OMEGA, com selo de
+  confiança, distinção entre explorado e nunca visitado, e verificação de pouso ao vivo sobre o relevo real
+- "Planejar Marswalk": paradas científicas escolhidas pelo objetivo, modo a pé ou rover decidido pela
+  distância e cobertura científica da rota no painel da EVA
+- Scripts `build-science-data.mjs` e `build-prospects.mjs` para regerar os dados a partir do Mars Trek
 
 ### Removido
 

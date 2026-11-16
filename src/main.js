@@ -4,12 +4,13 @@
  * rehearsal; owns navigation between app states and the animation loop.
  */
 // Self-hosted fonts, Latin subset only (covers English and Portuguese)
-import '@fontsource/orbitron/latin-500.css';
-import '@fontsource/orbitron/latin-700.css';
-import '@fontsource/rajdhani/latin-500.css';
-import '@fontsource/rajdhani/latin-600.css';
-import '@fontsource/rajdhani/latin-700.css';
-import '@fontsource/share-tech-mono/latin-400.css';
+import '@fontsource/ibm-plex-sans/latin-400.css';
+import '@fontsource/ibm-plex-sans/latin-500.css';
+import '@fontsource/ibm-plex-sans/latin-600.css';
+import '@fontsource/ibm-plex-sans-condensed/latin-500.css';
+import '@fontsource/ibm-plex-sans-condensed/latin-600.css';
+import '@fontsource/ibm-plex-mono/latin-400.css';
+import '@fontsource/ibm-plex-mono/latin-500.css';
 import './styles/tokens.css';
 import './styles/base.css';
 import './styles/screens.css';
@@ -18,6 +19,10 @@ import './styles/surface.css';
 import './styles/dialogs.css';
 import './styles/responsive.css';
 import './styles/planner.css';
+import './styles/science.css';
+import './styles/shell.css';
+import './styles/guide.css';
+import { hydrateIcons } from './ui/icons.js';
 
 import { $, $$ } from './core/dom.js';
 import { on, emit } from './core/events.js';
@@ -36,11 +41,16 @@ import { initTraverseApp, startTraverse, updateTraverse, exitTraverse, isTravers
 import { getSurfaceTextures } from './surface/textures.js';
 import { initRoutePanel, updateRouteLayer, setRouteLayerVisible, routeDebug, routeCard } from './ui/routePanel.js';
 import { openSnapshot } from './ui/snapshot.js';
+import { initGenieTopics } from './ui/genieTopics.js';
 import { formatLatLon } from './geo/mars.js';
 import { formatDistance } from './core/units.js';
 import { openSources } from './ui/sources.js';
 import { marsTime, localSolarTime, formatHours, seasonKey } from './geo/mars24.js';
-import { initDashboard, updateDashboard, showDashboardUI, handleDashboardEscape, openDetails, switchTab } from './ui/dashboard.js';
+import { initDashboard, updateDashboard, showDashboardUI, handleDashboardEscape, openSheet } from './ui/dashboard.js';
+import { initGuide, objectiveCards } from './ui/guide.js';
+import { initTour, startTour } from './ui/tour.js';
+import { suppressZones } from './orbit/zonesLayer.js';
+import { startMission, setStep, setObjective, selectSite, selectZone } from './core/mission.js';
 import { initHud, showHud } from './ui/hud.js';
 import { initMobileControls } from './ui/mobileControls.js';
 import { openSettings, openHelp } from './ui/menus.js';
@@ -48,6 +58,10 @@ import { isModalOpen } from './ui/modal.js';
 import { toast } from './ui/feedback.js';
 import pois from './data/pois.json';
 import sites from './data/sites.json';
+import scienceSites from './data/scienceSites.json';
+import prospects from './data/prospects.json';
+
+const SCIENCE_SITES = scienceSites.sites;
 
 const canvas = /** @type {HTMLCanvasElement} */ ($('#scene'));
 let quality;
@@ -117,6 +131,8 @@ function applyStateUI(state) {
   showHud(isSurfaceState(state));
   setRouteLayerVisible(state === 'dashboard');
   orbitView.setDashboardMode(state === 'dashboard');
+  orbitView.setStartFraming(state === 'start');
+  suppressZones(state !== 'dashboard');
   orbitView.controls.enabled = state === 'start' || state === 'dashboard';
   if (state === 'start' || state === 'dashboard') {
     audio.startMusic();
@@ -214,9 +230,9 @@ function bindGlobal() {
   addEventListener('pointerdown', unlockAudio, { once: false, passive: true });
   addEventListener('keydown', unlockAudio, { passive: true });
 
-  $('#btn-start-explore').addEventListener('click', () => {
-    openDashboard();
-    switchTab('route');
+  $('#btn-objective')?.addEventListener('click', () => {
+    setStep('objective');
+    openSheet('right-panel');
   });
   $('#btn-language').addEventListener('click', () => {
     const codes = LANGUAGES.map((l) => l.code);
@@ -298,11 +314,28 @@ function loop(now) {
 /* ============================ Deep links ============================ */
 function handleDeepLink() {
   const link = parseHash();
-  const site = link.site && sites.find((s) => s.id === link.site);
+  const scienceSite = link.site ? SCIENCE_SITES.find((s) => s.id === link.site) : null;
+  if (link.objective || link.zone || link.step || scienceSite) {
+    if (link.objective) setObjective(link.objective);
+    if (scienceSite) selectSite(scienceSite.id);
+    if (link.zone) selectZone(link.zone);
+    if (link.step) setStep(link.step);
+    openDashboard();
+    const zone = link.zone ? prospects.zones.find((z) => z.id === link.zone) : null;
+    const target = scienceSite || zone;
+    if (target) {
+      orbitView.flyTo(
+        { lat: target.lat, lon: target.lon, range: zone ? Math.max(12000, zone.radiusKm * 2400) : 6000, heading: 0, tilt: 55 },
+        2600
+      );
+    }
+    return true;
+  }
+  const site = link.site ? sites.find((s) => s.id === link.site) : null;
   const at = site ? { lat: site.lat, lon: site.lon } : link.at;
   if (at) {
     openDashboard();
-    switchTab('route');
+    setStep('route');
     orbitView.flyTo({ lat: at.lat, lon: at.lon, range: 3000, heading: 0, tilt: 55 }, 2600);
     return true;
   }
@@ -310,8 +343,8 @@ function handleDeepLink() {
     const poi = pois.find((p) => p.id === link.poi);
     if (poi) {
       openDashboard();
-      openDetails(poi);
-      setTimeout(() => orbitView.focusPoi(poi.id), 300);
+      if (SCIENCE_SITES.some((s) => s.id === poi.id)) selectSite(poi.id);
+      orbitView.flyTo({ lat: poi.lat, lon: poi.lon, range: 6000, heading: 0, tilt: 55 }, 2600);
       return true;
     }
   }
@@ -319,10 +352,22 @@ function handleDeepLink() {
 }
 
 /* ============================ Boot ============================ */
+function buildStartObjectives() {
+  const picker = $('#start-objectives');
+  if (!picker) return;
+  picker.replaceChildren(
+    ...objectiveCards((id) => {
+      startMission(id);
+      openDashboard();
+    })
+  );
+}
+
 async function boot() {
   initSettings();
   initErrorCapture();
   applyGlobalSettings({ language: true });
+  hydrateIcons();
 
   let errorMessage = null;
   try {
@@ -348,7 +393,21 @@ async function boot() {
 
     initDashboard({ goHome, screenshot });
     initRoutePanel({ traverse: (plan) => startTraverse(plan, 'dashboard') });
+    initGuide();
+    initTour({ enterMap: openDashboard, goHome });
+    $('#btn-tour')?.addEventListener('click', startTour);
+    buildStartObjectives();
+    on('language:change', buildStartObjectives);
+    on('mission:change', (m) => {
+      setHash({
+        objective: m.objective,
+        step: m.step,
+        ...(m.siteId ? { site: m.siteId } : {}),
+        ...(m.zoneId ? { zone: m.zoneId } : {}),
+      });
+    });
     initHud();
+    initGenieTopics();
     mobile = initMobileControls();
     initTraverseApp({ show: showSurface, exitTo });
     bindGlobal();

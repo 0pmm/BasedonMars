@@ -28,13 +28,14 @@ function rtcLine(points, material) {
   return line;
 }
 
-export function createRouteLayer(frame, { heightAt }) {
+export function createRouteLayer(frame, { heightAt, displayedHeightAt = () => null, version = () => 0 }) {
   const group = new THREE.Group();
   group.name = 'route';
   frame.add(group);
   const pins = new THREE.Group();
   group.add(pins);
   let pathGroup = null;
+  let altGroup = null;
   let preview = null;
   let ring = null;
   let data = { points: [], path: null, color: 0x4fd1ff, ring: null };
@@ -59,7 +60,7 @@ export function createRouteLayer(frame, { heightAt }) {
       s.material.dispose();
     }
     data.points.forEach((p, i) => {
-      const label = i === 0 ? '🏠 Base' : `${p.science ? '🔬' : '🚩'} ${i}`;
+      const label = i === 0 ? 'BASE' : `${p.science ? '◆' : '▲'} ${i}`;
       const s = createLabelSprite(label, i === 0 ? '#39ff88' : p.science ? '#ffcc33' : '#4fd1ff');
       s.center.set(0.5, 0);
       s.scale.multiplyScalar(0.9);
@@ -73,7 +74,7 @@ export function createRouteLayer(frame, { heightAt }) {
   function placePins() {
     for (const s of pins.children) {
       const p = s.userData.ll;
-      const h = p.h ?? heightAt(p.lat, p.lon) ?? 0;
+      const h = Math.max(p.h ?? heightAt(p.lat, p.lon) ?? 0, displayedHeightAt(p.lat, p.lon) ?? -Infinity);
       s.position.copy(localPoint(p.lat, p.lon, h + lift * 2));
     }
   }
@@ -81,10 +82,22 @@ export function createRouteLayer(frame, { heightAt }) {
   function buildPath() {
     clearObj(pathGroup);
     clearObj(preview);
+    clearObj(altGroup);
     pathGroup = null;
     preview = null;
+    altGroup = null;
+    if (data.path?.length > 1 && data.alts?.length) {
+      // the other route profiles, thin and muted, so the difference is visible
+      altGroup = new THREE.Group();
+      for (const alt of data.alts) {
+        const pts = alt.path.map((q) => localPoint(q.lat, q.lon, Math.max(q.h, displayedHeightAt(q.lat, q.lon) ?? -Infinity) + lift * 0.9));
+        altGroup.add(rtcLine(pts, new THREE.LineBasicMaterial({ color: alt.color, transparent: true, opacity: 0.55, toneMapped: false })));
+      }
+      group.add(altGroup);
+    }
     if (data.path?.length > 1) {
-      const pts = data.path.map((q) => localPoint(q.lat, q.lon, q.h + lift));
+      // never below the tile drawn right now (coarse tiles can sit above the real path)
+      const pts = data.path.map((q) => localPoint(q.lat, q.lon, Math.max(q.h, displayedHeightAt(q.lat, q.lon) ?? -Infinity) + lift));
       pathGroup = new THREE.Group();
       pathGroup.add(
         rtcLine(pts, new THREE.LineBasicMaterial({ color: data.color, toneMapped: false })),
@@ -95,6 +108,22 @@ export function createRouteLayer(frame, { heightAt }) {
       );
       pathGroup.children[1].renderOrder = 5;
       pathGroup.userData.ghost = pathGroup.children[1];
+      // stretches over the suit limits (only when no fully safe path exists), in red on top
+      let run = [];
+      const flush = () => {
+        if (run.length > 1) {
+          const l = rtcLine(run, new THREE.LineBasicMaterial({ color: 0xe0524b, depthTest: false, toneMapped: false }));
+          l.renderOrder = 6;
+          pathGroup.add(l);
+        }
+        run = [];
+      };
+      data.path.forEach((q, i) => {
+        if (q.over || data.path[i - 1]?.over) run.push(pts[i]);
+        else flush();
+        if (!q.over) flush();
+      });
+      flush();
       group.add(pathGroup);
     } else if (data.points.length > 1) {
       // straight previews (great circles) until the route is computed
@@ -146,6 +175,7 @@ export function createRouteLayer(frame, { heightAt }) {
 
   let lastAlt = 0;
   let lastRebuild = 0;
+  let lastVersion = -1;
   return {
     group,
     /**
@@ -165,7 +195,13 @@ export function createRouteLayer(frame, { heightAt }) {
       if (pathGroup?.userData.ghost) pathGroup.userData.ghost.visible = altitudeM < 60e3;
       const want = Math.min(4000, Math.max(1.5, altitudeM * 0.003));
       const now = performance.now();
-      if ((Math.abs(Math.log(want / lift)) > 0.6 || Math.abs(Math.log(altitudeM / (lastAlt || 1))) > 0.6) && now - lastRebuild > 250) {
+      const v = version();
+      const lodChanged = v !== lastVersion && now - lastRebuild > 1200;
+      if (
+        lodChanged ||
+        ((Math.abs(Math.log(want / lift)) > 0.6 || Math.abs(Math.log(altitudeM / (lastAlt || 1))) > 0.6) && now - lastRebuild > 250)
+      ) {
+        lastVersion = v;
         lift = want;
         lastAlt = altitudeM;
         lastRebuild = now;

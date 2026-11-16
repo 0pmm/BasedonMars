@@ -32,6 +32,7 @@ import {
   sampleTileGrid,
   gridSlopes,
   needsRefine,
+  meshSlopeRaster,
 } from '../geo/tileHeights.js';
 
 export const UNITS_PER_M = ORBIT.planetRadius / MARS_SPHERE_RADIUS_M;
@@ -78,6 +79,8 @@ const FRAG = /* glsl */ `
   uniform int overlayMode;
   uniform float overlayOpacity;
   uniform float slopeLimit;
+  uniform sampler2D slopeMap;
+  uniform float hasSlopeMap;
   uniform vec2 elevRange;
   uniform float contourStep;
   uniform vec3 sunDir;
@@ -107,6 +110,8 @@ const FRAG = /* glsl */ `
   }
 
   void main() {
+    // slope from the full NASA mesh (max per pixel) when available, else from the display grid
+    float slope = hasSlopeMap > 0.5 ? texture2D(slopeMap, vUv).r * 63.75 : vSlope;
     vec3 col = texture2D(colorMap, colorXf.xy + vUv * colorXf.zw).rgb;
     // Viking colours are approximate (dark basalts turn purple-grey): keep the
     // real brightness pattern, pull the hue towards rover-image soil colour.
@@ -123,11 +128,11 @@ const FRAG = /* glsl */ `
       vec3 o = texture2D(overlayMap, overlayXf.xy + vUv * overlayXf.zw).rgb;
       col = mix(col, o, overlayOpacity);
     } else if (overlayMode == 2) {
-      col = mix(col, ramp(vSlope / (slopeLimit * 1.5)), overlayOpacity);
+      col = mix(col, ramp(slope / (slopeLimit * 1.5)), overlayOpacity);
     } else if (overlayMode == 3) {
       col = mix(col, ramp((vHeight - elevRange.x) / max(1.0, elevRange.y - elevRange.x)), overlayOpacity);
     } else if (overlayMode == 4) {
-      float over = smoothstep(slopeLimit * 0.75, slopeLimit, vSlope);
+      float over = smoothstep(slopeLimit * 0.75, slopeLimit, slope);
       col = mix(col, vec3(1.0, 0.12, 0.2), over * overlayOpacity);
     } else if (overlayMode == 5) {
       float f = abs(fract(vHeight / contourStep + 0.5) - 0.5) * contourStep;
@@ -488,6 +493,8 @@ export function createTerrainGlobe(frame) {
         overlayMode: { value: 0 },
         overlayOpacity: { value: shared.overlayOpacity },
         slopeLimit: { value: shared.slopeLimit },
+        slopeMap: { value: blank },
+        hasSlopeMap: { value: 0 },
         elevRange: { value: shared.elevRange },
         contourStep: { value: shared.contourStep },
         sunDir: { value: shared.sunDir },
@@ -549,6 +556,7 @@ export function createTerrainGlobe(frame) {
         try {
           const mesh = await fetchTerrainTile(a.z, a.x, a.y);
           heights = sampleMeshGrid(mesh, tileBounds(a.z, a.x, a.y), tile.bounds, N, TREK_HEIGHT_OFFSET_M);
+          tile.slopeRaster = meshSlopeRaster(mesh, tileBounds(a.z, a.x, a.y), tile.bounds, 128, MARS_SPHERE_RADIUS_M);
         } catch {
           heights = null;
         }
@@ -581,6 +589,16 @@ export function createTerrainGlobe(frame) {
       mesh.userData.tile = tile;
       tile.mesh = mesh;
       group.add(mesh);
+      if (tile.slopeRaster) {
+        const st = new THREE.DataTexture(tile.slopeRaster, 128, 128, THREE.RedFormat, THREE.UnsignedByteType);
+        st.magFilter = THREE.LinearFilter;
+        st.minFilter = THREE.LinearFilter;
+        st.needsUpdate = true;
+        mesh.material.uniforms.slopeMap.value = st;
+        mesh.material.uniforms.hasSlopeMap.value = 1;
+        tile.slopeTex = st;
+        tile.slopeRaster = null;
+      }
       // Colour (required), detail and overlay (optional)
       const colour = findLayer(COLOR_LAYER);
       const colourOk = await bindImagery(tile, 'color', colour, Math.min(colour.maxZ, COLOR_MAX_Z));
@@ -618,6 +636,8 @@ export function createTerrainGlobe(frame) {
       group.remove(tile.mesh);
       tile.mesh.geometry.dispose();
       tile.mesh.material.dispose();
+      tile.slopeTex?.dispose();
+      tile.slopeTex = null;
       tile.mesh = null;
     }
     tile.heights = null;
@@ -634,6 +654,8 @@ export function createTerrainGlobe(frame) {
   const tmpSphere = new THREE.Sphere();
   const tmpV = new THREE.Vector3();
   const visible = [];
+  let lastSig = 0;
+  let version = 0;
 
   function request(tile, priority) {
     if (tile.state !== 'new') return;
@@ -725,6 +747,12 @@ export function createTerrainGlobe(frame) {
       const nice = [1, 2, 5, 10].map((m) => m * mag).find((v) => v >= raw) || 10 * mag;
       shared.contourStep = nice;
     }
+    let sig = visible.length;
+    for (const t of visible) sig = (sig * 31 + t.z * 7 + t.x * 13 + t.y) % 1000000007;
+    if (sig !== lastSig) {
+      lastSig = sig;
+      version++;
+    }
     for (const t of visible) {
       t.mesh.visible = true;
       const u = t.mesh.material.uniforms;
@@ -786,6 +814,19 @@ export function createTerrainGlobe(frame) {
     heightAt(lat, lon) {
       const t = tileAt(lat, lon);
       return t?.heights ? sampleTileGrid(t.heights, N, t.bounds, lat, lon) : null;
+    },
+    /** Height (m) of the tile actually drawn at a point (what the eye sees now). */
+    displayedHeightAt(lat, lon) {
+      for (const t of visible) {
+        const b = t.bounds;
+        if (lat >= b.south && lat <= b.north && lon >= b.west && lon <= b.east && t.heights)
+          return sampleTileGrid(t.heights, N, b, lat, lon);
+      }
+      return null;
+    },
+    /** Changes whenever the set of drawn tiles changes. */
+    get version() {
+      return version;
     },
     /** Level of the finest loaded tile at a point. */
     levelAt(lat, lon) {

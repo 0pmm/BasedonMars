@@ -177,3 +177,81 @@ export function needsRefine(tileWidth, distance, screenHeight, fovRad, maxPx = 1
   const pxPerUnit = screenHeight / (2 * Math.tan(fovRad / 2) * Math.max(distance, 1e-9));
   return (tileWidth / texels) * pxPerUnit > maxPx;
 }
+
+/**
+ * Slope raster (degrees, MAX of the triangles covering each pixel) of a
+ * quantized-mesh tile, over the `target` bounds. Uses every triangle of the
+ * NASA mesh (adaptive: rugged places keep more triangles), so cliffs and
+ * crater rims stay visible on coarse, zoomed-out tiles instead of being
+ * smoothed away by the display grid.
+ * @returns {Uint8Array} px² values = slope × 4 (0..63.75°), row 0 = north
+ */
+export function meshSlopeRaster(mesh, source, target, px = 128, radius = 3396190) {
+  const out = new Uint8Array(px * px);
+  const count = mesh.u.length;
+  const span = mesh.maxHeight - mesh.minHeight;
+  const midLat = ((source.north + source.south) / 2) * (Math.PI / 180);
+  const mLat = (Math.PI * radius) / 180;
+  const mLon = mLat * Math.cos(midLat);
+  const X = new Float64Array(count);
+  const Y = new Float64Array(count);
+  const Z = new Float64Array(count);
+  const gx = new Float64Array(count);
+  const gy = new Float64Array(count);
+  const sw = source.east - source.west;
+  const sh = source.north - source.south;
+  const tw = target.east - target.west;
+  const th = target.north - target.south;
+  for (let k = 0; k < count; k++) {
+    const lon = source.west + (mesh.u[k] / 32767) * sw;
+    const lat = source.south + (mesh.v[k] / 32767) * sh;
+    X[k] = lon * mLon;
+    Y[k] = lat * mLat;
+    Z[k] = mesh.minHeight + (mesh.h[k] / 32767) * span;
+    gx[k] = ((lon - target.west) / tw) * px;
+    gy[k] = ((target.north - lat) / th) * px;
+  }
+  const idx = mesh.indices;
+  for (let t = 0; t < idx.length; t += 3) {
+    const a = idx[t];
+    const b = idx[t + 1];
+    const c = idx[t + 2];
+    // triangle normal → slope
+    const ux = X[b] - X[a];
+    const uy = Y[b] - Y[a];
+    const uz = Z[b] - Z[a];
+    const vx = X[c] - X[a];
+    const vy = Y[c] - Y[a];
+    const vz = Z[c] - Z[a];
+    const nx = uy * vz - uz * vy;
+    const ny = uz * vx - ux * vz;
+    const nz = ux * vy - uy * vx;
+    const len = Math.hypot(nx, ny, nz);
+    if (!len) continue;
+    const slope = (Math.acos(Math.min(1, Math.abs(nz) / len)) * 180) / Math.PI;
+    const v = Math.min(255, Math.round(slope * 4));
+    // rasterise (pixel centres) with a little dilation so thin triangles still mark pixels
+    const minX = Math.max(0, Math.floor(Math.min(gx[a], gx[b], gx[c])));
+    const maxX = Math.min(px - 1, Math.floor(Math.max(gx[a], gx[b], gx[c])));
+    const minY = Math.max(0, Math.floor(Math.min(gy[a], gy[b], gy[c])));
+    const maxY = Math.min(px - 1, Math.floor(Math.max(gy[a], gy[b], gy[c])));
+    if (minX > maxX || minY > maxY) continue;
+    const det = (gy[b] - gy[c]) * (gx[a] - gx[c]) + (gx[c] - gx[b]) * (gy[a] - gy[c]);
+    const small = maxX - minX <= 1 && maxY - minY <= 1;
+    for (let y = minY; y <= maxY; y++)
+      for (let x = minX; x <= maxX; x++) {
+        if (!small && Math.abs(det) > 1e-12) {
+          const qx = x + 0.5;
+          const qy = y + 0.5;
+          const w1 = ((gy[b] - gy[c]) * (qx - gx[c]) + (gx[c] - gx[b]) * (qy - gy[c])) / det;
+          const w2 = ((gy[c] - gy[a]) * (qx - gx[c]) + (gx[a] - gx[c]) * (qy - gy[c])) / det;
+          const w3 = 1 - w1 - w2;
+          const e = -0.35; // slight dilation
+          if (w1 < e || w2 < e || w3 < e) continue;
+        }
+        const k = y * px + x;
+        if (v > out[k]) out[k] = v;
+      }
+  }
+  return out;
+}

@@ -82,6 +82,60 @@ A mesma informação aparece no app em **📚 Fontes e metodologia**.
 - No modo "seguir", a velocidade é a do modelo de EVA (Tobler ou rover) × o fator de tempo, limitada a
   60 m/s para o terreno conseguir carregar; o relógio da EVA, o O₂ e a dose seguem o modelo da rota.
 
+## Cálculo da rota (perfis Rápido, Equilibrado e Seguro)
+
+- **Área de busca**: cada trecho é resolvido numa grade de ~2,2 × o comprimento do trecho + 400 m de lado
+  (220–480 células), para que um desvio em volta de uma montanha caiba na grade.
+- **Busca**: A\* em 16 direções (além de 0°/45°/90°, também 26,6° e 63,4°), seguida de "puxar o fio":
+  o caminho é endireitado sempre que um segmento reto não cruza terreno proibido e não custa mais que o
+  trecho que substitui (+3 %). Isso tira os zigue-zagues da grade e os desvios desnecessários.
+- **Custo de cada passo** = tempo × (peso_tempo + peso_esforço × (esforço − 1)) × (1 + peso_risco × risco).
+  O tempo vem de Tobler (ou da velocidade do rover); o esforço é a potência metabólica naquele declive
+  dividida pela potência no plano.
+- **Cada perfil tem a sua ideia de perigo** (não só pesos diferentes):
+
+  | Perfil      | Limite efetivo de declive | Risco começa em | Margem de terreno proibido | Pesos (tempo / esforço / risco) |
+  | ----------- | ------------------------- | --------------- | -------------------------- | ------------------------------- |
+  | Rápido      | 100 % do limite do traje  | 85 % do limite  | nenhuma                    | 1 / 0,15 / 0,35                 |
+  | Equilibrado | 100 %                     | 50 %            | 6 m                        | 1 / 0,6 / 1,2                   |
+  | Seguro      | 80 %                      | 30 %            | 15 m                       | 1 / 1 / 3                       |
+
+- **Risco da célula**: declive e rugosidade (curva que cresce perto do limite), proximidade de rochas (halo de
+  3 m a pé, 6 m de rover), margem de terreno proibido, solo solto (THEMIS noturno), sem linha de visada com a
+  antena da base e sombra no horário planejado. Rádio e sombra não contam no perfil Rápido.
+- **Quando não existe caminho seguro**: se o terreno proibido separa os pontos (paredes de cânion, borda de
+  cratera), uma segunda busca permite cruzar terreno acima do limite a um custo multiplicado por
+  1 + k × excesso (k = 25 no Rápido, 60 no Equilibrado e 150 no Seguro; excesso = quanto o declive passa do
+  limite, em fração). A rota contorna tudo o que dá e cruza o menor e mais suave trecho possível, que aparece em
+  vermelho no mapa. Antes, o trecho era desenhado em linha reta.
+- **Rugosidade e escala**: o limite de 0,6 m (desvio do relevo em relação a um plano numa janela 5 × 5) faz
+  sentido em grade de ~1 m, onde mede pedras e degraus. Em trechos longos a grade tem dezenas ou centenas de
+  metros e o mesmo número mede o relevo, não a dificuldade de andar; por isso o limite é multiplicado pelo
+  tamanho da célula. O declive é verificado em qualquer escala.
+- **Comparação**: depois da rota escolhida, as outras duas são calculadas em segundo plano (o relevo já está em
+  cache) e aparecem no painel e no mapa, para comparar distância, tempo, subida e declive máximo.
+- **"Por que esta rota?"**: o mesmo trecho em linha reta é avaliado com o mesmo custo.
+
+## Recomendação de local e zona
+
+- **Objetivos**: História geológica (diversidade de unidades 30 %, contexto aquoso 20 %, exposição 20 %,
+  hidratação 15 %, transitabilidade 10 %, energia e comunicação 2,5 % cada) e Sobrevivência humana (acesso à
+  água 25 %, energia solar 20 %, blindagem atmosférica 20 %, transitabilidade 20 %, comunicação 15 %).
+- **Locais**: a aptidão é a soma ponderada dos atributos (0–1) de cada local. O passo Local mostra só o
+  primeiro colocado, com os critérios em que ele vai bem (≥ 70 %) e os pontos fracos. "Destacar por" ordena
+  por um critério só (empate desfeito pela aptidão geral).
+- **Zonas**: agrupamentos de detecções de minerais hidratados (CRISM/OMEGA). Para geologia, o valor é a nota
+  das detecções; para sobrevivência, 55 % detecções + 45 % insolação (cos da latitude), porque uma base
+  precisa de água e de energia. Filtros: mais detecções, maior confiança, mais sol, nunca visitadas.
+
+## Declividade no globo
+
+- A declividade de cada tile é calculada triângulo a triângulo a partir da malha de relevo da NASA (que guarda
+  mais triângulos onde o terreno é acidentado), numa textura de 128 × 128 que guarda o **máximo** de cada pixel.
+  Assim penhascos e bordas de cratera continuam visíveis de longe. Ainda assim é a declividade na escala dos
+  dados daquele nível: de longe, uma encosta aparece mais suave do que é; aproxime para ver o valor no metro.
+- As zonas proibidas seguem o limite do modo escolhido na rota (15° a pé, 25° de rover, ou o valor editado).
+
 ## Realismo da primeira pessoa
 
 - **Tempo real**: por padrão o ensaio corre a ×1. A caminhada usa a velocidade do modelo (Tobler ou rover) e
@@ -102,6 +156,44 @@ A mesma informação aparece no app em **📚 Fontes e metodologia**.
   blocos detectados no local. **Estimativa.**
 - **Trilha da Perseverance**: em Jezero, as marcas das rodas seguem o traverse real do rover (NASA/JPL MMGIS).
 
+## Objetivos científicos e aptidão dos locais (novo)
+
+O app responde a três objetivos, cada um com pesos publicados na interface:
+
+| Objetivo           | Critérios (peso)                                                                                                            |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| Vida antiga        | hidratação 30%, contexto aquoso 25%, acesso à água 15%, exposição 10%, transitabilidade 10%, energia 5%, rádio 5%           |
+| História geológica | diversidade de unidades 30%, contexto aquoso 20%, hidratação 15%, exposição 15%, transitabilidade 10%, energia 5%, rádio 5% |
+| Sobrevivência      | transitabilidade 25%, energia 20%, rádio 15%, blindagem 15%, água 15%, exposição 10%                                        |
+
+- **De onde vêm os valores**: cada atributo de cada local (0–1) tem uma fonte curta no cartão. Hidratação é um
+  valor de literatura corroborado pela contagem de detecções CRISM/OMEGA num raio de 140 km; a unidade
+  geológica vem do serviço `identify` do mapa USGS SIM 3292; os demais são julgamentos de planejamento
+  apoiados em estudos publicados das missões.
+- **Nota**: `fit = Σ peso × atributo`, em 0–100 com nota A–D. O cartão mostra os dois fatores que mais
+  ajudaram e os dois que mais limitaram, com a fonte de cada um. **Não é um ranking da NASA.**
+- **Confiança**: ligada à melhor resolução de imagem disponível no local (HiRISE/DTM > CTX > HRSC). Locais
+  sem imagem fina recebem o selo "preliminar" e a recomendação de uma observação direcionada.
+- **Validação retroativa**: os testes conferem que o modelo coloca Perseverance/Jezero e Curiosity/Gale no
+  topo para vida antiga e InSight/Elysium no topo para sobrevivência. Pousos dos anos 1970 são marcados como
+  "escolhidos com restrições da época" e não entram na validação — eles foram escolhidos por engenharia, não
+  pela ciência que o modelo valoriza hoje.
+- **Landabilidade**: nota separada (declive 35%, atmosfera/elevação 25%, rugosidade 15%, blocos 15%,
+  latitude 10%), calculada ao vivo sobre a grade de relevo real quando o usuário manda verificar o pouso de
+  uma zona. O ponto de base proposto é a célula mais plana e lisa dentro da zona.
+- **Rota científica**: as paradas são escolhidas pelos tipos de alvo do objetivo e ordenadas por vizinho mais
+  próximo + 2-opt. A **cobertura científica** é a soma do valor das paradas dividida pelas melhores paradas
+  alcançáveis de rover no local, então um plano a pé mostra honestamente o que deixa para depois. Se a
+  caminhada passa de ~9 km (ida e volta) ou perde muito valor, o app propõe rover em vez de fingir que cabe
+  no traje.
+- **Zonas candidatas**: `src/data/prospects.json` é gerado a partir de **todas** as 1.642 detecções
+  CRISM/OMEGA publicadas no Mars Trek, agrupadas por densidade com raio de 100 km e nota relativa
+  (participação de CRISM + tamanho do agrupamento). O selo "explorado" indica que a zona está a ≤150 km de um
+  local já visitado. **Limitação importante**: os instrumentos só observaram alvos escolhidos; ausência de
+  detecção não é evidência de ausência de minerais.
+
+Para regerar os dados: `node scripts/build-science-data.mjs` e `node scripts/build-prospects.mjs`.
+
 ## Limitações
 
 - Altitudes absolutas são aproximadas (±100 m longe do equador); as diferenças de altura são as do modelo.
@@ -111,3 +203,9 @@ A mesma informação aparece no app em **📚 Fontes e metodologia**.
 - Fotos HiRISE e CTX são em tons de cinza; a cor "marciana" do terreno é uma aproximação e pode ser desligada.
 - Avaliamos trocar o Three.js pelo CesiumJS (que tem Marte 3D com dados da NASA/JPL), mas ele exige conta e
   token do Cesium ion; optamos por ler os mesmos tiles do Mars Trek diretamente, sem conta.
+- Não há camada pública de gelo subsuperficial nem de sísmica no Mars Trek: por isso "recursos/ISRU" e
+  "interior" ficaram fora dos objetivos. A "água" do modelo é mineral hidratado, não gelo.
+- As coordenadas dos alvos científicos são aproximadas (centenas de metros a poucos km); elas servem para
+  planejar a caminhada, não para apontar um instrumento.
+- Os valores 0–1 dos atributos são julgamentos documentados, não medições; os pesos e as fontes aparecem na
+  interface para que qualquer pessoa possa discordar e recalibrar.

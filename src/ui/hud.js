@@ -15,7 +15,7 @@ import { formatHours } from '../geo/mars24.js';
 import { caption } from './feedback.js';
 
 const COMPASS_FOV = Math.PI * 0.9;
-const ICONS = { base: '🏠', stop: '🚩', science: '🔬', done: '✅' };
+const ICONS = { base: '■', stop: '▲', science: '◆', done: '·' };
 
 export function formatClock(seconds) {
   const s = Math.max(0, Math.floor(seconds));
@@ -68,14 +68,14 @@ export function updateHud(info, markers, player) {
   const pct = info.total > 0 ? Math.round((info.s / info.total) * 100) : 0;
   const parts = [
     info.mode === 'follow'
-      ? `🧭 ${formatDistance(info.s, units)} / ${formatDistance(info.total, units)} (${pct}%)`
-      : `🚶 ${t('tr.free')} · ${formatDistance(info.walked, units)}`,
+      ? `DIST ${formatDistance(info.s, units)} / ${formatDistance(info.total, units)} (${pct}%)`
+      : `${t('tr.free').toUpperCase()} · ${formatDistance(info.walked, units)}`,
     info.nextStop
-      ? `${info.nextStop.science ? '🔬' : '🚩'} ${info.nextStop.i}: ${formatDistance(info.nextStop.dist, units)}`
-      : `🏠 ${formatDistance(info.base.dist, units)}`,
-    `⛰ ${formatElevation(info.altitude, units)} · ${info.slope.toFixed(0)}°`,
-    `☀ ${formatHours(info.ltst)}`,
-    `⏩ ×${info.timeScale}`,
+      ? `NEXT ${info.nextStop.science ? '◆' : '▲'}${info.nextStop.i} ${formatDistance(info.nextStop.dist, units)}`
+      : `BASE ${formatDistance(info.base.dist, units)}`,
+    `ALT ${formatElevation(info.altitude, units)} · ${info.slope.toFixed(0)}°`,
+    `LTST ${formatHours(info.ltst)}`,
+    `×${info.timeScale}`,
   ];
   const el = $('#eva-hud');
   el.hidden = false;
@@ -84,16 +84,16 @@ export function updateHud(info, markers, player) {
   status.classList.toggle('info', !!(info.atStop || info.finished));
   if (info.paused) {
     status.hidden = false;
-    status.textContent = `⏸ ${t('tr.paused')}`;
+    status.textContent = `${t('tr.paused')}`;
   } else if (info.atStop) {
     status.hidden = false;
-    status.textContent = `${info.atStop.science ? '🔬' : '🚩'} ${t('tr.working', { i: info.atStop.i, time: formatClock(info.atStop.remaining) })}`;
+    status.textContent = `${t('tr.working', { i: info.atStop.i, time: formatClock(info.atStop.remaining) })}`;
   } else if (info.finished) {
     status.hidden = false;
-    status.textContent = `✅ ${t('tr.finished', { time: formatClock(info.finished.evaSeconds), time2: formatClock(info.finished.planned) })}`;
+    status.textContent = `${t('tr.finished', { time: formatClock(info.finished.evaSeconds), time2: formatClock(info.finished.planned) })}`;
   } else if (info.waiting) {
     status.hidden = false;
-    status.textContent = `⏳ ${t('tr.loadingGround')}`;
+    status.textContent = `${t('tr.loadingGround')}`;
   } else status.hidden = true;
   const ch = info.chunk;
   $('#objective-status').textContent = ch
@@ -103,10 +103,10 @@ export function updateHud(info, markers, player) {
     : t('tr.loadingGround');
   const e = info.env;
   const env = [
-    e.temp != null ? `🌡 ${formatTemperature(e.temp, units)} (${t('pl.estimate')})` : null,
+    e.temp != null ? `T ${formatTemperature(e.temp, units)} (${t('pl.estimate')})` : null,
     `${Math.round(e.pressure)} Pa`,
     `τ ${e.tau.toFixed(2)} · ${t('tr.haze', { km: Math.round(e.haze / 1000) })}`,
-    info.trackDist != null && info.trackDist < 400 ? `🛞 ${t('tr.tracks', { d: formatDistance(info.trackDist, units) })}` : null,
+    info.trackDist != null && info.trackDist < 400 ? `${t('tr.tracks', { d: formatDistance(info.trackDist, units) })}` : null,
   ].filter(Boolean);
   $('#objective-distance').textContent = env.join('  ·  ');
   updateCompass(player, markers);
