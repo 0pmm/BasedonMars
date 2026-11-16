@@ -12,6 +12,7 @@ import { h, $, clear } from '../core/dom.js';
 import { t, tr, getLocale } from '../core/i18n.js';
 import { on, emit } from '../core/events.js';
 import { getState } from '../core/state.js';
+import { setStep } from '../core/mission.js';
 import { getSettings } from '../core/settings.js';
 import { load, save } from '../core/storage.js';
 import { formatDistance, formatElevation, formatTemperature, formatPressure } from '../core/units.js';
@@ -606,9 +607,6 @@ function render() {
     h('p.pl-hint', null, R.editing ? t('rt.hintEditing') : t('rt.hint'))
   );
 
-  // Walk button right at the top once a route exists
-  if (R.result) root.append(btn(['walk', t('rt.walk')], () => walkCurrentRoute(), 'pl-btn primary big', { id: 'rt-walk' }));
-
   // --- Suggested places (empty route)
   if (!R.points.length) {
     const list = h('div.rt-sites');
@@ -925,6 +923,17 @@ function render() {
       )
     );
   root.append(plans);
+
+  // Final step: the rehearsal opens as a popup (summary → first-person walk)
+  if (R.result)
+    root.append(
+      h(
+        'div.rt-final',
+        null,
+        btn(['walk', t('rt.rehearse')], () => setStep('try'), 'pl-btn primary big', { id: 'rt-walk' }),
+        h('small', null, t('rt.rehearseHint'))
+      )
+    );
 }
 
 function renderEnvironment(base) {

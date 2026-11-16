@@ -218,7 +218,10 @@ function bindControls() {
   $('#btn-layers')?.addEventListener('click', () => toggleLayers());
   // Mobile bottom sheets
   $$('#mobile-toggles [data-panel]').forEach((b) =>
-    b.addEventListener('click', () => (b.dataset.panel === 'layers-panel' ? toggleLayers(true) : openSheet(b.dataset.panel)))
+    b.addEventListener('click', () => {
+      if (b.dataset.panel === 'layers-panel') toggleLayers(true);
+      else openSheet(b.dataset.panel);
+    })
   );
   $$('[data-close-panel]').forEach((b) =>
     b.addEventListener('click', () => {

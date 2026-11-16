@@ -9,9 +9,15 @@ Integração com a branch `feat/guia-objetivos` e nova identidade visual.
 ### Adicionado
 
 - **Tour com o GENIE** na tela inicial: 8 passos curtos que mostram o app inteiro, com o resto da tela desfocado
-- **Local recomendado**: o passo Local mostra só a melhor escolha para o objetivo, com os motivos em linguagem
-  simples e os pontos de atenção; "Trocar" abre uma janela sobre a tela desfocada com todas as opções e filtros
-  ("Destacar por": geral ou cada critério). O mesmo vale para as zonas
+- **Local recomendado**: o passo Local mostra só a melhor escolha para o objetivo; os motivos, os pontos de
+  atenção, as características e as missões ficam em seções recolhidas. "Trocar local" abre uma janela sobre a tela
+  desfocada com todas as opções e filtros
+- **Uma só lista de locais**: locais estudados e áreas candidatas (detecções de minerais hidratados) juntos, com o
+  filtro "Já explorados" (com os nomes e as missões) / "Nunca explorados" e a distância até o local explorado mais
+  próximo. Áreas candidatas são avaliadas só com o que se sabe de órbita, e a nota é reduzida pelo que falta
+- Guia em 3 abas (1 Objetivo, 2 Local, 3 Rota) que ocupam a largura do painel. O **Ensaio final** virou uma
+  janela de resumo, aberta no fim da rota, que leva à caminhada em primeira pessoa
+- A tela inicial mostra sempre o planeta inteiro girando (antes, uma missão salva aproximava a câmera)
 - GENIE em mais lugares: aptidão, cada critério do local, filtros, zonas, verificação de pouso, objetivo, camadas
   e comparação de perfis de rota
 - Objetivos de exploração (História geológica e Sobrevivência humana) com ranking de locais,

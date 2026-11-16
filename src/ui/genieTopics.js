@@ -112,6 +112,7 @@ export function initGenieTopics() {
     // ---- guide: objective, site and zone recommendations
     objective: topic('objective'),
     recFilter: topic('recFilter'),
+    explored: topic('explored'),
     zones: topic('zones'),
     landing: topic('landing'),
     modes: topic('modes'),

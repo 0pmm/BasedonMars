@@ -4,7 +4,7 @@
  * each option stands out in. Pure and unit-tested; the numbers come from
  * siteFit.js (sites) and prospects.json (zones of hydrated-mineral detections).
  */
-import { rankSites, objectiveById } from './siteFit.js';
+import { rankSites, objectiveById, fitSite } from './siteFit.js';
 
 /** Minimum weight for a criterion to become a filter of its own. */
 const FILTER_MIN_WEIGHT = 0.1;
@@ -83,6 +83,95 @@ export function rankZones(zones, objectiveId, filter = 'general') {
     .map((zone) => ({ zone, value: zoneValue(zone, objectiveId), key: keyOf(zone) }))
     .sort((a, b) => b.key - a.key || b.value - a.value)
     .map((r, i) => ({ ...r, rank: i + 1 }));
+}
+
+/* ------------------------------- places -------------------------------
+ * One list for the guide: the curated sites and the candidate areas (clusters
+ * of hydrated-mineral detections) are all "places". A candidate area carries
+ * only what orbit can tell (water-bearing minerals, sunlight from latitude);
+ * the other criteria stay unknown and the fit is scaled down for them
+ * (siteFit.js), so it is never presented as better known than it is.
+ */
+
+export const EXPLORED_FILTERS = Object.freeze(['all', 'explored', 'unexplored']);
+
+const round2 = (v) => Math.round(v * 100) / 100;
+
+/** A candidate area as a place. Attribute sources are i18n keys (sourceKey/sourceVars). */
+export function zoneAsPlace(zone) {
+  const sun = sunlight(zone.lat);
+  return {
+    id: zone.id,
+    kind: 'zone',
+    zone,
+    lat: zone.lat,
+    lon: zone.lon,
+    visited: !!zone.explored,
+    confidence: round2(confidenceValue(zone.confidence) * 0.7),
+    attributes: {
+      hydration: { v: zone.score, kind: 'derived', sourceKey: 'rec.src.hydration', sourceVars: { n: zone.detections, km: zone.radiusKm } },
+      waterAccess: { v: round2(zone.score * 0.9), kind: 'derived', sourceKey: 'rec.src.water' },
+      power: { v: round2(0.9 * sun), kind: 'derived', sourceKey: 'rec.src.power', sourceVars: { lat: Math.abs(zone.lat).toFixed(1) } },
+    },
+  };
+}
+
+/** Great-circle distance in km (Mars radius), kept local so this module stays pure. */
+function km(a, b) {
+  const R = 3389.5;
+  const r = Math.PI / 180;
+  const dLat = (b.lat - a.lat) * r;
+  const dLon = (b.lon - a.lon) * r;
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(a.lat * r) * Math.cos(b.lat * r) * Math.sin(dLon / 2) ** 2;
+  return 2 * R * Math.asin(Math.min(1, Math.sqrt(h)));
+}
+
+/** Within this distance an explored site is worth mentioning ("120 km from Jezero"). */
+export const NEAR_KM = 600;
+
+/**
+ * Every place for an objective: fit, exploration status, the missions that
+ * explored it and, for the others, the nearest explored site.
+ */
+export function places(sites, zones, missions, objectiveId) {
+  const explored = sites.filter((s) => s.visited);
+  const missionsAt = (id) => missions.filter((m) => m.siteId === id);
+  const list = [
+    ...sites.map((s) => ({
+      id: s.id,
+      kind: 'site',
+      site: s,
+      lat: s.lat,
+      lon: s.lon,
+      visited: !!s.visited,
+      attributes: s.attributes,
+      confidence: s.confidence,
+    })),
+    ...zones.map(zoneAsPlace),
+  ];
+  return list.map((p) => {
+    let near = null;
+    if (!(p.kind === 'site' && p.visited)) {
+      for (const s of explored) {
+        const d = km(p, s);
+        if (d <= NEAR_KM && (!near || d < near.km)) near = { id: s.id, name: s.name, km: Math.round(d), missions: missionsAt(s.id) };
+      }
+    }
+    return { ...p, fit: fitSite(p, objectiveId), missions: p.kind === 'site' ? missionsAt(p.id) : [], near };
+  });
+}
+
+/**
+ * Places ranked by the overall fit or by one criterion, optionally only the
+ * explored / never-explored ones. Places without data for the criterion go last.
+ */
+export function rankPlaces(list, { filter = 'general', explored = 'all' } = {}) {
+  const keyOf = (p) => (filter === 'general' ? p.fit.score / 100 : (p.attributes?.[filter]?.v ?? -1));
+  return list
+    .filter((p) => explored === 'all' || (explored === 'explored' ? p.visited : !p.visited))
+    .map((p) => ({ ...p, key: keyOf(p) }))
+    .sort((a, b) => b.key - a.key || b.fit.score - a.fit.score || (a.kind === b.kind ? 0 : a.kind === 'site' ? -1 : 1))
+    .map((p, i) => ({ ...p, rank: i + 1 }));
 }
 
 /** Plain-language reasons for a zone (i18n keys + vars), strongest first. */

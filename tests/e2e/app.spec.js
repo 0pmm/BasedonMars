@@ -70,37 +70,47 @@ test('start screen loads without errors and switches language', async ({ page })
   expect(errors).toEqual([]);
 });
 
-test('guided mission: best site with its reasons, chooser with filters, then a Marswalk', async ({ page }) => {
+test('guided mission: best place with its reasons, explored filter, chooser, route panel and rehearsal popup', async ({ page }) => {
   const errors = trackErrors(page);
   await boot(page);
   await page.locator('#start-objectives [data-objective="geology"]').click();
   await expect(page.locator('#guide-step-site')).toBeVisible();
-  // one recommendation, with plain-language reasons
+  // the guide has three tabs: objective, place, route
+  await expect(page.locator('.guide-step-btn')).toHaveCount(3);
+  // one recommendation; its reasons are collapsed until opened
   await expect(page.locator('.rec-card h4')).toHaveText('Gale Crater');
+  await expect(page.locator('.rec-card .rec-why li.plus').first()).toBeHidden();
+  await page.locator('.rec-card details summary').first().click();
   await expect(page.locator('.rec-card .rec-why li.plus').first()).toBeVisible();
   // a filter changes the recommendation
   await page.click('.rec-chip[data-filter="hydration"]');
-  await expect(page.locator('.rec-card h4')).toHaveText('Mawrth Vallis');
-  // the chooser lists every site over a blurred screen; picking one makes it "your choice"
+  await expect(page.locator('.rec-card h4')).not.toHaveText('Gale Crater');
+  // already explored: their names and missions right away
+  await page.click('.rec-explored .rec-chip[data-filter="explored"]');
+  await expect(page.locator('.rec-names')).toContainText('Perseverance');
+  await page.click('.rec-explored .rec-chip[data-filter="all"]');
+  // the chooser lists sites and candidate areas together over a blurred screen
   await page.click('#btn-change-site');
   await expect(page.locator('#site-picker')).toBeVisible();
-  await expect(page.locator('#site-picker .picker-option')).toHaveCount(12);
-  await page.click('#site-picker .picker-chip[data-filter="general"]');
+  await page.click('#site-picker [data-group="filter"] .picker-chip[data-filter="general"]');
+  await expect(page.locator('#site-picker .picker-option')).toHaveCount(52);
+  await page.click('#site-picker [data-group="explored"] .picker-chip[data-filter="unexplored"]');
+  await expect(page.locator('#site-picker .picker-option[data-option="jezero"]')).toHaveCount(0);
+  await page.click('#site-picker [data-group="explored"] .picker-chip[data-filter="all"]');
   await page.click('#site-picker .picker-option[data-option="jezero"]');
   await expect(page.locator('#site-picker')).toHaveCount(0);
   await expect(page.locator('.rec-card h4')).toHaveText('Jezero Crater');
   await expect(page.locator('.rec-tag.picked')).toBeVisible();
-  // zones: the best one, and every zone in the chooser
-  await page.locator('.sci-view').nth(1).click();
-  await expect(page.locator('.rec-card h4')).not.toHaveText('');
-  await page.click('#btn-change-zone');
-  await expect(page.locator('#zone-picker .picker-option')).toHaveCount(40);
-  await page.keyboard.press('Escape');
-  await page.locator('.sci-view').nth(0).click();
+  // the Marswalk opens tab 3, Route
   await page.getByRole('button', { name: /Plan Marswalk/ }).click();
   await expect(page.locator('#guide-step-route')).toBeVisible();
-  expect(await page.locator('#route-panel .rt-points li').count()).toBeGreaterThanOrEqual(2);
   await expect(page.locator('.guide-step-btn[data-step="route"]')).toHaveClass(/active/);
+  expect(await page.locator('#route-panel .rt-points li').count()).toBeGreaterThanOrEqual(2);
+  // tabs switch back and forth
+  await page.click('.guide-step-btn[data-step="site"]');
+  await expect(page.locator('#guide-step-route')).toBeHidden();
+  await page.click('.guide-step-btn[data-step="route"]');
+  await expect(page.locator('#guide-step-route')).toBeVisible();
   expect(errors).toEqual([]);
 });
 
@@ -164,7 +174,10 @@ test('route between points on the globe, then walk it in first person and come b
   await expect(page.locator('#snap-info')).toBeChecked();
   await page.keyboard.press('Escape');
   await expect(page.locator('#snap-download')).toBeHidden();
+  // final step: the rehearsal popup, then the first-person walk
   await page.click('#rt-walk');
+  await expect(page.locator('#rehearsal-dialog')).toBeVisible();
+  await page.click('#btn-walk-go');
   await expect(page.locator('#surface-hud')).toBeVisible({ timeout: 90_000 });
   await expect(page.locator('#eva-hud')).toContainText('DIST');
   await expect.poll(() => page.evaluate(() => window.__mars.traverse.world.chunks.stats().ready), { timeout: 60_000 }).toBeGreaterThan(8);

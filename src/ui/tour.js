@@ -35,7 +35,8 @@ const STEPS = [
   { id: 'rail', before: onMap(null), targets: () => [$('#layers-panel')] },
   { id: 'guide', before: onMap('site'), targets: () => [$('#right-panel')] },
   { id: 'route', before: onMap('route'), targets: () => [$('#right-panel')] },
-  { id: 'walk', before: onMap('try'), targets: () => [$('#right-panel')] },
+  // the rehearsal is a popup at the end of the route panel: point at its button
+  { id: 'walk', before: onMap('route'), targets: () => [$('#rt-walk') || $('#right-panel')] },
 ];
 
 /** @param {{enterMap:()=>void, goHome:()=>void}} hooks */

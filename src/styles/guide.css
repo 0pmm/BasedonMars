@@ -495,3 +495,150 @@ dialog.modal.picker .modal-body {
     flex-shrink: 0;
   }
 }
+
+/* ---------- one list of places: exploration filter, names, facts ---------- */
+.rec-explored {
+  margin-bottom: 4px;
+}
+.rec-names {
+  list-style: none;
+  margin: 2px 0 8px;
+  padding: 0;
+  border-top: 1px solid var(--line);
+  max-height: 180px;
+  overflow-y: auto;
+}
+.rec-name {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 6px 4px;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.8rem;
+  text-align: left;
+  cursor: pointer;
+}
+.rec-name:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+.rec-name[aria-pressed='true'] {
+  box-shadow: inset 2px 0 0 var(--orange);
+  background: var(--accent-soft);
+}
+.rec-name small {
+  color: var(--muted);
+  font-size: 0.72rem;
+  text-align: right;
+}
+.rec-map {
+  display: inline-flex;
+  margin: 0 0 10px;
+  font-size: 0.76rem;
+  color: var(--muted);
+}
+.rec-kind {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 2px;
+}
+.rec-facts {
+  list-style: none;
+  margin: 2px 0 6px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+.rec-facts li::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: var(--dim);
+  vertical-align: 1px;
+}
+.rec-facts li.explored::before {
+  background: var(--green);
+}
+.rec-facts li.unexplored::before {
+  background: var(--orange-glow);
+}
+.rec-count {
+  margin-left: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0;
+  color: var(--dim);
+  border: 1px solid var(--line-strong);
+  border-radius: 2px;
+  padding: 0 4px;
+}
+.rec-attrs summary {
+  padding: 4px 0;
+}
+.rec-attrs .rec-why {
+  margin-top: 4px;
+}
+.sci-track.unknown {
+  background: repeating-linear-gradient(90deg, var(--line) 0 4px, transparent 4px 8px);
+}
+.picker-groups {
+  border-bottom: 1px solid var(--line);
+}
+.picker-groups .picker-filters {
+  border-bottom: 0;
+  padding-bottom: 4px;
+}
+.picker-groups .picker-filters:last-child {
+  padding-bottom: 12px;
+}
+.picker-filters-label {
+  min-width: 96px;
+}
+.pk-tag.kind-zone {
+  color: var(--muted);
+  border-color: var(--line-strong);
+}
+.pk-tag.kind-site {
+  color: var(--text);
+  border-color: var(--line-strong);
+}
+
+/* ---------- route: the final rehearsal button stays at the bottom of the panel ---------- */
+.rt-final {
+  position: sticky;
+  bottom: 0;
+  margin: 14px -16px 0;
+  padding: 12px 16px 14px;
+  background: var(--panel-solid);
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.rt-final .pl-btn {
+  width: 100%;
+  justify-content: center;
+}
+.rt-final small {
+  color: var(--dim);
+  font-size: 0.72rem;
+  text-align: center;
+}
+.rehearsal .guide-report {
+  margin: 10px 0;
+}

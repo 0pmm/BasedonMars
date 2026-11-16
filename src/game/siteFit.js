@@ -75,17 +75,16 @@ export function fitSite(site, objectiveId) {
       contribution: value * weight,
       kind: attr.kind || 'literature',
       source: attr.source || ATTRIBUTES[key]?.source || '',
+      sourceKey: attr.sourceKey,
+      sourceVars: attr.sourceVars,
     });
   }
-  const score = Math.round(
-    Math.max(
-      0,
-      Math.min(
-        1,
-        factors.reduce((s, f) => s + f.contribution, 0)
-      )
-    ) * 100
-  );
+  // Share of the objective's criteria that have data. A place known only from
+  // orbit (a candidate area) is scored on what is known, scaled down for what
+  // is not: unknowns are never filled in, and never count as perfect either.
+  const coverage = factors.reduce((s, f) => s + f.weight, 0);
+  const known = coverage > 0 ? factors.reduce((s, f) => s + f.contribution, 0) / coverage : 0;
+  const score = Math.round(Math.max(0, Math.min(1, known * (0.6 + 0.4 * coverage))) * 100);
   const drivers = [...factors].sort((a, b) => b.contribution - a.contribution).slice(0, 2);
   const weak = factors
     .filter((f) => f.value < 0.85)
@@ -108,6 +107,7 @@ export function fitSite(site, objectiveId) {
     drivers,
     limits,
     missing,
+    coverage,
     confidence: clamp01(site?.confidence ?? 0.5),
   };
 }

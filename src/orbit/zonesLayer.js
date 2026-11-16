@@ -9,15 +9,15 @@ import { getState } from '../core/state.js';
 import { orbitView } from './orbitView.js';
 import { createLabelSprite } from './markers.js';
 import { isEditingRoute } from '../ui/routePanel.js';
-import { rankSites } from '../game/siteFit.js';
 import sitesData from '../data/scienceSites.json';
-import { rankZones } from '../game/recommend.js';
+import { places, rankPlaces } from '../game/recommend.js';
 import prospects from '../data/prospects.json';
 import { ORBIT } from '../config.js';
 
 const R_KM = 3389.5;
 const LIFT = 0.9; // scene units above the planet radius
 const SITES = sitesData.sites;
+const MISSIONS = sitesData.missions;
 
 const state = {
   visible: true,
@@ -132,30 +132,29 @@ export function refreshZones(objectiveId = state.objective, selectedSiteId = nul
   state.labels = [];
 
   const free = objectiveId === 'free';
-  const ranked = free ? [] : rankSites(SITES, objectiveId);
-  const rankById = new Map(ranked.map((r) => [r.site.id, r.rank]));
+  // one ranking for sites and candidate areas, the same the guide shows
+  const ranked = free ? [] : rankPlaces(places(SITES, prospects.zones, MISSIONS, objectiveId));
+  const rankById = new Map(ranked.map((r) => [r.id, r.rank]));
 
   // Sites are meaningful for every objective.
   for (const site of SITES) {
     state.siteGroup.add(buildSite(site, free ? null : rankById.get(site.id) || 99));
   }
 
-  // Zones come from hydrated minerals: water in the planet's past (geology) or
-  // water a base could extract (survival). Numbered by the objective's ranking.
+  // Candidate areas (clusters of hydrated-mineral detections): water in the
+  // planet's past (geology) or water a base could extract (survival).
   if (!free) {
-    const zones = rankZones(prospects.zones, objectiveId)
-      .slice(0, 24)
-      .map((r) => r.zone);
-    zones.forEach((zone, i) => {
-      const g = buildZone(zone);
-      state.zoneGroup.add(g);
-      if (i < 6) {
-        const label = createLabelSprite(`${i + 1}`, zone.explored ? '#a7b2c4' : '#39ff88');
-        label.position.copy(toVec(zone.lat, zone.lon, LIFT + 0.5));
+    const zones = ranked.filter((r) => r.kind === 'zone').slice(0, 24);
+    for (const r of zones) {
+      state.zoneGroup.add(buildZone(r.zone));
+      if (r.rank <= 12) {
+        const label = createLabelSprite(`#${r.rank}`, r.zone.explored ? '#a7b2c4' : '#8bd0b0');
+        label.scale.multiplyScalar(0.72);
+        label.position.copy(toVec(r.zone.lat, r.zone.lon, LIFT + 0.5));
         state.zoneGroup.add(label);
         state.labels.push(label);
       }
-    });
+    }
   }
   state.group.visible = state.visible && !state.suppressed;
 }

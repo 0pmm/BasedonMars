@@ -136,7 +136,8 @@ function applyStateUI(state) {
   orbitView.controls.enabled = state === 'start' || state === 'dashboard';
   if (state === 'start' || state === 'dashboard') {
     audio.startMusic();
-    if (state === 'start') orbitView.controls.autoRotate = getSettings().autoRotate && !prefersReducedMotion();
+    // the start screen always shows the whole planet slowly turning (unless reduced motion is asked)
+    if (state === 'start') orbitView.controls.autoRotate = !prefersReducedMotion();
   } else audio.stopMusic();
   canvas.style.cursor = isSurfaceState(state) ? 'crosshair' : 'grab';
   mobile?.checkOrientation();

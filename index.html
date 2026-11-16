@@ -139,7 +139,7 @@
         <span data-icon="layers"></span> <span data-i18n="panel.layers">Layers</span>
       </button>
       <button type="button" class="pill-btn" data-panel="right-panel">
-        <span data-icon="route"></span> <span data-i18n="guide.title">Mission guide</span>
+        <span data-icon="target"></span> <span data-i18n="guide.title">Mission guide</span>
       </button>
     </div>
 
@@ -246,49 +246,14 @@
           </button>
         </div>
         <div class="guide-steps" role="tablist" data-i18n-attr="aria-label:guide.title">
-          <button
-            class="guide-step-btn"
-            type="button"
-            role="tab"
-            data-step="objective"
-            aria-selected="true"
-            data-i18n="guide.step.objective"
-            data-n="01"
-          >
-            Objective
+          <button class="guide-step-btn" type="button" role="tab" data-step="objective" data-n="1" aria-selected="true">
+            <span data-i18n="guide.step.objective">Objective</span>
           </button>
-          <button
-            class="guide-step-btn"
-            type="button"
-            role="tab"
-            data-step="site"
-            aria-selected="false"
-            data-i18n="guide.step.site"
-            data-n="02"
-          >
-            Site
+          <button class="guide-step-btn" type="button" role="tab" data-step="site" data-n="2" aria-selected="false">
+            <span data-i18n="guide.step.site">Site</span>
           </button>
-          <button
-            class="guide-step-btn"
-            type="button"
-            role="tab"
-            data-step="route"
-            aria-selected="false"
-            data-i18n="guide.step.route"
-            data-n="03"
-          >
-            Route
-          </button>
-          <button
-            class="guide-step-btn"
-            type="button"
-            role="tab"
-            data-step="try"
-            aria-selected="false"
-            data-i18n="guide.step.try"
-            data-n="04"
-          >
-            Walk
+          <button class="guide-step-btn" type="button" role="tab" data-step="route" data-n="3" aria-selected="false">
+            <span data-i18n="guide.step.route">Route</span>
           </button>
         </div>
       </div>
@@ -301,9 +266,6 @@
         </section>
         <section class="guide-step" data-step="route" id="guide-step-route" aria-label="Route">
           <div id="route-panel"></div>
-        </section>
-        <section class="guide-step" data-step="try" id="guide-step-try" aria-label="Walk">
-          <div id="guide-try"></div>
         </section>
       </div>
     </aside>

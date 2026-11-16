@@ -78,6 +78,41 @@ export default {
   // ---- objectives missions had that the app no longer offers
   'science.objLegacy.life': 'Ancient life (astrobiology)',
 
+  // ---- um só tipo de lista: locais estudados + áreas candidatas
+  'rec.exploredLabel': 'Exploration',
+  'rec.explored.all': 'All',
+  'rec.explored.explored': 'Already explored',
+  'rec.explored.unexplored': 'Never explored',
+  'rec.kind.site': 'Studied site',
+  'rec.kind.zone': 'Candidate area',
+  'rec.zoneTitle': 'Area {coords}',
+  'rec.zoneNote': 'Area with {n} detections of water-bearing minerals within {km} km, known only from orbital data.',
+  'rec.src.hydration': 'CRISM/OMEGA: {n} detections within {km} km',
+  'rec.src.water': 'Hydrated minerals detected from orbit as a water source',
+  'rec.src.power': 'Latitude {lat}° (sunlight through the year)',
+  'rec.place.new': 'Never explored: everything found there will be new.',
+  'rec.place.nearKnown': '{km} km from {name}, an already explored site.',
+  'rec.place.nearShort': '{km} km from {name}',
+  'rec.place.nearSurvival': '{km} km from {name}, already explored: known terrain, weather and landing approaches help build the base.',
+  'rec.place.partial': 'Assessed on {n} of {m} criteria, from orbital data only: confirm with high-resolution images.',
+  'rec.place.exploredBy': 'Explored by {missions}',
+  'rec.place.exploredNear': 'Explored: near {name} ({missions})',
+  'rec.place.never': 'Never explored',
+  'rec.mapToggle': 'Candidate areas on the map',
+  'rec.none': 'No place with this filter.',
+  'rec.unknown': 'no data (only observed from orbit)',
+  'rec.allAttrsTitle': 'All characteristics',
+  'rec.picker.placesIntro':
+    'Studied sites and candidate areas flagged by orbiters, from most to least suited to this objective. Filter by already explored or never explored and see where each one stands out.',
+  'rt.dock.toggle': 'Route',
+  'rt.rehearse': 'Final rehearsal',
+  'rt.rehearseHint': 'Review the plan and walk the route in first person.',
+  'guide.try.title': 'Final rehearsal',
+  'guide.try.noRoute': 'Plan a route first to rehearse it in first person.',
+  'genie.explored.title': 'Explored or not',
+  'genie.explored.text':
+    'Explored places had a lander or a rover: the missions are listed next to the name, and there is plenty of ground data. Never-explored places are new: some were studied from orbit by scientists, others are candidate areas the orbiters flagged for their water-bearing minerals.',
+
   // ---- GENIE: new topics
   'genie.fitScore.title': 'Fit for the objective',
   'genie.fitScore.text':
@@ -142,13 +177,13 @@ export default {
   'tour.rail.title': 'Map tools',
   'tour.rail.text':
     'In this bar you switch layers (slope, minerals, temperature…), show labels and orbiters, point north, take a picture or go full screen.',
-  'tour.guide.title': 'The guide in 4 steps',
+  'tour.guide.title': 'The guide in 3 steps',
   'tour.guide.text':
-    'Objective, Site, Route and Rehearsal. In the Site step I show the best place and why. If you want another one, "Change" opens every option with filters.',
+    'In the right panel: 1 Objective, 2 Site and 3 Route. In Site I show the best place and, if you open each section, why. "Change site" opens every option, with already explored / never explored filters.',
   'tour.route.title': 'Plan the route',
   'tour.route.text':
-    'Mark the base and the stops by clicking the terrain. The route avoids slopes and boulders, and you compare the Fast, Balanced and Safe profiles: distance, time, oxygen and radiation.',
-  'tour.walk.title': 'Walk the route',
+    'In tab 3, Route, mark the base and the stops by clicking the terrain: the route avoids slopes and boulders, and you compare Fast, Balanced and Safe.',
+  'tour.walk.title': 'Final rehearsal',
   'tour.walk.text':
-    "In the Rehearsal step you walk the route in first person, with oxygen, time and the Sun running for real. Ready? Pick an objective and let's go!",
+    'With the route ready, the "Final rehearsal" opens a summary of the plan and takes you on the route in first person, with oxygen, time and the Sun running for real. Ready? Let\'s go!',
 };

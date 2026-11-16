@@ -80,6 +80,41 @@ export default {
   // ---- objetivos que as missões tiveram, mas o app não oferece mais
   'science.objLegacy.life': 'Vida antiga (astrobiologia)',
 
+  // ---- um só tipo de lista: locais estudados + áreas candidatas
+  'rec.exploredLabel': 'Exploração',
+  'rec.explored.all': 'Todos',
+  'rec.explored.explored': 'Já explorados',
+  'rec.explored.unexplored': 'Nunca explorados',
+  'rec.kind.site': 'Local estudado',
+  'rec.kind.zone': 'Área candidata',
+  'rec.zoneTitle': 'Área {coords}',
+  'rec.zoneNote': 'Área com {n} detecções de minerais com água num raio de {km} km, conhecida só por dados de órbita.',
+  'rec.src.hydration': 'CRISM/OMEGA: {n} detecções num raio de {km} km',
+  'rec.src.water': 'Minerais hidratados detectados de órbita como fonte de água',
+  'rec.src.power': 'Latitude {lat}° (insolação ao longo do ano)',
+  'rec.place.new': 'Nunca explorado: tudo o que se encontrar ali será novo.',
+  'rec.place.nearKnown': 'A {km} km de {name}, um local já explorado.',
+  'rec.place.nearShort': 'a {km} km de {name}',
+  'rec.place.nearSurvival': 'A {km} km de {name}, já explorado: terreno, clima e rotas de pouso já conhecidos ajudam a montar a base.',
+  'rec.place.partial': 'Avaliado com {n} de {m} critérios, só com dados de órbita: confirme com imagens de alta resolução.',
+  'rec.place.exploredBy': 'Explorado por {missions}',
+  'rec.place.exploredNear': 'Explorado: perto de {name} ({missions})',
+  'rec.place.never': 'Nunca explorado',
+  'rec.mapToggle': 'Áreas candidatas no mapa',
+  'rec.none': 'Nenhum local com este filtro.',
+  'rec.unknown': 'sem dados (só observado de órbita)',
+  'rec.allAttrsTitle': 'Todas as características',
+  'rec.picker.placesIntro':
+    'Locais estudados e áreas candidatas detectadas pelos satélites, do mais ao menos indicado para este objetivo. Filtre pelos já explorados ou nunca explorados e veja onde cada um se destaca.',
+  'rt.dock.toggle': 'Rota',
+  'rt.rehearse': 'Ensaio final',
+  'rt.rehearseHint': 'Revise o plano e percorra a rota em primeira pessoa.',
+  'guide.try.title': 'Ensaio final',
+  'guide.try.noRoute': 'Planeje uma rota primeiro para ensaiá-la em primeira pessoa.',
+  'genie.explored.title': 'Já explorados ou não',
+  'genie.explored.text':
+    'Locais já explorados receberam um pouso ou um rover: as missões aparecem ao lado do nome, e há muitos dados de solo. Os nunca explorados são novidade: alguns foram estudados de órbita por cientistas, outros são áreas candidatas que os satélites marcaram por terem minerais com água.',
+
   // ---- GENIE: novos tópicos
   'genie.fitScore.title': 'Aptidão ao objetivo',
   'genie.fitScore.text':
@@ -144,13 +179,13 @@ export default {
   'tour.rail.title': 'Ferramentas do mapa',
   'tour.rail.text':
     'Nesta barra você troca as camadas (declividade, minerais, temperatura…), mostra rótulos e satélites, aponta para o norte, tira uma foto ou entra em tela cheia.',
-  'tour.guide.title': 'O guia em 4 passos',
+  'tour.guide.title': 'O guia em 3 passos',
   'tour.guide.text':
-    'Objetivo, Local, Rota e Ensaio. No passo Local eu mostro o melhor lugar e por quê. Se quiser outro, "Trocar" abre todas as opções com filtros.',
+    'No painel da direita: 1 Objetivo, 2 Local e 3 Rota. No Local eu mostro o melhor lugar e, abrindo cada seção, o porquê. "Trocar local" abre todas as opções, com filtros de já explorados ou nunca explorados.',
   'tour.route.title': 'Planeje a rota',
   'tour.route.text':
-    'Marque a base e as paradas clicando no terreno. A rota desvia de declives e pedras, e você compara os perfis Rápido, Equilibrado e Seguro: distância, tempo, oxigênio e radiação.',
-  'tour.walk.title': 'Ande pela rota',
+    'Na aba 3, Rota, marque a base e as paradas clicando no terreno: a rota desvia de declives e pedras, e você compara Rápido, Equilibrado e Seguro.',
+  'tour.walk.title': 'Ensaio final',
   'tour.walk.text':
-    'No passo Ensaio você percorre a rota em primeira pessoa, com oxigênio, tempo e Sol correndo de verdade. Está pronto? Escolha um objetivo e vamos lá!',
+    'Com a rota pronta, o "Ensaio final" abre um resumo do plano e leva você a percorrer a rota em primeira pessoa, com oxigênio, tempo e Sol correndo de verdade. Pronto? Vamos lá!',
 };
