@@ -1,79 +1,63 @@
-# Mars Explorer 3 · Mapa e rotas em Marte
 
-Mapa marciano em camadas, montado com **dados reais da NASA**, para planejar uma caminhada em Marte
-(EVA, ou "Marswalk") com segurança. Feito para o desafio
-[Interplanetary Survival Guide: Martian Map](https://www.spaceappschallenge.org/2026/challenges/interplanetary-survival-guide-martian-map/)
-do NASA Space Apps 2026.
+# Mars Explorer · Map and Routes on Mars
 
-O foco é mostrar Marte **como ele é**, no nível de uma caminhada: o relevo e as fotos reais de um local,
-combinados com camadas térmicas, minerais, geológicas, de radiação e de clima. Sobre isso, a ferramenta
-traça uma rota segura entre quaisquer pontos, calcula oxigênio, tempo, dose e ponto de não retorno, e deixa
-percorrer a rota em primeira pessoa sobre o terreno real. A parte gamificada (missão guiada) foi retirada.
+A layered map of Mars, built with **real NASA data**, designed to safely plan a walk on Mars (EVA, or "Marswalk").
 
-> Projeto educacional, **sem afiliação ou endosso da NASA**. Todos os dados vêm de serviços públicos da
-> NASA consultados ao vivo. O que é calculado ou estimado pelo app está marcado assim na interface e
-> explicado em [docs/METHODOLOGY.md](docs/METHODOLOGY.md).
+Developed for the NASA Space Apps 2026 challenge:
+[Interplanetary Survival Guide: Martian Map](https://www.spaceappschallenge.org/2026/challenges/interplanetary-survival-guide-martian-map/).
 
-## O que tem
+The goal is to show Mars **as it really is**, at the scale of a human walk: the terrain and actual images of a location, combined with thermal, mineral, geological, radiation, and weather layers. On top of this data, the tool calculates safe routes between any points, estimates oxygen consumption, duration, radiation dose, and the point of no return, and allows users to traverse the route in first-person view over the real terrain. The gamified component (guided mission) has been removed.
 
-Uma ferramenta só, em três passos: **olhar Marte inteiro → planejar uma rota entre quaisquer pontos →
-percorrer a rota em primeira pessoa para testá-la.**
+## Features
 
-**1. Globo contínuo, do planeta ao chão**
+A single tool with three main steps: **explore the entire planet → plan a route between any points → traverse the route in first-person view to test it.**
 
-- Terreno real em streaming, com nível de detalhe como no Google Earth: o globo vira o chão sem corte. Cada
-  tile tem o relevo do NASA/JPL Mars Trek (MOLA/HRSC no planeta todo; DTMs CTX/HiRISE de até ~1 m nos
-  locais de pouso) e a cor do mosaico Viking com o detalhe da imagem mais nítida disponível (HiRISE 25 cm,
-  CTX 6 m, THEMIS-IR 100 m)
-- Câmera estilo Google Earth: arrastar move o mapa, a roda aproxima no ponto do cursor, botão direito
-  (ou Ctrl) gira e inclina perto do chão, duplo clique desce
-- Camadas de instrumentos da NASA (THEMIS dia/noite, geologia USGS, MOLA, TES: inércia térmica, poeira,
-  argilas, piroxênio, albedo, rugosidade) e camadas calculadas do relevo real na escala da vista
-  (declividade, zonas proibidas, altitude, curvas de nível), com opacidade
-- 14 locais importantes (com fotos da NASA), que podem ser mostrados ou escondidos; iluminação pelo ponto
-  subsolar real; telemetria real de Jezero (Mars24, MEDA, RAD)
+**1. Continuous Globe: From Planetary View to Ground Level**
 
-**2. Rota entre quaisquer pontos (aba "Rota")**
+- Real terrain streamed dynamically, with a level of detail similar to Google Earth: the globe seamlessly transitions into ground-level terrain. Each tile combines elevation data from NASA/JPL Mars Trek (MOLA/HRSC across the planet; CTX/HiRISE DTMs at up to ~1 m resolution in landing sites) with colors from the Viking mosaic and the highest-resolution imagery available (HiRISE 25 cm, CTX 6 m, THEMIS-IR 100 m).
+- Google Earth-style camera controls: drag to move the map, scroll to zoom toward the cursor, right-click (or Ctrl) to rotate and tilt near the ground, and double-click to descend.
+- NASA instrument layers (THEMIS day/night, USGS geology, MOLA, TES: thermal inertia, dust, clay minerals, pyroxene, albedo, and roughness), plus calculated layers derived from actual terrain data at the current viewing scale (slope, restricted zones, elevation, and contour lines), all with adjustable opacity.
+- 14 important locations (with NASA images), which can be shown or hidden; illumination based on the actual subsolar point; real-time telemetry from Jezero (Mars24, MEDA, RAD).
 
-- Marque a base e as paradas clicando em qualquer lugar do globo, em qualquer zoom; arraste os marcadores
-- Cada trecho é calculado numa grade do tamanho dele: um trecho de 300 m usa ~1,5 m de resolução (com os
-  blocos detectados na HiRISE); um de 200 km usa centenas de metros. O A\* (16 direções, depois endireitado)
-  evita declives, rugosidade e blocos acima dos limites do traje
-- Três perfis com regras próprias: **Rápido** (menor tempo, aceita declives até o limite), **Equilibrado**
-  e **Seguro** (limite efetivo menor, margem de 15 m do terreno proibido, contorna morros). Os três são
-  calculados e comparados no painel e no mapa
-- Distância, duração, subida/descida, O₂, ponto de não retorno, pior tempo até a base, raio de alcance,
-  % da rota com sinal de rádio (linha de visada da antena), % na sombra, dose e nota do plano; perfil
-- A pé ou de rover, em dupla ou sozinho, hora solar local ajustável, premissas do traje editáveis
-- Rotas salvas e comparadas, exportação GeoJSON e checklist
+**2. Route Planning Between Any Points ("Route" Tab)**
 
-**3. Primeira pessoa ao longo da rota**
+- Set a base and intermediate stops by clicking anywhere on the globe, at any zoom level; drag markers to reposition them.
+- Each route segment is calculated using a grid adapted to its length: a 300 m segment uses ~1.5 m resolution (including boulders detected in HiRISE imagery), while a 200 km segment uses resolutions of hundreds of meters. The A* algorithm (16 directions, followed by path smoothing) avoids slopes, rough terrain, and boulders exceeding spacesuit limits.
+- Three profiles with distinct rules:
+  - **Fast:** minimizes travel time while accepting slopes up to the permitted limit.
+  - **Balanced:** balances travel time and safety.
+  - **Safe:** uses a lower effective slope limit, maintains a 15 m margin from restricted terrain, and avoids hills.
 
-- O chão é carregado em blocos de 160 m em volta do caminhante: os blocos próximos ficam ativos, os
-  seguintes carregam escondidos pela neblina e os distantes são descartados; os blocos à frente na rota
-  são carregados primeiro. A rota pode ter qualquer comprimento
-- Relevo real nos vértices de cada bloco, foto HiRISE/CTX tingida com a cor real do local e blocos de
-  rocha reais onde a foto é nítida
-- Modo "seguir" (anda sozinho pela rota na velocidade do modelo × fator de tempo de ×1 a ×200) e modo
-  livre (WASD). Relógio da EVA, O₂, dose e posição do Sol avançam com o tempo da EVA
-- Ao sair, o globo volta exatamente ao ponto onde você estava
+  All three profiles are calculated and compared in the panel and on the map.
+- Distance, duration, ascent/descent, O₂ consumption, point of no return, worst-case return time to base, operational range, percentage of the route with radio coverage (antenna line of sight), percentage in shadow, radiation dose, and plan score; elevation profile.
+- Travel on foot or by rover, solo or in pairs, adjustable local solar time, and editable spacesuit assumptions.
+- Saved and comparable routes, GeoJSON export, and a checklist.
 
-**4. Objetivos científicos e guia de pouso**
+**3. First-Person Route Traversal**
 
-- Dois objetivos: **História geológica** (onde as rochas contam melhor como Marte mudou) e **Sobrevivência
-  humana** (onde faria sentido montar uma base), com pesos e fontes visíveis em cada critério, e a
-  **Exploração livre**, sem objetivo científico, que leva direto ao mapa
-- O passo Local mostra a melhor escolha e o porquê; "Trocar" abre todas as opções com filtros
-- **Tour com o GENIE** na tela inicial e explicações do GENIE (botões "?") em todo o app
-- Ranking de 12 locais curados e de zonas candidatas descobertas nas detecções de minerais hidratados do
-  CRISM/OMEGA, com selo de explorado/nunca visitado e de confiança
-- "Planejar Marswalk": escolhe as paradas científicas do objetivo, monta a EVA (a pé ou de rover) e mostra
-  a cobertura científica da rota
-- Em zona não explorada, verifica a landabilidade ao vivo sobre o relevo real e propõe um ponto de base
+- Terrain is loaded in 160 m chunks around the astronaut: nearby chunks remain active, upcoming chunks load hidden behind fog, and distant chunks are discarded. Chunks ahead along the route are prioritized. Routes can have any length.
+- Real elevation at each chunk vertex, HiRISE/CTX imagery tinted with the actual local colors, and real rock formations where the imagery provides sufficient detail.
+- **Follow mode:** automatically moves along the route at the modeled speed, with adjustable time acceleration from ×1 to ×200.
+- **Free mode:** allows movement using WASD.
+- The EVA clock, O₂ consumption, radiation dose, and Sun position advance as EVA time progresses.
+- When exiting first-person mode, the globe returns exactly to the position where you left it.
 
-## Como rodar
+**4. Scientific Objectives and Landing Guide**
 
-Requer [Node.js](https://nodejs.org/) 20.19+ (ou 22.12+) e internet (os dados vêm da NASA ao vivo).
+- Two scientific objectives:
+  - **Geological History:** identifies locations where rocks provide the best evidence of how Mars has changed over time.
+  - **Human Survival:** identifies locations where establishing a human base would make sense.
+
+  Both objectives include visible criteria, weights, and sources. A third option, **Free Exploration**, skips scientific objectives and takes users directly to the map.
+- The Location step presents the best choice and explains why. The "Change" option opens all available alternatives with filters.
+- **GENIE Tour** on the home screen, along with GENIE explanations (the "?" buttons) throughout the app.
+- Ranking of 12 curated locations and candidate zones discovered through CRISM/OMEGA hydrated mineral detections, with explored/never-visited and confidence labels.
+- **Plan Marswalk:** selects scientific stops based on the chosen objective, builds the EVA (on foot or by rover), and displays the scientific coverage of the route.
+- In unexplored zones, evaluates landing suitability in real time using actual terrain data and suggests a base location.
+
+## Getting Started
+
+Requires [Node.js](https://nodejs.org/) 20.19+ (or 22.12+) and an internet connection (data is retrieved live from NASA services).
 
 ```bash
 npm install
@@ -83,77 +67,79 @@ npm install
 npm run dev
 ```
 
-Abra o endereço mostrado no terminal (normalmente http://localhost:5173).
+Open the address displayed in the terminal (usually http://localhost:5173).
 
-Links diretos: `#site=delta-front` desce até um local sugerido; `#at=18.4446,77.4509` desce até qualquer
-coordenada (latitude, longitude leste); `#poi=gale` abre um local do globo.
+Direct links:
 
-### Outros comandos
+- `#site=delta-front` navigates to a suggested location.
+- `#at=18.4446,77.4509` navigates to any coordinate (latitude, east longitude).
+- `#poi=gale` opens a location on the globe.
 
-| Comando            | O que faz                                             |
+### Additional Commands
+
+| Command | Description |
 | ------------------ | ----------------------------------------------------- |
-| `npm run build`    | Gera a versão de produção em `dist/`                  |
-| `npm run preview`  | Serve o `dist/` localmente (com CSP ativa)            |
-| `npm test`         | Testes unitários (Vitest)                             |
-| `npm run test:e2e` | Testes ponta a ponta no Chrome instalado (Playwright) |
-| `npm run lint`     | ESLint                                                |
-| `npm run format`   | Prettier                                              |
-| `npm run check`    | Lint + formatação + testes + build                    |
+| `npm run build` | Builds the production version in `dist/` |
+| `npm run preview` | Serves `dist/` locally (with CSP enabled) |
+| `npm test` | Runs unit tests (Vitest) |
+| `npm run test:e2e` | Runs end-to-end tests in the installed Chrome browser (Playwright) |
+| `npm run lint` | Runs ESLint |
+| `npm run format` | Runs Prettier |
+| `npm run check` | Runs linting, formatting, tests, and build |
 
-## Como planejar uma rota
+## How to Plan a Route
 
-1. Escolha um objetivo ou **Exploração livre** e aproxime o globo até o lugar (ou use um local sugerido).
-2. Ative **Marcar pontos** e clique no terreno: o primeiro ponto é a base, os outros são paradas.
-3. A rota aparece no globo e as métricas no painel, com a comparação Rápido / Equilibrado / Seguro.
-   Arraste marcadores, mude o perfil, a hora ou as premissas.
-4. Salve, compare e exporte.
-5. **Percorrer a rota em primeira pessoa** para testá-la.
+1. Choose an objective or select **Free Exploration**, then zoom in on the desired location on the globe (or use a suggested location).
+2. Enable **Mark Points** and click on the terrain. The first point becomes the base, and subsequent points become stops.
+3. The route appears on the globe, and its metrics are displayed in the panel, including the Fast / Balanced / Safe comparison. Drag markers or adjust the profile, time, and assumptions as needed.
+4. Save, compare, and export your route.
+5. Select **Traverse Route in First-Person View** to test the planned journey.
 
-## Controles
+## Controls
 
-| Ação                        | Globo                                  | Primeira pessoa                     |
+| Action | Globe | First-Person View |
 | --------------------------- | -------------------------------------- | ----------------------------------- |
-| Mover                       | Arrastar · setas                       | WASD / setas (muda para modo livre) |
-| Zoom / olhar                | Roda (no cursor) · pinça · + / −       | Mouse (clique para capturar)        |
-| Girar e inclinar            | Botão direito ou Ctrl + arrastar · Q/E | —                                   |
-| Seguir a rota / andar livre | —                                      | F (ou E)                            |
-| Fator de tempo              | —                                      | [ e ]                               |
-| Pausar / minimapa / foto    | —                                      | P · M · K                           |
+| Move | Drag · Arrow keys | WASD / Arrow keys (switches to free mode) |
+| Zoom / Look | Scroll (toward cursor) · Pinch · + / − | Mouse (click to capture) |
+| Rotate and Tilt | Right-click or Ctrl + drag · Q/E | — |
+| Follow Route / Free Walk | — | F (or E) |
+| Time Acceleration | — | [ and ] |
+| Pause / Minimap / Photo | — | P · M · K |
 
-No celular: um dedo move o mapa, pinça aproxima, dois dedos giram e inclinam; na primeira pessoa,
-joystick à esquerda e arrastar à direita para olhar.
+**Mobile controls:** One finger moves the map, pinch to zoom, and two fingers rotate and tilt. In first-person mode, use the joystick on the left and drag on the right to look around.
 
-## Estrutura
+## Project Structure
 
-```
-index.html            Estrutura da interface
-public/               Texturas do globo, ícones, PWA (service worker com cache dos tiles da NASA)
+```text
+index.html            Interface structure
+public/               Globe textures, icons, PWA (service worker with NASA tile caching)
 src/
-  main.js             Inicialização, navegação entre estados e loop principal
-  config.js           Constantes físicas e parâmetros
-  geo/                Dados reais: geodésia de Marte, tiles do Mars Trek, decodificador de terreno,
-                      alturas por tile, grade de altitude e análises, Mars24, feeds das missões
-  orbit/              Globo: terreno em streaming (terrainGlobe), câmera (globeControls), rota no globo,
-                      locais, satélites, atmosfera
-  planner/            Modelos de planejamento: rota entre pontos, A*, modelo de EVA, detecção de blocos
-  traverse/           Primeira pessoa: blocos de terreno (chunks), caminhada ao longo da rota, controle
-  surface/            Peças da primeira pessoa: céu, jogador, rochas, poeira, texturas
-  ui/                 Painel do globo, aba Rota, HUD, menus, diálogos, fontes e metodologia
-  core/               Infraestrutura: eventos, estado, configurações, i18n, áudio, entrada, renderer
-  data/               JSON: locais sugeridos, camadas da NASA, locais do globo, catálogo
-  i18n/               Textos (en / pt)
-  styles/             CSS por área
-tests/unit/           Vitest (tiles, rota, EVA, chunks, geodésia, Mars24, feeds, traduções)
-tests/e2e/            Playwright (zoom contínuo, rota, primeira pessoa, celular, configurações)
-docs/                 ARCHITECTURE.md e METHODOLOGY.md
+  main.js             Initialization, state navigation, and main loop
+  config.js           Physical constants and parameters
+  geo/                Real data: Mars geodesy, Mars Trek tiles, terrain decoder,
+                      tile elevations, elevation grids and analysis, Mars24, mission feeds
+  orbit/              Globe: streamed terrain (terrainGlobe), camera (globeControls),
+                      globe routes, locations, satellites, atmosphere
+  planner/            Planning models: point-to-point routing, A*,
+                      EVA model, boulder detection
+  traverse/           First-person view: terrain chunks, route traversal, controls
+  surface/            First-person components: sky, player, rocks, dust, textures
+  ui/                 Globe panel, Route tab, HUD, menus, dialogs, sources and methodology
+  core/               Infrastructure: events, state, settings, i18n, audio, input, renderer
+  data/               JSON: suggested locations, NASA layers, globe locations, catalog
+  i18n/               Translations (en / pt)
+  styles/             Area-specific CSS
+tests/unit/           Vitest (tiles, routing, EVA, chunks, geodesy, Mars24, feeds, translations)
+tests/e2e/            Playwright (continuous zoom, routing, first-person view, mobile, settings)
+docs/                 ARCHITECTURE.md and METHODOLOGY.md
 ```
 
-## Privacidade
+## Privacy
 
-Sem conta, sem cookies e sem rastreamento. Configurações, progresso e planos ficam no `localStorage`.
-As requisições externas vão apenas para serviços públicos da NASA (trek.nasa.gov, o bucket de terreno do
-Mars Trek, mars.nasa.gov, api.nasa.gov e images-api.nasa.gov).
+No accounts, cookies, or tracking. Settings, progress, and plans are stored in `localStorage`.
 
-## Licença
+External requests are sent only to public NASA services (trek.nasa.gov, the Mars Trek terrain bucket, mars.nasa.gov, api.nasa.gov, and images-api.nasa.gov).
 
-A definir pela equipe (ver [CREDITS.md](CREDITS.md) para as licenças dos recursos de terceiros).
+## License
+
+To be determined by the team (see [CREDITS.md](CREDITS.md) for third-party asset licenses).
